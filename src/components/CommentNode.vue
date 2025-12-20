@@ -39,7 +39,7 @@ async function ensureKids() {
 </script>
 
 <template>
-  <div v-if="item" class="relative mb-4" :class="depth > 0 ? 'ml-6' : ''">
+  <div v-if="item" class="relative mb-4" :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''">
     <!-- Visual branch for threading -->
     <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/50 font-mono leading-none">
       {{ isLast ? '└─' : '├─' }}
@@ -97,7 +97,7 @@ async function ensureKids() {
     </div>
   </div>
   
-  <div v-else class="relative mb-4" :class="depth > 0 ? 'ml-6' : ''">
+  <div v-else class="relative mb-4" :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''">
     <!-- Skeleton branch -->
     <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/20 font-mono">
       {{ isLast ? '└─' : '├─' }}

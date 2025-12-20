@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
           <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-white font-bold truncate">{{ storyHost }}</span></div>
         </div>
 
-        <div v-if="storyText" class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words leading-relaxed" v-html="storyText" />
+        <div v-if="storyText" class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words overflow-wrap-anywhere leading-relaxed prose prose-invert max-w-none" v-html="storyText" />
       </div>
 
       <div class="mt-6">

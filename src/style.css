@@ -72,8 +72,37 @@
   }
 
   .tui-comment-card {
-    @apply border border-tui-active bg-tui-bg p-2 mb-2 relative;
+    @apply border border-tui-active bg-tui-bg p-2 mb-2 relative overflow-hidden;
     box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+  }
+
+  /* Handle long text/code in v-html */
+  .prose {
+    @apply break-words w-full max-w-full;
+    overflow-wrap: anywhere;
+  }
+  
+  .prose pre {
+    @apply p-2 bg-black/30 border border-tui-active/30 my-2 font-mono text-sm w-full max-w-full;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    word-break: break-all !important;
+    overflow-x: hidden;
+  }
+
+  .prose code {
+    @apply px-1 bg-black/30 text-tui-cyan;
+    word-break: break-all !important;
+    white-space: pre-wrap !important;
+  }
+
+  /* Quoted text in HN often uses <i> or simple indentation */
+  .prose i, .prose em {
+    @apply border-l-2 border-tui-active/50 pl-2 not-italic text-tui-gray block my-2;
+  }
+
+  .prose blockquote {
+    @apply border-l-2 border-tui-yellow pl-2 my-2 italic text-tui-gray;
   }
 
   .tui-comment-branch {
