@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch, onMounted } from 'vue'
+import { useAsyncState } from '@vueuse/core'
 
 import { fetchFeedIds, fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
-import { setMenuActions, setMenuTitle } from '../store'
+import { setMenuActions, setMenuTitle, setLoading } from '../store'
 
 const props = defineProps<{
   feed: FeedKind
@@ -21,67 +22,38 @@ const feedTitle: Record<FeedKind, string> = {
 }
 
 const title = computed(() => feedTitle[props.feed])
-
-const ids = ref<number[]>([])
-const items = ref<HnItem[]>([])
-
 const page = ref(1)
 const pageSize = 30
 
-const loadingIds = ref(false)
-const loadingItems = ref(false)
-const error = ref<string | null>(null)
+const { state: ids, isLoading: loadingIds, error: idsError, execute: executeLoadIds } = useAsyncState(
+  async () => {
+    return await fetchFeedIds(props.feed)
+  },
+  [],
+  { immediate: false, shallow: true }
+)
+
+const { state: items, isLoading: loadingItems, error: itemsError, execute: executeLoadItems } = useAsyncState(
+  async () => {
+    if (ids.value.length === 0) return []
+    const start = (page.value - 1) * pageSize
+    const slice = ids.value.slice(start, start + pageSize)
+    return await fetchItems(slice)
+  },
+  [],
+  { immediate: false, shallow: true }
+)
+
+const error = computed(() => idsError.value || itemsError.value)
 
 const totalPages = computed(() => Math.max(1, Math.ceil(ids.value.length / pageSize)))
 const canPrev = computed(() => page.value > 1)
 const canNext = computed(() => page.value < totalPages.value)
 
-let abortIds: AbortController | null = null
-
-async function loadIds() {
-  abortIds?.abort()
-  abortIds = new AbortController()
-
-  loadingIds.value = true
-  error.value = null
-
-  try {
-    ids.value = await fetchFeedIds(props.feed, abortIds.signal)
-  } catch (e) {
-    if (abortIds.signal.aborted) return
-    error.value = e instanceof Error ? e.message : 'Failed to load feed'
-    ids.value = []
-  } finally {
-    if (!abortIds.signal.aborted) loadingIds.value = false
-  }
-}
-
-async function loadItemsForPage() {
-  if (ids.value.length === 0) {
-    items.value = []
-    return
-  }
-
-  const start = (page.value - 1) * pageSize
-  const slice = ids.value.slice(start, start + pageSize)
-
-  loadingItems.value = true
-  error.value = null
-
-  try {
-    items.value = await fetchItems(slice)
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Failed to load stories'
-    items.value = []
-  } finally {
-    loadingItems.value = false
-  }
-}
-
 async function refresh() {
   page.value = 1
-  await loadIds()
-  await loadItemsForPage()
+  await executeLoadIds()
+  await executeLoadItems()
 }
 
 function next() {
@@ -103,6 +75,10 @@ function updateMenu() {
   ])
 }
 
+watch([loadingIds, loadingItems], ([l1, l2]) => {
+  setLoading(l1 || l2)
+})
+
 watch([() => props.feed, canNext, canPrev, title], () => {
   updateMenu()
 })
@@ -116,7 +92,7 @@ watch(
 )
 
 watch(page, async () => {
-  await loadItemsForPage()
+  await executeLoadItems()
 })
 
 onMounted(() => {
@@ -124,7 +100,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  abortIds?.abort()
   setMenuActions([])
   setMenuTitle('')
 })

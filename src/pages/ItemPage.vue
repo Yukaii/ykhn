@@ -1,29 +1,37 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, reactive, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAsyncState } from '@vueuse/core'
 
 import { fetchItem } from '../api/hn'
 import type { HnItem } from '../api/types'
 import CommentNode from '../components/CommentNode.vue'
 import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
-import { setMenuActions, setMenuTitle } from '../store'
+import { setMenuActions, setMenuTitle, setLoading } from '../store'
 
 const route = useRoute()
-
 const id = computed(() => Number(route.params.id))
-
-const story = ref<HnItem | null>(null)
-const loading = ref(false)
-const error = ref<string | null>(null)
-
 const itemsById = reactive(new Map<number, HnItem>())
+const topLimit = ref(40)
+
+const { state: story, isLoading, error, execute: executeFetchStory } = useAsyncState(
+  async () => {
+    const item = await fetchItem(id.value)
+    if (!item) throw new Error('Not found')
+    itemsById.set(item.id, item)
+    // Prefetch first batch of comments
+    if (item.kids?.length) {
+      await ensureItems(item.kids.slice(0, topLimit.value))
+    }
+    return item
+  },
+  null,
+  { immediate: false, shallow: true }
+)
 
 const topCommentIds = computed(() => story.value?.kids ?? [])
-const topLimit = ref(40)
 const visibleTopIds = computed(() => topCommentIds.value.slice(0, topLimit.value))
-
-let abort: AbortController | null = null
 
 async function ensureItems(ids: number[]) {
   const uniques = Array.from(new Set(ids)).filter((n) => !itemsById.has(n))
@@ -37,28 +45,9 @@ async function ensureItems(ids: number[]) {
 }
 
 async function loadStory() {
-  abort?.abort()
-  abort = new AbortController()
-
-  loading.value = true
-  error.value = null
-  story.value = null
   itemsById.clear()
-
-  try {
-    const item = await fetchItem(id.value, abort.signal)
-    if (!item) throw new Error('Not found')
-    story.value = item
-    itemsById.set(item.id, item)
-
-    topLimit.value = 40
-    await ensureItems(visibleTopIds.value)
-  } catch (e) {
-    if (abort.signal.aborted) return
-    error.value = e instanceof Error ? e.message : 'Failed to load item'
-  } finally {
-    if (!abort.signal.aborted) loading.value = false
-  }
+  topLimit.value = 40
+  await executeFetchStory()
 }
 
 async function loadMoreTop() {
@@ -83,6 +72,10 @@ function updateMenu() {
 const storyHost = computed(() => hostFromUrl(story.value?.url))
 const storyText = computed(() => sanitizeHtml(story.value?.text))
 
+watch(isLoading, (l) => {
+  setLoading(l)
+})
+
 watch([id, story, visibleTopIds], () => {
   updateMenu()
 })
@@ -93,7 +86,6 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  abort?.abort()
   setMenuActions([])
   setMenuTitle('')
 })

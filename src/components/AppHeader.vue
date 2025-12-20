@@ -121,8 +121,17 @@ onUnmounted(() => window.removeEventListener('click', onWindowClick))
       <div class="tui-menu-item opacity-30"><u>E</u>dit</div>
       <div class="tui-menu-item opacity-30"><u>H</u>elp</div>
       
-      <div class="ml-auto px-4 py-0.5 opacity-60 font-mono flex items-center gap-2">
-        {{ menuState.title }}
+      <div class="ml-auto px-4 py-0.5 opacity-60 font-mono flex items-center gap-2 whitespace-nowrap min-w-0">
+        <div v-if="menuState.loading" class="text-tui-yellow animate-pulse flex items-center gap-1 mr-1 shrink-0">
+          <span class="hidden md:inline">WORKING...</span>
+          <span class="md:hidden">BUSY</span>
+          <div class="flex gap-0.5">
+            <div class="w-1 h-3 bg-tui-yellow animate-[pulse_0.5s_infinite_0ms]"></div>
+            <div class="w-1 h-3 bg-tui-yellow animate-[pulse_0.5s_infinite_100ms]"></div>
+            <div class="w-1 h-3 bg-tui-yellow animate-[pulse_0.5s_infinite_200ms]"></div>
+          </div>
+        </div>
+        <span class="truncate">{{ menuState.title }}</span>
       </div>
     </div>
   </div>
