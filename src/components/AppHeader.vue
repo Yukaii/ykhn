@@ -92,25 +92,25 @@ onUnmounted(() => {
         </RouterLink>
 
         <!-- System Dropdown Menu -->
-        <div v-if="sysMenuOpen" class="tui-menu-dropdown font-mono text-tui-bg left-0 top-full mt-[2px]">
-          <div class="tui-dropdown-item" @click="navigate('/')">
-            <span>TOP_STORIES</span>
-            <span class="opacity-50">F1</span>
+          <div v-if="sysMenuOpen" class="tui-menu-dropdown font-mono text-tui-bg left-0 top-full mt-[2px]">
+            <div class="tui-dropdown-item" @click="navigate('/')">
+              <span>TOP_STORIES</span>
+              <span class="tui-shortcut">F1</span>
+            </div>
+            <div class="tui-dropdown-item" @click="navigate('/new')">
+              <span>NEW_STORIES</span>
+              <span class="tui-shortcut">F2</span>
+            </div>
+            <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
+            <div class="tui-dropdown-item" @click="navigate('/about')">
+              <span>SYSTEM_SETUP</span>
+              <span class="tui-shortcut">F9</span>
+            </div>
+            <div class="tui-dropdown-item" @click="reboot">
+              <span>REBOOT_OS</span>
+              <span class="tui-shortcut">^R</span>
+            </div>
           </div>
-          <div class="tui-dropdown-item" @click="navigate('/new')">
-            <span>NEW_STORIES</span>
-            <span class="opacity-50">F2</span>
-          </div>
-          <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
-          <div class="tui-dropdown-item" @click="navigate('/about')">
-            <span>SYSTEM_SETUP</span>
-            <span class="opacity-50">F9</span>
-          </div>
-          <div class="tui-dropdown-item" @click="reboot">
-            <span>REBOOT_OS</span>
-            <span class="opacity-50">^R</span>
-          </div>
-        </div>
       </div>
       
       <div class="flex items-center gap-4">
@@ -136,7 +136,7 @@ onUnmounted(() => {
               @click="runAction(item.action, item.disabled)"
             >
               <span class="font-bold">{{ item.label.toUpperCase() }}</span>
-              <span v-if="item.shortcut" class="opacity-60">{{ item.shortcut }}</span>
+              <span v-if="item.shortcut" class="tui-shortcut">{{ item.shortcut }}</span>
             </div>
           </template>
           <div v-else class="px-4 py-2 opacity-50 italic">NO_ACTIONS</div>
@@ -146,16 +146,16 @@ onUnmounted(() => {
       <div class="tui-menu-item" @click.stop="toggleHelpMenu" :class="helpMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''">
         <u>H</u>elp
         <!-- Help Dropdown -->
-        <div v-if="helpMenuOpen" class="tui-menu-dropdown left-0 top-full">
-          <div class="tui-dropdown-item" @click="navigate('/about')">
-            <span class="font-bold">ABOUT</span>
-            <span class="opacity-60">F9</span>
+          <div v-if="helpMenuOpen" class="tui-menu-dropdown left-0 top-full">
+            <div class="tui-dropdown-item" @click="navigate('/about')">
+              <span class="font-bold">ABOUT</span>
+              <span class="tui-shortcut">F9</span>
+            </div>
+            <div class="tui-dropdown-item" @click="openExternal('https://github.com/Yukaii/ykhn')">
+              <span class="font-bold">OPEN_REPO</span>
+              <span class="tui-shortcut">WEB</span>
+            </div>
           </div>
-          <div class="tui-dropdown-item" @click="openExternal('https://github.com/Yukaii/ykhn')">
-            <span class="font-bold">OPEN_REPO</span>
-            <span class="opacity-60">WEB</span>
-          </div>
-        </div>
       </div>
       
       <div class="ml-auto px-4 py-0.5 opacity-100 font-mono flex items-center gap-2 whitespace-nowrap min-w-0">

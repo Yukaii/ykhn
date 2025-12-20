@@ -160,4 +160,21 @@
   .tui-dropdown-item {
     @apply px-4 py-1 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
   }
+
+  /* Reveal shortcuts in dropdown sub-entries on hover */
+  .tui-dropdown-item .tui-shortcut {
+    @apply opacity-0;
+    transition: opacity 80ms linear;
+  }
+
+  .tui-dropdown-item:hover .tui-shortcut,
+  .tui-dropdown-item:focus-within .tui-shortcut {
+    @apply opacity-60;
+  }
+
+  @media (hover: none) {
+    .tui-dropdown-item .tui-shortcut {
+      opacity: 0.6;
+    }
+  }
 }

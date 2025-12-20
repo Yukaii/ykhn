@@ -24,6 +24,12 @@ const item = computed(() => props.itemsById.get(props.id))
 const kids = computed(() => item.value?.kids ?? [])
 const text = computed(() => sanitizeHtml(item.value?.text))
 
+const hasLoadedKids = computed(() => {
+  if (loadedKids.value) return true
+  if (kids.value.length === 0) return false
+  return props.itemsById.has(kids.value[0] as number)
+})
+
 async function toggle() {
   if (!expanded.value && kids.value.length > 0 && !loadedKids.value) {
     await props.loadKids(kids.value)
@@ -44,6 +50,7 @@ async function ensureKids() {
     v-if="item"
     class="relative mb-4"
     :data-ykhn-comment-id="String(id)"
+    :data-ykhn-depth="String(depth)"
     :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''"
   >
     <!-- Visual branch for threading -->
@@ -77,7 +84,7 @@ async function ensureKids() {
         <div v-if="text" class="prose prose-invert max-w-none leading-relaxed mb-1 font-content break-words" v-html="text" />
         <div v-else class="opacity-30 mb-2 italic">-- NO_CONTENT --</div>
         
-        <div v-if="expanded && kids.length && !loadedKids" class="mt-2 text-right">
+        <div v-if="expanded && kids.length && !hasLoadedKids" class="mt-2 text-right">
           <button
             class="font-bold text-tui-yellow hover:bg-tui-yellow hover:text-tui-bg px-2 border border-tui-yellow/30 transition-none uppercase"
             type="button"
@@ -90,7 +97,7 @@ async function ensureKids() {
     </div>
 
     <!-- Recursive children -->
-    <div v-if="expanded && kids.length && (loadedKids || itemsById.has(kids[0] as number))" class="flex flex-col mt-2">
+    <div v-if="expanded && kids.length && hasLoadedKids" class="flex flex-col mt-2">
       <CommentNode
         v-for="(kidId, index) in (kids as number[])"
         :key="kidId"

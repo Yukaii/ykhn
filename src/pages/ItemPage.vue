@@ -117,6 +117,65 @@ function visibleCommentElements() {
   return nodes
 }
 
+function elementDepth(el: HTMLElement) {
+  const d = Number(el.dataset.ykhnDepth)
+  return Number.isFinite(d) ? d : 0
+}
+
+async function selectParent() {
+  if (!selectionActive.value || selectedCommentId.value == null) return
+  const els = visibleCommentElements()
+  if (els.length === 0) return
+
+  const idx = els.findIndex((el) => Number(el.dataset.ykhnCommentId) === selectedCommentId.value)
+  if (idx <= 0) return
+
+  const currentDepth = elementDepth(els[idx] as HTMLElement)
+  const parentDepth = currentDepth - 1
+
+  for (let i = idx - 1; i >= 0; i--) {
+    if (elementDepth(els[i] as HTMLElement) === parentDepth) {
+      await selectCommentByIndex(i, { scroll: 'nearest' })
+      return
+    }
+  }
+}
+
+async function loadSubEntries(opts: { recursive: boolean }) {
+  if (!selectionActive.value || selectedCommentId.value == null) return
+
+  const item = itemsById.get(selectedCommentId.value)
+  const kidIds = item?.kids ?? []
+  if (!kidIds.length) return
+
+  if (!opts.recursive) {
+    await ensureItems(kidIds.slice(0, 200))
+    return
+  }
+
+
+  // Breadth-first load descendants with a hard cap.
+  const cap = 800
+  const queue = [...kidIds]
+  const seen = new Set<number>()
+
+  while (queue.length && seen.size < cap) {
+    const batch = queue.splice(0, 40)
+    const uniques = batch.filter((n) => Number.isFinite(n) && !seen.has(n))
+    if (uniques.length === 0) continue
+
+    for (const n of uniques) {
+      seen.add(n)
+    }
+    await ensureItems(uniques)
+
+    for (const childId of uniques) {
+      const child = itemsById.get(childId)
+      if (child?.kids?.length) queue.push(...child.kids)
+    }
+  }
+}
+
 function currentCommentIndex() {
   const els = visibleCommentElements()
   if (els.length === 0) return -1
@@ -246,6 +305,24 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'h') {
+    await selectParent()
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'l') {
+    await loadSubEntries({ recursive: false })
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'L') {
+    await loadSubEntries({ recursive: true })
+    e.preventDefault()
+    return
+  }
+
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'j') {
     await selectCommentByIndex(currentCommentIndex() + parseCount(1))
     e.preventDefault()
@@ -316,7 +393,12 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else-if="story">
-      <div class="p-4 border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_rgba(0,0,0,0.5)]">
+      <div
+        class="p-4 border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_rgba(0,0,0,0.5)]"
+        :data-ykhn-comment-id="String(story.id)"
+        :data-ykhn-depth="'-1'"
+        :class="selectionActive && selectedCommentId === story.id ? 'border-tui-yellow bg-tui-active/10' : ''"
+      >
         <h1 class="font-black mb-4 uppercase leading-tight text-tui-yellow">
           <a v-if="story.url" :href="story.url" target="_blank" rel="noreferrer" class="hover:underline">
             {{ story.title ?? 'UNTITLED' }}
