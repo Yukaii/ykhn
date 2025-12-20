@@ -52,6 +52,12 @@ function close() {
           <div class="flex justify-between"><span>o</span><span>Open link</span></div>
           <div class="flex justify-between"><span>O</span><span>Open link (new tab)</span></div>
           <div class="flex justify-between"><span>zt / zz / zb</span><span>Scroll active row</span></div>
+
+          <div class="font-bold uppercase text-tui-cyan mt-4 mb-2">Item Page</div>
+          <div class="flex justify-between"><span>[count]j / [count]k</span><span>Next/Prev comment</span></div>
+          <div class="flex justify-between"><span>gg / G</span><span>Top / Bottom comment</span></div>
+          <div class="flex justify-between"><span>[count]G</span><span>Jump to comment</span></div>
+          <div class="flex justify-between"><span>zt / zz / zb</span><span>Scroll active comment</span></div>
         </div>
 
         <div class="border border-tui-active/30 p-3 md:col-span-2">

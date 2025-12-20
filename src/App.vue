@@ -6,8 +6,10 @@ import AppNav from './components/AppNav.vue'
 import KeyboardHelp from './components/KeyboardHelp.vue'
 import ToastBar from './components/ToastBar.vue'
 import { useGlobalHotkeys } from './composables/useGlobalHotkeys'
+import { useMainScrollRestoration } from './composables/useMainScrollRestoration'
 
 useGlobalHotkeys()
+useMainScrollRestoration()
 </script>
 
 <template>
@@ -16,7 +18,7 @@ useGlobalHotkeys()
     <div class="tui-window flex-1 flex flex-col overflow-hidden relative border-4">
       <AppHeader />
 
-      <main class="flex-1 overflow-y-auto p-2 md:p-4 custom-scrollbar bg-tui-bg">
+      <main data-ykhn-main class="flex-1 overflow-y-auto p-2 md:p-4 custom-scrollbar bg-tui-bg">
         <RouterView />
       </main>
 

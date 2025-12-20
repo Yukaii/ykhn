@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch, onMounted } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAsyncState } from '@vueuse/core'
 
@@ -8,22 +8,53 @@ import type { HnItem } from '../api/types'
 import CommentNode from '../components/CommentNode.vue'
 import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
-import { setMenuActions, setMenuTitle, setLoading } from '../store'
+import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { readSessionJson, writeSessionJson } from '../lib/persist'
 
 const route = useRoute()
+
 const id = computed(() => Number(route.params.id))
 const itemsById = reactive(new Map<number, HnItem>())
 const topLimit = ref(40)
+
+type ItemViewState = {
+  selectedCommentId: number | null
+  selectionActive: boolean
+  scrollTop: number
+  topLimit: number
+}
+
+function stateKey(itemId: number) {
+  return `ykhn:item:${itemId}`
+}
+
+function saveViewState() {
+  const main = getMainScrollContainer()
+  const state: ItemViewState = {
+    selectedCommentId: selectedCommentId.value,
+    selectionActive: selectionActive.value,
+    scrollTop: main?.scrollTop ?? 0,
+    topLimit: topLimit.value,
+  }
+  writeSessionJson(stateKey(id.value), state)
+}
+
+function readViewState(itemId: number) {
+  return readSessionJson<ItemViewState>(stateKey(itemId))
+}
 
 const { state: story, isLoading, error, execute: executeFetchStory } = useAsyncState(
   async () => {
     const item = await fetchItem(id.value)
     if (!item) throw new Error('Not found')
     itemsById.set(item.id, item)
+
     // Prefetch first batch of comments
     if (item.kids?.length) {
       await ensureItems(item.kids.slice(0, topLimit.value))
     }
+
     return item
   },
   null,
@@ -44,9 +75,9 @@ async function ensureItems(ids: number[]) {
   }
 }
 
-async function loadStory() {
+async function loadStory(opts?: { keepTopLimit?: boolean }) {
   itemsById.clear()
-  topLimit.value = 40
+  if (!opts?.keepTopLimit) topLimit.value = 40
   await executeFetchStory()
 }
 
@@ -54,12 +85,13 @@ async function loadMoreTop() {
   if (visibleTopIds.value.length >= topCommentIds.value.length) return
   topLimit.value += 40
   await ensureItems(visibleTopIds.value)
+  saveViewState()
 }
 
 function updateMenu() {
   setMenuTitle(`FILE: ${id.value}.TXT`)
   const actions = [
-    { label: 'Refresh', action: loadStory, shortcut: 'r' },
+    { label: 'Refresh', action: () => loadStory({ keepTopLimit: true }), shortcut: 'r' },
     { label: 'Open URL', action: () => story.value?.url && window.open(story.value.url, '_blank'), disabled: !story.value?.url },
     { label: 'View Source', action: () => window.open(`https://news.ycombinator.com/item?id=${id.value}`, '_blank') },
   ]
@@ -72,6 +104,179 @@ function updateMenu() {
 const storyHost = computed(() => hostFromUrl(story.value?.url))
 const storyText = computed(() => sanitizeHtml(story.value?.text))
 
+const selectedCommentId = ref<number | null>(null)
+const selectionActive = ref(true)
+
+let countBuffer = ''
+let pendingGAt = 0
+let pendingZAt = 0
+
+function visibleCommentElements() {
+  const root = getMainScrollContainer() ?? document
+  const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-ykhn-comment-id]'))
+  return nodes
+}
+
+function currentCommentIndex() {
+  const els = visibleCommentElements()
+  if (els.length === 0) return -1
+  if (!selectionActive.value || selectedCommentId.value == null) return 0
+
+  const idx = els.findIndex((el) => Number(el.dataset.ykhnCommentId) === selectedCommentId.value)
+  return idx >= 0 ? idx : 0
+}
+
+async function selectCommentByIndex(idx: number, opts?: { scroll?: ScrollLogicalPosition }) {
+  const els = visibleCommentElements()
+  if (els.length === 0) return
+
+  const clamped = Math.max(0, Math.min(els.length - 1, idx))
+  const el = els[clamped]
+  if (!el) return
+
+  const nextId = Number(el.dataset.ykhnCommentId)
+
+  selectionActive.value = true
+  selectedCommentId.value = Number.isFinite(nextId) ? nextId : null
+
+  await nextTick()
+  scrollElementIntoMain(el, opts?.scroll ?? 'nearest')
+  saveViewState()
+}
+
+function parseCount(defaultCount: number) {
+  const n = Number(countBuffer)
+  countBuffer = ''
+  if (!Number.isFinite(n) || n <= 0) return defaultCount
+  return n
+}
+
+async function ensureInitialCommentSelection() {
+  if (!selectionActive.value) return
+
+  const els = visibleCommentElements()
+  if (els.length === 0) {
+    selectedCommentId.value = null
+    return
+  }
+
+  if (selectedCommentId.value == null) {
+    await selectCommentByIndex(0, { scroll: 'nearest' })
+    return
+  }
+
+  const exists = els.some((el) => Number(el.dataset.ykhnCommentId) === selectedCommentId.value)
+  if (!exists) {
+    await selectCommentByIndex(0, { scroll: 'nearest' })
+  }
+}
+
+function restoreFromState() {
+  const st = readViewState(id.value)
+  if (!st) return null
+
+  topLimit.value = st.topLimit && st.topLimit >= 40 ? st.topLimit : 40
+  selectedCommentId.value = st.selectedCommentId
+  selectionActive.value = st.selectionActive
+  return st
+}
+
+async function applyRestoredScroll(st: ItemViewState | null) {
+  if (!st) return
+  await nextTick()
+  const main = getMainScrollContainer()
+  if (!main) return
+  main.scrollTop = st.scrollTop
+  await nextTick()
+  main.scrollTop = st.scrollTop
+}
+
+async function onKeyDown(e: KeyboardEvent) {
+  if (uiState.shortcutsOpen) return
+  if (shouldIgnoreKeyboardEvent(e)) return
+
+  // Count prefix: <num>j / <num>k / <num>G
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && /^\d$/.test(e.key)) {
+    if (countBuffer.length === 0 && e.key === '0') return
+    countBuffer += e.key
+    e.preventDefault()
+    return
+  }
+
+  const now = Date.now()
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'g') {
+    const isDouble = now - pendingGAt < 650
+    pendingGAt = now
+    if (isDouble) {
+      await selectCommentByIndex(0, { scroll: 'start' })
+    }
+    e.preventDefault()
+    return
+  }
+
+  if (now - pendingGAt >= 650) pendingGAt = 0
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'z') {
+    pendingZAt = now
+    e.preventDefault()
+    return
+  }
+
+  if (pendingZAt && now - pendingZAt < 650 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 't') {
+      pendingZAt = 0
+      await selectCommentByIndex(currentCommentIndex(), { scroll: 'start' })
+      e.preventDefault()
+      return
+    }
+    if (e.key === 'z') {
+      pendingZAt = 0
+      await selectCommentByIndex(currentCommentIndex(), { scroll: 'center' })
+      e.preventDefault()
+      return
+    }
+    if (e.key === 'b') {
+      pendingZAt = 0
+      await selectCommentByIndex(currentCommentIndex(), { scroll: 'end' })
+      e.preventDefault()
+      return
+    }
+  }
+
+  if (now - pendingZAt >= 650) pendingZAt = 0
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'j') {
+    await selectCommentByIndex(currentCommentIndex() + parseCount(1))
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'k') {
+    await selectCommentByIndex(currentCommentIndex() - parseCount(1))
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'G') {
+    const els = visibleCommentElements()
+    if (els.length) {
+      const count = parseCount(els.length)
+      const idx = Math.min(els.length - 1, Math.max(0, count - 1))
+      await selectCommentByIndex(idx, { scroll: 'end' })
+      e.preventDefault()
+    }
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
+    selectionActive.value = false
+    saveViewState()
+    e.preventDefault()
+    return
+  }
+}
+
 watch(isLoading, (l) => {
   setLoading(l)
 })
@@ -80,12 +285,23 @@ watch([id, story, visibleTopIds], () => {
   updateMenu()
 })
 
+watch([selectedCommentId, selectionActive], () => {
+  saveViewState()
+})
+
 onMounted(async () => {
-  await loadStory()
+  const restored = restoreFromState()
+  await loadStory({ keepTopLimit: true })
   updateMenu()
+  await applyRestoredScroll(restored)
+  await ensureInitialCommentSelection()
+
+  window.addEventListener('keydown', onKeyDown)
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+  saveViewState()
   setMenuActions([])
   setMenuTitle('')
 })
@@ -96,7 +312,7 @@ onBeforeUnmount(() => {
     <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000]">
       <div class="font-bold mb-2 uppercase">!! ACCESS DENIED !!</div>
       <div class="mb-4">{{ error }}</div>
-      <button class="tui-btn" @click="loadStory">RETRY</button>
+      <button class="tui-btn" @click="() => loadStory()">RETRY</button>
     </div>
 
     <template v-else-if="story">
@@ -107,7 +323,7 @@ onBeforeUnmount(() => {
           </a>
           <template v-else>{{ story.title ?? 'UNTITLED' }}</template>
         </h1>
-        
+
         <div class="flex flex-wrap gap-x-6 gap-y-2 mb-6 border-y border-tui-active/30 py-2 font-mono uppercase">
           <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-white font-bold">{{ story.by }}</span></div>
           <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-white font-bold">{{ story.score }}</span></div>
@@ -115,7 +331,11 @@ onBeforeUnmount(() => {
           <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-white font-bold truncate">{{ storyHost }}</span></div>
         </div>
 
-        <div v-if="storyText" class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words overflow-wrap-anywhere leading-relaxed prose prose-invert max-w-none" v-html="storyText" />
+        <div
+          v-if="storyText"
+          class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words overflow-wrap-anywhere leading-relaxed prose prose-invert max-w-none"
+          v-html="storyText"
+        />
       </div>
 
       <div class="mt-6">
@@ -134,19 +354,16 @@ onBeforeUnmount(() => {
             :id="commentId"
             :items-by-id="itemsById"
             :load-kids="ensureItems"
+            :selected-id="selectionActive ? selectedCommentId : null"
           />
 
-          <button
-            v-if="visibleTopIds.length < topCommentIds.length"
-            class="tui-btn w-full"
-            @click="loadMoreTop"
-          >
+          <button v-if="visibleTopIds.length < topCommentIds.length" class="tui-btn w-full" @click="loadMoreTop">
             LOAD_MORE_RECORDS
           </button>
         </div>
       </div>
     </template>
-    
+
     <div v-else-if="isLoading" class="text-center py-20">
       <div>LOADING...</div>
       <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>

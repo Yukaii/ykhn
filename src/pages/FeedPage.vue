@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
 import { useAsyncState } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 
@@ -7,14 +8,41 @@ import { fetchFeedIds, fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
-import { setMenuActions, setMenuTitle, setLoading } from '../store'
-import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { readSessionJson, writeSessionJson } from '../lib/persist'
 
 const props = defineProps<{
   feed: FeedKind
 }>()
 
 const router = useRouter()
+
+type FeedViewState = {
+  page: number
+  selectedIndex: number
+  selectionActive: boolean
+  scrollTop: number
+}
+
+function stateKey(feed: FeedKind) {
+  return `ykhn:feed:${feed}`
+}
+
+function saveViewState(feed: FeedKind) {
+  const main = getMainScrollContainer()
+  const state: FeedViewState = {
+    page: page.value,
+    selectedIndex: selectedIndex.value,
+    selectionActive: selectionActive.value,
+    scrollTop: main?.scrollTop ?? 0,
+  }
+  writeSessionJson(stateKey(feed), state)
+}
+
+function readViewState(feed: FeedKind) {
+  return readSessionJson<FeedViewState>(stateKey(feed))
+}
 
 const feedTitle: Record<FeedKind, string> = {
   top: 'Top',
@@ -32,6 +60,9 @@ const pageSize = 30
 const selectedIndex = ref(0)
 const selectionActive = ref(true)
 const rowEls = ref<(HTMLElement | null)[]>([])
+
+let suppressPageWatch = false
+let restoring = false
 
 let countBuffer = ''
 let pendingGAt = 0
@@ -63,18 +94,21 @@ const canPrev = computed(() => page.value > 1)
 const canNext = computed(() => page.value < totalPages.value)
 
 async function refresh() {
-  page.value = 1
   await executeLoadIds()
   await executeLoadItems()
 }
 
 function next() {
   if (!canNext.value) return
+  selectionActive.value = true
+  selectedIndex.value = 0
   page.value++
 }
 
 function prev() {
   if (!canPrev.value) return
+  selectionActive.value = true
+  selectedIndex.value = 0
   page.value--
 }
 
@@ -97,7 +131,7 @@ async function scrollSelectedIntoView(block: ScrollLogicalPosition = 'nearest') 
   await nextTick()
   const el = rowEls.value[selectedIndex.value]
   if (!el) return
-  el.scrollIntoView({ block, behavior: 'auto' })
+  scrollElementIntoMain(el, block)
 }
 
 function setSelected(i: number, opts?: { scroll?: ScrollLogicalPosition }) {
@@ -112,6 +146,9 @@ function selectedItem() {
 }
 
 function openComments(it: HnItem, newTab: boolean) {
+  // Snapshot current list state so Back restores selection+scroll.
+  saveViewState(props.feed)
+
   const resolved = router.resolve({ name: 'item', params: { id: it.id } })
   if (newTab) {
     window.open(resolved.href, '_blank', 'noopener,noreferrer')
@@ -131,6 +168,8 @@ function openLink(it: HnItem, newTab: boolean) {
     return
   }
 
+  // Leaving the SPA: persist state first.
+  saveViewState(props.feed)
   window.location.assign(it.url)
 }
 
@@ -142,6 +181,7 @@ function parseCount(defaultCount: number) {
 }
 
 function onKeyDown(e: KeyboardEvent) {
+  if (uiState.shortcutsOpen) return
   if (shouldIgnoreKeyboardEvent(e)) return
 
   // Count prefix: <num>j / <num>k / <num>G
@@ -230,13 +270,36 @@ function onKeyDown(e: KeyboardEvent) {
   }
 
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
-    // Unfocus selection.
     selectionActive.value = false
     e.preventDefault()
     return
   }
 }
 
+async function loadWithOptionalRestore(feed: FeedKind) {
+  restoring = true
+
+  const restored = readViewState(feed)
+  suppressPageWatch = true
+  page.value = restored?.page && restored.page >= 1 ? restored.page : 1
+  selectedIndex.value = restored?.selectedIndex ?? 0
+  selectionActive.value = restored?.selectionActive ?? true
+  suppressPageWatch = false
+
+  await refresh()
+
+  await nextTick()
+  const main = getMainScrollContainer()
+  if (main && restored) {
+    main.scrollTop = restored.scrollTop
+  }
+
+  if (selectionActive.value) {
+    setSelected(selectedIndex.value)
+  }
+
+  restoring = false
+}
 
 watch([loadingIds, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
@@ -246,24 +309,32 @@ watch([() => props.feed, canNext, canPrev, title], () => {
   updateMenu()
 })
 
-watch(
-  () => props.feed,
-  async () => {
-    await refresh()
-  },
-  { immediate: true },
-)
-
 watch(page, async () => {
+  if (suppressPageWatch) return
   await executeLoadItems()
+  saveViewState(props.feed)
 })
 
 watch(
   () => items.value.length,
   () => {
     rowEls.value = []
+    if (restoring) return
     setSelected(0, { scroll: 'start' })
   }
+)
+
+watch([selectedIndex, selectionActive], () => {
+  saveViewState(props.feed)
+})
+
+watch(
+  () => props.feed,
+  async (nextFeed, prevFeed) => {
+    if (prevFeed) saveViewState(prevFeed)
+    await loadWithOptionalRestore(nextFeed)
+  },
+  { immediate: true }
 )
 
 onMounted(() => {
@@ -273,13 +344,14 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
+  saveViewState(props.feed)
   setMenuActions([])
   setMenuTitle('')
 })
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-full" role="listbox" aria-label="Stories">
     <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000] text-center">
       <div class="font-bold mb-2 uppercase">!! DISK READ ERROR !!</div>
       <div class="mb-4">{{ error }}</div>
@@ -301,7 +373,7 @@ onBeforeUnmount(() => {
         <div
           v-for="(item, idx) in items"
           :key="item.id"
-          :ref="(el) => (rowEls[idx] = el as HTMLElement)"
+          :ref="(el: Element | ComponentPublicInstance | null) => (rowEls[idx] = el as HTMLElement | null)"
           role="option"
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"

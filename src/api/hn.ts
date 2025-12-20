@@ -21,8 +21,28 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   return (await res.json()) as T
 }
 
+const FEED_IDS_TTL_MS = 2 * 60 * 1000
+const feedIdsCache = new Map<FeedKind, { ids: number[]; at: number }>()
+const feedIdsInFlight = new Map<FeedKind, Promise<number[]>>()
+
 export async function fetchFeedIds(kind: FeedKind, signal?: AbortSignal) {
-  return await fetchJson<number[]>(`/${feedEndpoint[kind]}.json`, signal)
+  const cached = feedIdsCache.get(kind)
+  if (cached && Date.now() - cached.at < FEED_IDS_TTL_MS) return cached.ids
+
+  const existing = feedIdsInFlight.get(kind)
+  if (existing) return await existing
+
+  const promise = fetchJson<number[]>(`/${feedEndpoint[kind]}.json`, signal)
+    .then((ids) => {
+      feedIdsCache.set(kind, { ids, at: Date.now() })
+      return ids
+    })
+    .finally(() => {
+      feedIdsInFlight.delete(kind)
+    })
+
+  feedIdsInFlight.set(kind, promise)
+  return await promise
 }
 
 const inFlight = new Map<number, Promise<HnItem | null>>()
@@ -72,8 +92,22 @@ async function mapConcurrent<T, R>(
   return results
 }
 
+function isValidItem(x: HnItem | null): x is HnItem {
+  return x != null && !x.deleted && !x.dead
+}
+
+function cachedItem(id: number) {
+  const item = itemCache.get(id)
+  return isValidItem(item ?? null) ? item : null
+}
+
 export async function fetchItems(ids: number[], options?: { concurrency?: number }) {
+  // Fast path: everything is already in memory cache.
+  const cached = ids.map((id) => cachedItem(id))
+  const allCached = cached.every((x) => x !== null)
+  if (allCached) return cached.filter((x): x is HnItem => x !== null)
+
   const concurrency = options?.concurrency ?? 12
   const items = await mapConcurrent(ids, concurrency, async (id) => await fetchItem(id))
-  return items.filter((x): x is HnItem => x != null && !x.deleted && !x.dead)
+  return items.filter(isValidItem)
 }

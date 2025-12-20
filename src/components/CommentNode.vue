@@ -10,6 +10,7 @@ const props = defineProps<{
   id: number
   itemsById: Map<number, HnItem>
   loadKids: (ids: number[]) => Promise<void>
+  selectedId?: number | null
   isLast?: boolean
   depth?: number
 }>()
@@ -39,14 +40,19 @@ async function ensureKids() {
 </script>
 
 <template>
-  <div v-if="item" class="relative mb-4" :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''">
+  <div
+    v-if="item"
+    class="relative mb-4"
+    :data-ykhn-comment-id="String(id)"
+    :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''"
+  >
     <!-- Visual branch for threading -->
     <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/50 font-mono leading-none">
       {{ isLast ? '└─' : '├─' }}
     </div>
     <div v-if="depth > 0 && !isLast" class="absolute left-[-18px] top-8 bottom-[-16px] border-l border-tui-active/30"></div>
 
-    <div class="tui-comment-card">
+    <div class="tui-comment-card" :class="selectedId === id ? 'border-2 border-tui-yellow bg-tui-active/10' : ''">
       <div class="flex items-center justify-between gap-2 bg-tui-active/40 px-2 py-1 mb-2 font-mono">
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1">
@@ -91,6 +97,7 @@ async function ensureKids() {
         :id="kidId"
         :items-by-id="itemsById"
         :load-kids="loadKids"
+        :selected-id="selectedId"
         :is-last="index === kids.length - 1"
         :depth="depth + 1"
       />
