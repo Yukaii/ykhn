@@ -38,6 +38,7 @@ function close() {
           <div class="flex justify-between"><span>r</span><span>Refresh</span></div>
           <div class="flex justify-between"><span>PgUp/PgDn</span><span>Prev/Next (or load more)</span></div>
           <div class="flex justify-between"><span>Ctrl+o / Ctrl+i</span><span>Back / Forward</span></div>
+          <div class="flex justify-between"><span>Ctrl+e / Ctrl+y</span><span>Scroll one row</span></div>
           <div class="flex justify-between"><span>Ctrl+d / Ctrl+u</span><span>Scroll half page</span></div>
           <div class="flex justify-between"><span>Ctrl+f / Ctrl+b</span><span>Scroll full page</span></div>
         </div>

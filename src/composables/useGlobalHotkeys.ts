@@ -2,7 +2,7 @@ import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { menuState, setShortcutsOpen, toggleShortcuts, uiState } from '../store'
-import { getMainScrollContainer, menuShortcutFromEvent, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { estimateRowScrollStepPx, getMainScrollContainer, menuShortcutFromEvent, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
 
 function runMenuActionByShortcut(shortcut: string) {
   const action = menuState.actions.find((a) => a.shortcut === shortcut && !a.disabled)
@@ -105,6 +105,18 @@ export function useGlobalHotkeys() {
       // Scrolling (vimify-hackernews style)
       const el = getMainScrollContainer()
       const page = el ? el.clientHeight : 0
+
+      if (e.key === 'e') {
+        const step = estimateRowScrollStepPx(el)
+        if (scrollMainBy(step)) e.preventDefault()
+        return
+      }
+      if (e.key === 'y') {
+        const step = estimateRowScrollStepPx(el)
+        if (scrollMainBy(-step)) e.preventDefault()
+        return
+      }
+
       if (e.key === 'd' && page) {
         if (scrollMainBy(page / 2)) e.preventDefault()
         return

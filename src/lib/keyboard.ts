@@ -80,3 +80,16 @@ export function scrollElementIntoMain(el: HTMLElement, block: ScrollLogicalPosit
   const maxTop = Math.max(0, container.scrollHeight - container.clientHeight)
   container.scrollTop = clamp(targetTop, 0, maxTop)
 }
+
+export function estimateRowScrollStepPx(container?: HTMLElement | null) {
+  const el = container ?? getMainScrollContainer()
+  if (!el) return 40
+
+  const selected = el.querySelector<HTMLElement>('[role="option"][aria-selected="true"]')
+  const sample = selected ?? el.querySelector<HTMLElement>('[role="option"]')
+  const raw = sample?.offsetHeight
+
+  const px = typeof raw === 'number' && Number.isFinite(raw) ? raw : 40
+  // Clamp to a sane range to avoid giant comment cards.
+  return clamp(px, 16, 120)
+}
