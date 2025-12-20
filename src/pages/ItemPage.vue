@@ -217,12 +217,6 @@ async function onKeyDown(e: KeyboardEvent) {
 
   if (now - pendingGAt >= 650) pendingGAt = 0
 
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'z') {
-    pendingZAt = now
-    e.preventDefault()
-    return
-  }
-
   if (pendingZAt && now - pendingZAt < 650 && !e.ctrlKey && !e.metaKey && !e.altKey) {
     if (e.key === 't') {
       pendingZAt = 0
@@ -245,6 +239,12 @@ async function onKeyDown(e: KeyboardEvent) {
   }
 
   if (now - pendingZAt >= 650) pendingZAt = 0
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'z') {
+    pendingZAt = now
+    e.preventDefault()
+    return
+  }
 
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'j') {
     await selectCommentByIndex(currentCommentIndex() + parseCount(1))
