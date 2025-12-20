@@ -60,7 +60,10 @@ async function mapConcurrent<T, R>(
       const current = nextIndex
       if (current >= items.length) return
       nextIndex++
-      results[current] = await fn(items[current])
+
+      const item = items[current]
+      if (item === undefined) throw new Error('Invariant: missing item')
+      results[current] = await fn(item)
     }
   }
 
@@ -72,5 +75,5 @@ async function mapConcurrent<T, R>(
 export async function fetchItems(ids: number[], options?: { concurrency?: number }) {
   const concurrency = options?.concurrency ?? 12
   const items = await mapConcurrent(ids, concurrency, async (id) => await fetchItem(id))
-  return items.filter((x): x is HnItem => Boolean(x) && !x.deleted && !x.dead)
+  return items.filter((x): x is HnItem => x != null && !x.deleted && !x.dead)
 }
