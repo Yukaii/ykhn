@@ -68,28 +68,28 @@ onUnmounted(() => window.removeEventListener('click', onWindowClick))
         </RouterLink>
 
         <!-- System Dropdown Menu -->
-        <div v-if="sysMenuOpen" class="tui-menu-dropdown font-mono text-sm text-tui-bg left-0 top-full mt-[2px]">
+        <div v-if="sysMenuOpen" class="tui-menu-dropdown font-mono text-tui-bg left-0 top-full mt-[2px]">
           <div class="tui-dropdown-item" @click="navigate('/')">
             <span>TOP_STORIES</span>
-            <span class="opacity-50 text-[10px]">F1</span>
+            <span class="opacity-50">F1</span>
           </div>
           <div class="tui-dropdown-item" @click="navigate('/new')">
             <span>NEW_STORIES</span>
-            <span class="opacity-50 text-[10px]">F2</span>
+            <span class="opacity-50">F2</span>
           </div>
           <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
           <div class="tui-dropdown-item" @click="navigate('/about')">
             <span>SYSTEM_SETUP</span>
-            <span class="opacity-50 text-[10px]">F9</span>
+            <span class="opacity-50">F9</span>
           </div>
           <div class="tui-dropdown-item" @click="reboot">
             <span>REBOOT_OS</span>
-            <span class="opacity-50 text-[10px]">^R</span>
+            <span class="opacity-50">^R</span>
           </div>
         </div>
       </div>
       
-      <div class="flex items-center gap-4 text-xs">
+      <div class="flex items-center gap-4">
         <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1 animate-pulse'">
           {{ online ? '[ONLINE]' : '[OFFLINE]' }}
         </span>
@@ -112,16 +112,16 @@ onUnmounted(() => window.removeEventListener('click', onWindowClick))
               @click="runAction(item.action, item.disabled)"
             >
               <span>{{ item.label.toUpperCase() }}</span>
-              <span v-if="item.shortcut" class="opacity-50 text-[10px]">{{ item.shortcut }}</span>
+              <span v-if="item.shortcut" class="opacity-50">{{ item.shortcut }}</span>
             </div>
           </template>
-          <div v-else class="px-4 py-2 opacity-30 italic text-xs">NO_ACTIONS</div>
+          <div v-else class="px-4 py-2 opacity-30 italic">NO_ACTIONS</div>
         </div>
       </div>
       <div class="tui-menu-item opacity-30"><u>E</u>dit</div>
       <div class="tui-menu-item opacity-30"><u>H</u>elp</div>
       
-      <div class="ml-auto px-4 py-0.5 text-[10px] opacity-60 font-mono flex items-center gap-2">
+      <div class="ml-auto px-4 py-0.5 opacity-60 font-mono flex items-center gap-2">
         {{ menuState.title }}
       </div>
     </div>

@@ -133,8 +133,8 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex flex-col h-full">
     <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000] text-center">
-      <div class="text-xl font-bold mb-2 uppercase">!! DISK READ ERROR !!</div>
-      <div class="text-sm mb-4">{{ error }}</div>
+      <div class="font-bold mb-2 uppercase">!! DISK READ ERROR !!</div>
+      <div class="mb-4">{{ error }}</div>
       <button class="tui-btn" @click="refresh">RETRY</button>
     </div>
 

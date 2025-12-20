@@ -25,7 +25,7 @@ function applyFontSize() {
 <template>
   <div class="flex flex-col gap-6">
     <header class="border-b border-retro-border pb-4">
-      <h1 class="text-4xl font-black uppercase tracking-widest">
+      <h1 class="font-black uppercase tracking-widest">
         SYS_INFO / ABOUT
       </h1>
       <p class="mt-2 opacity-70">
@@ -34,7 +34,7 @@ function applyFontSize() {
     </header>
 
     <div class="retro-border">
-      <h2 class="text-xl font-bold mb-4 uppercase">>> PROJECT_OVERVIEW</h2>
+      <h2 class="font-bold mb-4 uppercase">>> PROJECT_OVERVIEW</h2>
       <p class="mb-4">
         YKHN IS A HIGH-PERFORMANCE, OFFLINE-ENABLED INTERFACE FOR THE HACKER_NEWS MAINFRAME.
       </p>
@@ -44,7 +44,7 @@ function applyFontSize() {
     </div>
 
     <div class="retro-border bg-tui-active/20">
-      <h2 class="text-xl font-bold mb-4 uppercase">>> SYS_CONFIGURATION</h2>
+      <h2 class="font-bold mb-4 uppercase">>> SYS_CONFIGURATION</h2>
       <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <span>FONT_SIZE:</span>
@@ -58,20 +58,20 @@ function applyFontSize() {
     </div>
 
     <div class="retro-border bg-tui-active/10">
-      <h2 class="text-xl font-bold mb-4 uppercase">>> CACHING_SUBSYSTEM</h2>
+      <h2 class="font-bold mb-4 uppercase">>> CACHING_SUBSYSTEM</h2>
       <p>
         DATA PERSISTENCE IS AUTOMATICALLY MANAGED. FEED INDEXES AND STORY CONTENT ARE STORED IN LOCAL_BUFFER FOR RETRIEVAL DURING NETWORK_INTERRUPTIONS.
       </p>
     </div>
 
     <div class="retro-border">
-      <h2 class="text-xl font-bold mb-4 uppercase">>> DATA_SOURCE</h2>
+      <h2 class="font-bold mb-4 uppercase">>> DATA_SOURCE</h2>
       <p>
         PRIMARY UPLINK: OFFICIAL HACKER_NEWS FIREBASE_API.
       </p>
     </div>
 
-    <div class="mt-8 text-center text-xs opacity-50 animate-pulse">
+    <div class="mt-8 text-center opacity-50 animate-pulse uppercase">
       [END OF TRANSMISSION]
     </div>
   </div>

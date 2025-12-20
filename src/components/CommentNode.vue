@@ -10,7 +10,11 @@ const props = defineProps<{
   id: number
   itemsById: Map<number, HnItem>
   loadKids: (ids: number[]) => Promise<void>
+  isLast?: boolean
+  depth?: number
 }>()
+
+const depth = computed(() => props.depth ?? 0)
 
 const expanded = ref(true)
 const loadedKids = ref(false)
@@ -35,13 +39,15 @@ async function ensureKids() {
 </script>
 
 <template>
-  <div v-if="item" class="relative ml-2 md:ml-4 mb-4">
+  <div v-if="item" class="relative mb-4" :class="depth > 0 ? 'ml-6' : ''">
     <!-- Visual branch for threading -->
-    <div class="absolute left-[-10px] md:left-[-16px] top-0 bottom-0 border-l border-tui-active/30"></div>
-    <div class="absolute left-[-10px] md:left-[-16px] top-4 w-2 md:w-3 border-t border-tui-active/30"></div>
+    <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/50 font-mono leading-none">
+      {{ isLast ? '└─' : '├─' }}
+    </div>
+    <div v-if="depth > 0 && !isLast" class="absolute left-[-18px] top-8 bottom-[-16px] border-l border-tui-active/30"></div>
 
     <div class="tui-comment-card">
-      <div class="flex items-center justify-between gap-2 text-[0.65rem] md:text-[0.7rem] bg-tui-active/40 px-2 py-1 mb-2 font-mono">
+      <div class="flex items-center justify-between gap-2 bg-tui-active/40 px-2 py-1 mb-2 font-mono">
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1">
             <span class="text-tui-gray">USR:</span>
@@ -62,12 +68,12 @@ async function ensureKids() {
       </div>
 
       <div v-if="expanded" class="px-1">
-        <div v-if="text" class="prose prose-invert max-w-none text-[0.85rem] md:text-[0.95rem] leading-relaxed mb-1 font-content break-words" v-html="text" />
-        <div v-else class="text-[0.6rem] opacity-30 mb-2 italic">-- NO_CONTENT --</div>
+        <div v-if="text" class="prose prose-invert max-w-none leading-relaxed mb-1 font-content break-words" v-html="text" />
+        <div v-else class="opacity-30 mb-2 italic">-- NO_CONTENT --</div>
         
         <div v-if="expanded && kids.length && !loadedKids" class="mt-2 text-right">
           <button
-            class="text-[0.65rem] md:text-[0.7rem] font-bold text-tui-yellow hover:bg-tui-yellow hover:text-tui-bg px-2 border border-tui-yellow/30 transition-none uppercase"
+            class="font-bold text-tui-yellow hover:bg-tui-yellow hover:text-tui-bg px-2 border border-tui-yellow/30 transition-none uppercase"
             type="button"
             @click="ensureKids"
           >
@@ -80,11 +86,13 @@ async function ensureKids() {
     <!-- Recursive children -->
     <div v-if="expanded && kids.length && (loadedKids || itemsById.has(kids[0] as number))" class="flex flex-col mt-2">
       <CommentNode
-        v-for="kidId in (kids as number[])"
+        v-for="(kidId, index) in (kids as number[])"
         :key="kidId"
         :id="kidId"
         :items-by-id="itemsById"
         :load-kids="loadKids"
+        :is-last="index === kids.length - 1"
+        :depth="depth + 1"
       />
     </div>
   </div>

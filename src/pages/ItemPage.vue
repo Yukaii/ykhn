@@ -103,26 +103,31 @@ onBeforeUnmount(() => {
   <div class="flex flex-col gap-4">
     <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000]">
       <div class="font-bold mb-2 uppercase">!! ACCESS DENIED !!</div>
-      <div class="text-sm mb-4">{{ error }}</div>
+      <div class="mb-4">{{ error }}</div>
       <button class="tui-btn" @click="loadStory">RETRY</button>
     </div>
 
     <template v-else-if="story">
       <div class="p-4 border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_rgba(0,0,0,0.5)]">
-        <h1 class="text-2xl md:text-3xl font-black mb-4 uppercase leading-tight text-tui-yellow">{{ story.title ?? 'UNTITLED' }}</h1>
+        <h1 class="font-black mb-4 uppercase leading-tight text-tui-yellow">
+          <a v-if="story.url" :href="story.url" target="_blank" rel="noreferrer" class="hover:underline">
+            {{ story.title ?? 'UNTITLED' }}
+          </a>
+          <template v-else>{{ story.title ?? 'UNTITLED' }}</template>
+        </h1>
         
-        <div class="flex flex-wrap gap-x-6 gap-y-2 text-[0.75rem] mb-6 border-y border-tui-active/30 py-2 font-mono uppercase">
+        <div class="flex flex-wrap gap-x-6 gap-y-2 mb-6 border-y border-tui-active/30 py-2 font-mono uppercase">
           <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-white font-bold">{{ story.by }}</span></div>
           <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-white font-bold">{{ story.score }}</span></div>
           <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-white font-bold">{{ timeAgo(story.time) }}</span></div>
           <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-white font-bold truncate">{{ storyHost }}</span></div>
         </div>
 
-        <div v-if="storyText" class="font-content text-[0.95rem] md:text-[1.05rem] border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words leading-relaxed" v-html="storyText" />
+        <div v-if="storyText" class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words leading-relaxed" v-html="storyText" />
       </div>
 
       <div class="mt-6">
-        <div class="bg-tui-active text-white px-2 font-bold uppercase text-sm mb-4 border-b border-tui-border/30">
+        <div class="bg-tui-active text-white px-2 font-bold uppercase mb-4 border-b border-tui-border/30">
           >> COMMENTS_THREAD ({{ topCommentIds.length }})
         </div>
 
@@ -151,7 +156,7 @@ onBeforeUnmount(() => {
     </template>
     
     <div v-else-if="loading" class="text-center py-20 animate-pulse">
-      <div class="text-2xl">LOADING...</div>
+      <div>LOADING...</div>
       <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>
     </div>
   </div>

@@ -26,6 +26,7 @@
     -webkit-font-smoothing: none;
     image-rendering: pixelated;
     font-size: 1rem;
+    line-height: 1.2;
   }
 
   /* Norton Commander style scrollbar */
@@ -76,12 +77,24 @@
   }
 
   .tui-comment-branch {
-    @apply absolute left-[-12px] top-0 bottom-0 w-[2px] bg-tui-active/40;
+    @apply absolute left-[-14px] md:left-[-20px] top-0 bottom-0 w-[2px] bg-tui-active/30;
   }
   
-  .tui-comment-branch::before {
-    content: '';
-    @apply absolute left-0 top-[14px] w-[8px] h-[2px] bg-tui-active/40;
+  .tui-comment-node {
+    @apply relative ml-4 md:ml-6 mb-2;
+  }
+
+  .tui-comment-node::before {
+    content: "├─";
+    @apply absolute left-[-16px] md:left-[-20px] top-4 text-tui-active/50 font-mono;
+  }
+
+  .tui-comment-node:last-child::before {
+    content: "└─";
+  }
+
+  .tui-comment-node:last-child > .tui-comment-branch {
+    @apply hidden;
   }
 
   .tui-btn {
@@ -89,7 +102,7 @@
   }
 
   .tui-f-key {
-    @apply flex-1 text-center py-1 text-xs md:text-sm border-r border-tui-border last:border-r-0;
+    @apply flex-1 text-center py-1 border-r border-tui-border last:border-r-0;
   }
   .tui-f-key span {
     @apply text-tui-yellow font-bold mr-1;
@@ -104,7 +117,7 @@
   }
 
   .tui-menu-bar {
-    @apply bg-tui-gray text-tui-bg flex font-mono text-sm border-b border-tui-bg sticky top-0 z-10;
+    @apply bg-tui-gray text-tui-bg flex font-mono border-b border-tui-bg sticky top-0 z-10;
   }
 
   .tui-menu-item {
