@@ -407,10 +407,10 @@ onBeforeUnmount(() => {
         </h1>
 
         <div class="flex flex-wrap gap-x-6 gap-y-2 mb-6 border-y border-tui-active/30 py-2 font-mono uppercase">
-          <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-white font-bold">{{ story.by }}</span></div>
-          <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-white font-bold">{{ story.score }}</span></div>
-          <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-white font-bold">{{ timeAgo(story.time) }}</span></div>
-          <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-white font-bold truncate">{{ storyHost }}</span></div>
+          <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-tui-text font-bold">{{ story.by }}</span></div>
+          <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-tui-text font-bold">{{ story.score }}</span></div>
+          <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-tui-text font-bold">{{ timeAgo(story.time) }}</span></div>
+          <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-tui-text font-bold truncate">{{ storyHost }}</span></div>
         </div>
 
         <div
@@ -421,7 +421,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="mt-6">
-        <div class="bg-tui-active text-white px-2 font-bold uppercase mb-4 border-b border-tui-border/30">
+        <div class="bg-tui-active text-tui-text px-2 font-bold uppercase mb-4 border-b border-tui-border/30">
           >> COMMENTS_THREAD ({{ topCommentIds.length }})
         </div>
 

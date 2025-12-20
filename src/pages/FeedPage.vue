@@ -363,8 +363,8 @@ onBeforeUnmount(() => {
         <div v-for="n in 15" :key="n" class="p-2 border-b border-tui-active/30 flex gap-4 opacity-20">
           <div class="w-10 text-right">000</div>
           <div class="flex-1">
-            <div class="bg-white h-4 w-3/4 mb-2"></div>
-            <div class="bg-white h-3 w-1/2"></div>
+            <div class="bg-tui-text/20 h-4 w-3/4 mb-2"></div>
+            <div class="bg-tui-text/20 h-3 w-1/2"></div>
           </div>
         </div>
       </div>

@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { setTheme, uiState, type Theme } from '../store'
 
 const fontSize = ref(16)
+
+const theme = computed(() => uiState.theme)
+
+function setThemeLocal(next: Theme) {
+  setTheme(next)
+}
 
 onMounted(() => {
   const saved = localStorage.getItem('ykhn-font-size')
@@ -56,16 +63,43 @@ function applyFontSize() {
 
     <div class="retro-border bg-tui-active/20">
       <h2 class="font-bold mb-4 uppercase">>> SYS_CONFIGURATION</h2>
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-          <span>FONT_SIZE:</span>
-          <div class="flex border border-tui-border">
-            <button class="px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan" @click="updateFontSize(-1)">-</button>
-            <div class="px-4 py-1 bg-tui-bg text-tui-cyan">{{ fontSize }}PX</div>
-            <button class="px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan" @click="updateFontSize(1)">+</button>
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <span>FONT_SIZE:</span>
+            <div class="flex border border-tui-border">
+              <button class="px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan" @click="updateFontSize(-1)">-</button>
+              <div class="px-4 py-1 bg-tui-bg text-tui-cyan">{{ fontSize }}PX</div>
+              <button class="px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan" @click="updateFontSize(1)">+</button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span>COLOR_THEME:</span>
+            <div class="flex border border-tui-border">
+              <button
+                class="px-3 py-1 uppercase"
+                :class="theme === 'commander' ? 'bg-tui-cyan text-tui-bg font-bold' : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'"
+                @click="setThemeLocal('commander')"
+              >
+                CMD
+              </button>
+              <button
+                class="px-3 py-1 uppercase"
+                :class="theme === 'dark' ? 'bg-tui-cyan text-tui-bg font-bold' : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'"
+                @click="setThemeLocal('dark')"
+              >
+                DARK
+              </button>
+              <button
+                class="px-3 py-1 uppercase"
+                :class="theme === 'light' ? 'bg-tui-cyan text-tui-bg font-bold' : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'"
+                @click="setThemeLocal('light')"
+              >
+                LIGHT
+              </button>
+            </div>
           </div>
         </div>
-      </div>
     </div>
 
     <div class="retro-border bg-tui-active/10">

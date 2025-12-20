@@ -70,7 +70,7 @@ const host = computed(() => hostFromUrl(props.item.url))
     </div>
 
     <RouterLink
-      class="flex-none px-2 bg-tui-active text-white"
+      class="flex-none px-2 bg-tui-active text-tui-text"
       :class="selected ? 'bg-tui-bg text-tui-cyan' : 'group-hover:bg-tui-bg group-hover:text-tui-cyan'"
       :to="`/item/${item.id}`"
     >

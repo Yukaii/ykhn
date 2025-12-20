@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useOnline } from '../composables/useOnline'
-import { menuState } from '../store'
+import { menuState, setTheme, uiState, type Theme } from '../store'
 
 const { online } = useOnline()
 const router = useRouter()
@@ -42,6 +42,11 @@ function navigate(path: string) {
 
 function reboot() {
   window.location.reload()
+}
+
+function setThemeAndClose(theme: Theme) {
+  setTheme(theme)
+  closeMenus()
 }
 
 function openExternal(url: string) {
@@ -92,7 +97,7 @@ onUnmounted(() => {
         </RouterLink>
 
         <!-- System Dropdown Menu -->
-          <div v-if="sysMenuOpen" class="tui-menu-dropdown font-mono text-tui-bg left-0 top-full mt-[2px]">
+          <div v-if="sysMenuOpen" class="tui-menu-dropdown tui-sys-menu font-mono left-0 top-full mt-[2px]">
             <div class="tui-dropdown-item" @click="navigate('/')">
               <span>TOP_STORIES</span>
               <span class="tui-shortcut">F1</span>
@@ -100,6 +105,19 @@ onUnmounted(() => {
             <div class="tui-dropdown-item" @click="navigate('/new')">
               <span>NEW_STORIES</span>
               <span class="tui-shortcut">F2</span>
+            </div>
+            <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
+            <div class="tui-dropdown-item" @click="setThemeAndClose('dark')">
+              <span>{{ uiState.theme === 'dark' ? '● ' : '  ' }}THEME_DARK</span>
+              <span class="tui-shortcut">BW</span>
+            </div>
+            <div class="tui-dropdown-item" @click="setThemeAndClose('light')">
+              <span>{{ uiState.theme === 'light' ? '● ' : '  ' }}THEME_LIGHT</span>
+              <span class="tui-shortcut">WB</span>
+            </div>
+            <div class="tui-dropdown-item" @click="setThemeAndClose('commander')">
+              <span>{{ uiState.theme === 'commander' ? '● ' : '  ' }}THEME_CMD</span>
+              <span class="tui-shortcut">NC</span>
             </div>
             <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
             <div class="tui-dropdown-item" @click="navigate('/about')">
@@ -142,7 +160,7 @@ onUnmounted(() => {
           <div v-else class="px-4 py-2 opacity-50 italic">NO_ACTIONS</div>
         </div>
       </div>
-      <div class="tui-menu-item text-black/50"><u>E</u>dit</div>
+      <div class="tui-menu-item opacity-50"><u>E</u>dit</div>
       <div class="tui-menu-item" @click.stop="toggleHelpMenu" :class="helpMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''">
         <u>H</u>elp
         <!-- Help Dropdown -->

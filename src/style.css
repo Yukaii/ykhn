@@ -17,6 +17,27 @@
     --tui-font-size: 16px;
   }
 
+  /* Themes (default is commander via @theme) */
+  :root[data-theme='dark'] {
+    --color-tui-bg: #000000;
+    --color-tui-text: #ffffff;
+    --color-tui-border: #ffffff;
+    --color-tui-gray: #141414;
+    --color-tui-active: #1f1f1f;
+    --color-tui-cyan: #ffffff;
+    --color-tui-yellow: #ffffff;
+  }
+
+  :root[data-theme='light'] {
+    --color-tui-bg: #ffffff;
+    --color-tui-text: #000000;
+    --color-tui-border: #000000;
+    --color-tui-gray: #e6e6e6;
+    --color-tui-active: #dcdcdc;
+    --color-tui-cyan: #000000;
+    --color-tui-yellow: #000000;
+  }
+
   html {
     font-size: var(--tui-font-size);
   }
@@ -127,7 +148,11 @@
   }
 
   .tui-btn {
-    @apply px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan border-2 border-tui-border shadow-[2px_2px_0px_#000000] active:shadow-none active:translate-x-[1px] active:translate-y-[1px] uppercase font-bold;
+    @apply px-3 py-1 bg-tui-gray text-tui-text hover:bg-tui-cyan border-2 border-tui-border shadow-[2px_2px_0px_#000000] active:shadow-none active:translate-x-[1px] active:translate-y-[1px] uppercase font-bold;
+  }
+
+  :root[data-theme='commander'] .tui-btn {
+    @apply text-tui-bg;
   }
 
   .tui-f-key {
@@ -146,7 +171,11 @@
   }
 
   .tui-menu-bar {
-    @apply bg-tui-gray text-black flex font-mono border-b border-tui-bg sticky top-0 z-10;
+    @apply bg-tui-gray text-tui-text flex font-mono border-b border-tui-bg sticky top-0 z-10;
+  }
+
+  :root[data-theme='commander'] .tui-menu-bar {
+    @apply text-black;
   }
 
   .tui-menu-item {
@@ -154,11 +183,24 @@
   }
 
   .tui-menu-dropdown {
-    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px] text-black;
+    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px] text-tui-text;
+  }
+
+  :root[data-theme='commander'] .tui-menu-dropdown {
+    @apply text-black;
   }
 
   .tui-dropdown-item {
     @apply px-4 py-1 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
+  }
+
+  /* System dropdown uses theme-aware text color */
+  .tui-sys-menu {
+    @apply text-tui-text;
+  }
+
+  :root[data-theme='commander'] .tui-sys-menu {
+    @apply text-tui-bg;
   }
 
   /* Reveal shortcuts in dropdown sub-entries on hover */

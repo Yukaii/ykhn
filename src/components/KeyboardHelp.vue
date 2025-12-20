@@ -23,7 +23,7 @@ function close() {
       class="w-full max-w-2xl bg-tui-bg border-4 border-double border-tui-border shadow-[8px_8px_0px_rgba(0,0,0,0.7)]"
       @click.stop
     >
-      <div class="bg-tui-active text-white px-3 py-2 font-black uppercase flex items-center">
+      <div class="bg-tui-active text-tui-text px-3 py-2 font-black uppercase flex items-center">
         <span class="flex-1">KEYBOARD_SHORTCUTS</span>
         <button class="tui-btn" type="button" @click="close">[ESC]</button>
       </div>

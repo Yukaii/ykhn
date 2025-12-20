@@ -5,6 +5,7 @@ import './style.css'
 import App from './App.vue'
 import { router } from './router'
 import { markNeedRefresh, markOfflineReady } from './pwa'
+import { initThemeFromStorage } from './store'
 
 const updateServiceWorker = registerSW({
   immediate: true,
@@ -21,5 +22,8 @@ const savedFontSize = localStorage.getItem('ykhn-font-size')
 if (savedFontSize) {
   document.documentElement.style.setProperty('--tui-font-size', `${savedFontSize}px`)
 }
+
+// Initialize theme (commander/dark/light)
+initThemeFromStorage()
 
 createApp(App).use(router).mount('#app')
