@@ -35,33 +35,50 @@ async function ensureKids() {
 </script>
 
 <template>
-  <div v-if="item" class="border-l-2 border-tui-active pl-2 md:pl-4 mb-4">
-    <div class="flex items-center gap-2 text-[0.6rem] md:text-[0.7rem] bg-tui-active/30 px-2 py-1 mb-2 font-bold uppercase overflow-hidden">
-      <span class="text-tui-yellow truncate">{{ item.by ?? 'GUEST' }}</span>
-      <span class="opacity-50">|</span>
-      <span class="whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
+  <div v-if="item" class="relative ml-2 md:ml-4 mb-4">
+    <!-- Visual branch for threading -->
+    <div class="absolute left-[-10px] md:left-[-16px] top-0 bottom-0 border-l border-tui-active/30"></div>
+    <div class="absolute left-[-10px] md:left-[-16px] top-4 w-2 md:w-3 border-t border-tui-active/30"></div>
+
+    <div class="tui-comment-card">
+      <div class="flex items-center justify-between gap-2 text-[0.65rem] md:text-[0.7rem] bg-tui-active/40 px-2 py-1 mb-2 font-mono">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1">
+            <span class="text-tui-gray">USR:</span>
+            <span class="text-tui-yellow font-bold">{{ item.by ?? 'GUEST' }}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-tui-gray">DATE:</span>
+            <span class="text-tui-cyan whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
+          </div>
+        </div>
+        <button 
+          v-if="kids.length" 
+          @click="toggle" 
+          class="bg-tui-bg text-tui-border px-2 border border-tui-border/30 hover:bg-tui-border hover:text-tui-bg transition-none"
+        >
+          {{ expanded ? '[-] COLLAPSE' : `[+] EXPAND ${kids.length}` }}
+        </button>
+      </div>
+
+      <div v-if="expanded" class="px-1">
+        <div v-if="text" class="prose prose-invert max-w-none text-[0.85rem] md:text-[0.95rem] leading-relaxed mb-1 font-content break-words" v-html="text" />
+        <div v-else class="text-[0.6rem] opacity-30 mb-2 italic">-- NO_CONTENT --</div>
+        
+        <div v-if="expanded && kids.length && !loadedKids" class="mt-2 text-right">
+          <button
+            class="text-[0.65rem] md:text-[0.7rem] font-bold text-tui-yellow hover:bg-tui-yellow hover:text-tui-bg px-2 border border-tui-yellow/30 transition-none uppercase"
+            type="button"
+            @click="ensureKids"
+          >
+            [ LOAD_{{ kids.length }}_SUB_ENTRIES ]
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div v-if="expanded">
-      <div v-if="text" class="prose prose-invert max-w-none text-[0.85rem] md:text-[0.9rem] leading-relaxed mb-3 font-sans break-words" v-html="text" />
-      <div v-else class="text-[0.6rem] opacity-30 mb-2 italic">-- NO_DATA_FIELD --</div>
-    </div>
-
-    <div v-if="kids.length" class="flex gap-4">
-      <button class="text-[0.6rem] md:text-[0.7rem] font-bold text-tui-cyan hover:bg-tui-cyan hover:text-tui-bg px-1 border border-tui-cyan/30 transition-none" type="button" @click="toggle">
-        {{ expanded ? '[ - ]' : `[ +${kids.length} ]` }}
-      </button>
-      <button
-        v-if="expanded && !loadedKids"
-        class="text-[0.6rem] md:text-[0.7rem] font-bold text-tui-yellow hover:bg-tui-yellow hover:text-tui-bg px-1 border border-tui-yellow/30 transition-none"
-        type="button"
-        @click="ensureKids"
-      >
-        [ LOAD_SUB ]
-      </button>
-    </div>
-
-    <div v-if="expanded && kids.length && (loadedKids || itemsById.has(kids[0] as number))" class="flex flex-col gap-4 mt-4">
+    <!-- Recursive children -->
+    <div v-if="expanded && kids.length && (loadedKids || itemsById.has(kids[0] as number))" class="flex flex-col mt-2">
       <CommentNode
         v-for="kidId in (kids as number[])"
         :key="kidId"
@@ -71,8 +88,11 @@ async function ensureKids() {
       />
     </div>
   </div>
-  <div v-else class="border-l-2 border-tui-active/20 pl-2 md:pl-4 mb-4 animate-pulse">
-    <div class="h-3 bg-tui-active/20 w-16 mb-2"></div>
-    <div class="h-8 bg-tui-active/10 w-full"></div>
+  
+  <div v-else class="ml-2 md:ml-4 mb-4 opacity-30">
+    <div class="tui-comment-card animate-pulse">
+      <div class="h-3 bg-tui-active/40 w-24 mb-2"></div>
+      <div class="h-10 bg-tui-active/20 w-full"></div>
+    </div>
   </div>
 </template>

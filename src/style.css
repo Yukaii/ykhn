@@ -2,6 +2,7 @@
 
 @theme {
   --font-mono: "VT323", "Courier New", Courier, monospace;
+  --font-content: "JetBrains Mono", monospace;
   --color-tui-bg: #0000aa;
   --color-tui-text: #ffffff;
   --color-tui-cyan: #55ffff;
@@ -38,22 +39,49 @@
     @apply bg-tui-gray border-2 border-tui-bg;
   }
 
+  /* Custom scrollbar for the main area */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 16px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-tui-active/50;
+    box-shadow: inset 2px 2px 0px rgba(0,0,0,0.5);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-tui-gray border-2 border-tui-bg;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+  }
+
   a {
     @apply transition-colors;
   }
 
   #app {
-    @apply min-h-screen flex flex-col;
+    @apply min-h-screen flex flex-col bg-tui-bg;
   }
 }
 
 @layer components {
   .tui-window {
-    @apply border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_#000000];
+    @apply border-2 border-tui-border bg-tui-bg shadow-[6px_6px_0px_#000000];
   }
 
   .tui-title-bar {
-    @apply bg-tui-cyan text-tui-bg px-2 font-bold flex justify-between items-center uppercase;
+    @apply bg-tui-cyan text-tui-bg px-2 font-bold flex justify-between items-center uppercase border-b-2 border-tui-border;
+  }
+
+  .tui-comment-card {
+    @apply border border-tui-active bg-tui-bg p-2 mb-2 relative;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+  }
+
+  .tui-comment-branch {
+    @apply absolute left-[-12px] top-0 bottom-0 w-[2px] bg-tui-active/40;
+  }
+  
+  .tui-comment-branch::before {
+    content: '';
+    @apply absolute left-0 top-[14px] w-[8px] h-[2px] bg-tui-active/40;
   }
 
   .tui-btn {

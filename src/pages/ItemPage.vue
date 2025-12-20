@@ -95,17 +95,17 @@ onBeforeUnmount(() => {
         FILE_CONTENT: {{ id }}.TXT
       </div>
       
-      <div class="p-4 border-2 border-tui-border bg-tui-bg">
-        <h1 class="text-2xl font-black mb-4 uppercase">{{ story.title ?? 'UNTITLED' }}</h1>
+      <div class="p-4 border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_rgba(0,0,0,0.5)]">
+        <h1 class="text-2xl md:text-3xl font-black mb-4 uppercase leading-tight text-tui-yellow">{{ story.title ?? 'UNTITLED' }}</h1>
         
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] mb-4 bg-tui-active p-2">
-          <div>USER: {{ story.by }}</div>
-          <div>SCORE: {{ story.score }}</div>
-          <div>DATE: {{ timeAgo(story.time).toUpperCase() }}</div>
-          <div class="truncate">HOST: {{ storyHost }}</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-[0.7rem] md:text-[0.75rem] mb-6 bg-tui-active/30 p-3 border border-tui-border/20 font-mono">
+          <div class="flex gap-2"><span class="text-tui-cyan">AUTHOR:</span> <span class="font-bold">{{ story.by }}</span></div>
+          <div class="flex gap-2"><span class="text-tui-cyan">SCORE:</span> <span class="font-bold">{{ story.score }} PTS</span></div>
+          <div class="flex gap-2"><span class="text-tui-cyan">TIMESTAMP:</span> <span class="font-bold">{{ timeAgo(story.time).toUpperCase() }}</span></div>
+          <div class="flex gap-2 truncate"><span class="text-tui-cyan">URL:</span> <span class="font-bold truncate">{{ storyHost || 'INTERNAL' }}</span></div>
         </div>
 
-        <div v-if="storyText" class="font-sans text-[0.9rem] md:text-base border-l-4 border-tui-active pl-4 py-2 mb-6 bg-tui-active/10 break-words" v-html="storyText" />
+        <div v-if="storyText" class="font-content text-[0.9rem] md:text-[1rem] border-l-4 border-tui-active pl-4 py-2 mb-6 bg-tui-active/5 break-words leading-relaxed" v-html="storyText" />
 
         <div class="flex gap-4">
           <a v-if="story.url" class="tui-btn" :href="story.url" target="_blank" rel="noreferrer">OPEN_FILE</a>
