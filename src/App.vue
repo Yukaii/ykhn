@@ -6,7 +6,7 @@ import ToastBar from './components/ToastBar.vue'
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col p-2 md:p-4 overflow-hidden h-screen bg-tui-bg">
+  <div class="fixed inset-0 flex flex-col p-2 md:p-4 bg-tui-bg overflow-hidden h-screen w-screen">
     <!-- Main Window -->
     <div class="tui-window flex-1 flex flex-col overflow-hidden relative border-4">
       <AppHeader />
@@ -15,8 +15,8 @@ import ToastBar from './components/ToastBar.vue'
         <RouterView />
       </main>
 
-      <!-- TUI Status/Nav Bar (Fixed at bottom of window) -->
-      <AppNav class="sticky bottom-0 z-20" />
+      <!-- TUI Status/Nav Bar (Locked at bottom of window) -->
+      <AppNav class="flex-none z-20" />
     </div>
     
     <ToastBar />

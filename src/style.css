@@ -57,7 +57,7 @@
   }
 
   #app {
-    @apply min-h-screen flex flex-col bg-tui-bg;
+    @apply h-screen w-screen overflow-hidden bg-tui-bg;
   }
 }
 
@@ -101,5 +101,21 @@
   
   .tui-list-item.active {
     @apply bg-tui-yellow text-tui-bg;
+  }
+
+  .tui-menu-bar {
+    @apply bg-tui-gray text-tui-bg flex font-mono text-sm border-b border-tui-bg sticky top-0 z-10;
+  }
+
+  .tui-menu-item {
+    @apply px-4 py-0.5 hover:bg-tui-bg hover:text-tui-cyan cursor-pointer transition-none relative;
+  }
+
+  .tui-menu-dropdown {
+    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px];
+  }
+
+  .tui-dropdown-item {
+    @apply px-4 py-1 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
   }
 }

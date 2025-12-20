@@ -7,6 +7,7 @@ import type { HnItem } from '../api/types'
 import CommentNode from '../components/CommentNode.vue'
 import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
+import { setMenuActions, setMenuTitle } from '../store'
 
 const route = useRoute()
 
@@ -66,19 +67,35 @@ async function loadMoreTop() {
   await ensureItems(visibleTopIds.value)
 }
 
+function updateMenu() {
+  setMenuTitle(`FILE: ${id.value}.TXT`)
+  const actions = [
+    { label: 'Refresh', action: loadStory, shortcut: 'F5' },
+    { label: 'Open URL', action: () => story.value?.url && window.open(story.value.url, '_blank'), disabled: !story.value?.url },
+    { label: 'View Source', action: () => window.open(`https://news.ycombinator.com/item?id=${id.value}`, '_blank') },
+  ]
+  if (visibleTopIds.value.length < topCommentIds.value.length) {
+    actions.push({ label: 'Load More', action: loadMoreTop, shortcut: 'PgDn' })
+  }
+  setMenuActions(actions)
+}
+
 const storyHost = computed(() => hostFromUrl(story.value?.url))
 const storyText = computed(() => sanitizeHtml(story.value?.text))
 
-watch(id, async () => {
-  await loadStory()
+watch([id, story, visibleTopIds], () => {
+  updateMenu()
 })
 
 onMounted(async () => {
   await loadStory()
+  updateMenu()
 })
 
 onBeforeUnmount(() => {
   abort?.abort()
+  setMenuActions([])
+  setMenuTitle('')
 })
 </script>
 
@@ -91,31 +108,22 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else-if="story">
-      <div class="bg-tui-cyan text-tui-bg px-2 font-bold uppercase text-sm mb-2">
-        FILE_CONTENT: {{ id }}.TXT
-      </div>
-      
       <div class="p-4 border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_rgba(0,0,0,0.5)]">
         <h1 class="text-2xl md:text-3xl font-black mb-4 uppercase leading-tight text-tui-yellow">{{ story.title ?? 'UNTITLED' }}</h1>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-[0.7rem] md:text-[0.75rem] mb-6 bg-tui-active/30 p-3 border border-tui-border/20 font-mono">
-          <div class="flex gap-2"><span class="text-tui-cyan">AUTHOR:</span> <span class="font-bold">{{ story.by }}</span></div>
-          <div class="flex gap-2"><span class="text-tui-cyan">SCORE:</span> <span class="font-bold">{{ story.score }} PTS</span></div>
-          <div class="flex gap-2"><span class="text-tui-cyan">TIMESTAMP:</span> <span class="font-bold">{{ timeAgo(story.time).toUpperCase() }}</span></div>
-          <div class="flex gap-2 truncate"><span class="text-tui-cyan">URL:</span> <span class="font-bold truncate">{{ storyHost || 'INTERNAL' }}</span></div>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-[0.75rem] mb-6 border-y border-tui-active/30 py-2 font-mono uppercase">
+          <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-white font-bold">{{ story.by }}</span></div>
+          <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-white font-bold">{{ story.score }}</span></div>
+          <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-white font-bold">{{ timeAgo(story.time) }}</span></div>
+          <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-white font-bold truncate">{{ storyHost }}</span></div>
         </div>
 
-        <div v-if="storyText" class="font-content text-[0.9rem] md:text-[1rem] border-l-4 border-tui-active pl-4 py-2 mb-6 bg-tui-active/5 break-words leading-relaxed" v-html="storyText" />
-
-        <div class="flex gap-4">
-          <a v-if="story.url" class="tui-btn" :href="story.url" target="_blank" rel="noreferrer">OPEN_FILE</a>
-          <button class="tui-btn bg-tui-active text-white" @click="loadStory">REFRESH</button>
-        </div>
+        <div v-if="storyText" class="font-content text-[0.95rem] md:text-[1.05rem] border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words leading-relaxed" v-html="storyText" />
       </div>
 
       <div class="mt-6">
-        <div class="bg-tui-active text-white px-2 font-bold uppercase text-sm mb-2">
-          SUBDIRECTORY: {{ topCommentIds.length }} ENTRIES
+        <div class="bg-tui-active text-white px-2 font-bold uppercase text-sm mb-4 border-b border-tui-border/30">
+          >> COMMENTS_THREAD ({{ topCommentIds.length }})
         </div>
 
         <div v-if="topCommentIds.length === 0" class="text-center py-8 opacity-50 italic">

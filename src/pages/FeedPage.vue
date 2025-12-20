@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, onMounted } from 'vue'
 
 import { fetchFeedIds, fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
+import { setMenuActions, setMenuTitle } from '../store'
 
 const props = defineProps<{
   feed: FeedKind
@@ -93,6 +94,19 @@ function prev() {
   page.value--
 }
 
+function updateMenu() {
+  setMenuTitle(`DIR: ${title.value.toUpperCase()}\\*.*`)
+  setMenuActions([
+    { label: 'Refresh', action: refresh, shortcut: 'F5' },
+    { label: 'Next Page', action: next, shortcut: 'PgDn', disabled: !canNext.value },
+    { label: 'Prev Page', action: prev, shortcut: 'PgUp', disabled: !canPrev.value },
+  ])
+}
+
+watch([() => props.feed, canNext, canPrev, title], () => {
+  updateMenu()
+})
+
 watch(
   () => props.feed,
   async () => {
@@ -105,47 +119,19 @@ watch(page, async () => {
   await loadItemsForPage()
 })
 
+onMounted(() => {
+  updateMenu()
+})
+
 onBeforeUnmount(() => {
   abortIds?.abort()
+  setMenuActions([])
+  setMenuTitle('')
 })
 </script>
 
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 bg-tui-active/20 p-2 border border-tui-border/50">
-      <div class="flex flex-col">
-        <h1 class="text-xl font-black text-tui-yellow uppercase">
-          DIRECTORY: {{ title }}\*.*
-        </h1>
-        <div class="text-[10px] opacity-70">
-          SELECTING {{ items.length }} OF {{ ids.length }} OBJECTS
-        </div>
-      </div>
-      
-      <div class="flex gap-2 mt-2 md:mt-0">
-        <button class="tui-btn text-xs" @click="refresh">REFRESH</button>
-        <div class="flex border border-tui-border">
-          <button 
-            class="px-2 bg-tui-gray text-tui-bg hover:bg-tui-cyan disabled:opacity-30 transition-none" 
-            :disabled="!canPrev" 
-            @click="prev"
-          >
-            ↑
-          </button>
-          <div class="px-3 bg-tui-bg text-tui-cyan text-xs flex items-center">
-            P{{ page }}/{{ totalPages }}
-          </div>
-          <button 
-            class="px-2 bg-tui-gray text-tui-bg hover:bg-tui-cyan disabled:opacity-30 transition-none" 
-            :disabled="!canNext" 
-            @click="next"
-          >
-            ↓
-          </button>
-        </div>
-      </div>
-    </div>
-
     <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000] text-center">
       <div class="text-xl font-bold mb-2 uppercase">!! DISK READ ERROR !!</div>
       <div class="text-sm mb-4">{{ error }}</div>
