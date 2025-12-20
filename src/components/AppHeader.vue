@@ -9,20 +9,30 @@ const router = useRouter()
 
 const sysMenuOpen = ref(false)
 const actionsMenuOpen = ref(false)
+const helpMenuOpen = ref(false)
 
 function toggleSysMenu() {
   sysMenuOpen.value = !sysMenuOpen.value
   actionsMenuOpen.value = false
+  helpMenuOpen.value = false
 }
 
 function toggleActionsMenu() {
   actionsMenuOpen.value = !actionsMenuOpen.value
   sysMenuOpen.value = false
+  helpMenuOpen.value = false
+}
+
+function toggleHelpMenu() {
+  helpMenuOpen.value = !helpMenuOpen.value
+  sysMenuOpen.value = false
+  actionsMenuOpen.value = false
 }
 
 function closeMenus() {
   sysMenuOpen.value = false
   actionsMenuOpen.value = false
+  helpMenuOpen.value = false
 }
 
 function navigate(path: string) {
@@ -34,6 +44,11 @@ function reboot() {
   window.location.reload()
 }
 
+function openExternal(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
+  closeMenus()
+}
+
 function runAction(action: () => void, disabled?: boolean) {
   if (disabled) return
   action()
@@ -42,7 +57,7 @@ function runAction(action: () => void, disabled?: boolean) {
 
 // Close menu when clicking outside
 const onWindowClick = (e: MouseEvent) => {
-  if ((sysMenuOpen.value || actionsMenuOpen.value) && !(e.target as HTMLElement).closest('.tui-menu-container')) {
+  if ((sysMenuOpen.value || actionsMenuOpen.value || helpMenuOpen.value) && !(e.target as HTMLElement).closest('.tui-menu-container')) {
     closeMenus()
   }
 }
@@ -119,7 +134,20 @@ onUnmounted(() => window.removeEventListener('click', onWindowClick))
         </div>
       </div>
       <div class="tui-menu-item text-black/50"><u>E</u>dit</div>
-      <div class="tui-menu-item text-black/50"><u>H</u>elp</div>
+      <div class="tui-menu-item" @click.stop="toggleHelpMenu" :class="helpMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''">
+        <u>H</u>elp
+        <!-- Help Dropdown -->
+        <div v-if="helpMenuOpen" class="tui-menu-dropdown left-0 top-full">
+          <div class="tui-dropdown-item" @click="navigate('/about')">
+            <span class="font-bold">ABOUT</span>
+            <span class="opacity-60">F9</span>
+          </div>
+          <div class="tui-dropdown-item" @click="openExternal('https://github.com/Yukaii/ykhn')">
+            <span class="font-bold">OPEN_REPO</span>
+            <span class="opacity-60">WEB</span>
+          </div>
+        </div>
+      </div>
       
       <div class="ml-auto px-4 py-0.5 opacity-100 font-mono flex items-center gap-2 whitespace-nowrap min-w-0">
         <div v-if="menuState.loading" class="text-tui-bg flex items-center gap-1 mr-1 shrink-0">

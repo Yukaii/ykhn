@@ -41,6 +41,17 @@ function applyFontSize() {
       <p class="mb-4">
         BUILT USING MODERN PROTOCOLS: BUN, VITE, VUE, AND TAILWIND_CSS.
       </p>
+      <p class="mb-4">
+        SOURCE_CODE:
+        <a
+          class="text-tui-cyan underline hover:bg-tui-cyan hover:text-tui-bg px-1"
+          href="https://github.com/Yukaii/ykhn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GITHUB.COM/YUKAII/YKHN
+        </a>
+      </p>
     </div>
 
     <div class="retro-border bg-tui-active/20">
