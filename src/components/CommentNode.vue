@@ -97,10 +97,16 @@ async function ensureKids() {
     </div>
   </div>
   
-  <div v-else class="ml-2 md:ml-4 mb-4 opacity-30">
-    <div class="tui-comment-card animate-pulse">
-      <div class="h-3 bg-tui-active/40 w-24 mb-2"></div>
-      <div class="h-10 bg-tui-active/20 w-full"></div>
+  <div v-else class="relative mb-4" :class="depth > 0 ? 'ml-6' : ''">
+    <!-- Skeleton branch -->
+    <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/20 font-mono">
+      {{ isLast ? '└─' : '├─' }}
+    </div>
+    
+    <div class="tui-comment-card opacity-20 border-dashed">
+      <div class="h-6 bg-tui-active/40 w-full mb-2"></div>
+      <div class="h-4 bg-tui-active/20 w-3/4 mb-1"></div>
+      <div class="h-4 bg-tui-active/20 w-1/2"></div>
     </div>
   </div>
 </template>

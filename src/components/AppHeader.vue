@@ -90,7 +90,7 @@ onUnmounted(() => window.removeEventListener('click', onWindowClick))
       </div>
       
       <div class="flex items-center gap-4">
-        <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1 animate-pulse'">
+        <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1'">
           {{ online ? '[ONLINE]' : '[OFFLINE]' }}
         </span>
         <span class="hidden md:inline opacity-70">C:\HN\STORIES\</span>
@@ -111,27 +111,25 @@ onUnmounted(() => window.removeEventListener('click', onWindowClick))
               :class="item.disabled ? 'opacity-30 cursor-not-allowed' : ''"
               @click="runAction(item.action, item.disabled)"
             >
-              <span>{{ item.label.toUpperCase() }}</span>
-              <span v-if="item.shortcut" class="opacity-50">{{ item.shortcut }}</span>
+              <span class="font-bold">{{ item.label.toUpperCase() }}</span>
+              <span v-if="item.shortcut" class="opacity-60">{{ item.shortcut }}</span>
             </div>
           </template>
-          <div v-else class="px-4 py-2 opacity-30 italic">NO_ACTIONS</div>
+          <div v-else class="px-4 py-2 opacity-50 italic">NO_ACTIONS</div>
         </div>
       </div>
-      <div class="tui-menu-item opacity-30"><u>E</u>dit</div>
-      <div class="tui-menu-item opacity-30"><u>H</u>elp</div>
+      <div class="tui-menu-item text-black/50"><u>E</u>dit</div>
+      <div class="tui-menu-item text-black/50"><u>H</u>elp</div>
       
-      <div class="ml-auto px-4 py-0.5 opacity-60 font-mono flex items-center gap-2 whitespace-nowrap min-w-0">
-        <div v-if="menuState.loading" class="text-tui-yellow animate-pulse flex items-center gap-1 mr-1 shrink-0">
-          <span class="hidden md:inline">WORKING...</span>
-          <span class="md:hidden">BUSY</span>
+      <div class="ml-auto px-4 py-0.5 opacity-100 font-mono flex items-center gap-2 whitespace-nowrap min-w-0">
+        <div v-if="menuState.loading" class="text-tui-bg flex items-center gap-1 mr-1 shrink-0">
+          <span class="hidden md:inline font-bold">WORKING...</span>
+          <span class="md:hidden font-bold">BUSY</span>
           <div class="flex gap-0.5">
-            <div class="w-1 h-3 bg-tui-yellow animate-[pulse_0.5s_infinite_0ms]"></div>
-            <div class="w-1 h-3 bg-tui-yellow animate-[pulse_0.5s_infinite_100ms]"></div>
-            <div class="w-1 h-3 bg-tui-yellow animate-[pulse_0.5s_infinite_200ms]"></div>
+            <div class="w-1 h-3 bg-tui-bg animate-[step-end_1s_infinite]"></div>
           </div>
         </div>
-        <span class="truncate">{{ menuState.title }}</span>
+        <span class="truncate font-bold">{{ menuState.title }}</span>
       </div>
     </div>
   </div>

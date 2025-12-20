@@ -54,7 +54,7 @@
   }
 
   a {
-    @apply transition-colors;
+    @apply transition-none;
   }
 
   #app {
@@ -117,15 +117,15 @@
   }
 
   .tui-menu-bar {
-    @apply bg-tui-gray text-tui-bg flex font-mono border-b border-tui-bg sticky top-0 z-10;
+    @apply bg-tui-gray text-black flex font-mono border-b border-tui-bg sticky top-0 z-10;
   }
 
   .tui-menu-item {
-    @apply px-4 py-0.5 hover:bg-tui-bg hover:text-tui-cyan cursor-pointer transition-none relative;
+    @apply px-4 py-0.5 hover:bg-tui-bg hover:text-tui-cyan cursor-pointer transition-none relative font-bold;
   }
 
   .tui-menu-dropdown {
-    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px];
+    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px] text-black;
   }
 
   .tui-dropdown-item {

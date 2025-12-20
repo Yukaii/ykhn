@@ -114,10 +114,13 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-else class="flex-1">
-      <div v-if="loadingItems && items.length === 0" class="flex flex-col divide-y divide-tui-active/30">
-        <div v-for="n in 15" :key="n" class="p-2 animate-pulse flex gap-2">
-          <div class="w-8 h-4 bg-tui-active/40"></div>
-          <div class="flex-1 h-4 bg-tui-active/20"></div>
+      <div v-if="loadingItems && items.length === 0" class="flex flex-col">
+        <div v-for="n in 15" :key="n" class="p-2 border-b border-tui-active/30 flex gap-4 opacity-20">
+          <div class="w-10 text-right">000</div>
+          <div class="flex-1">
+            <div class="bg-white h-4 w-3/4 mb-2"></div>
+            <div class="bg-white h-3 w-1/2"></div>
+          </div>
         </div>
       </div>
 

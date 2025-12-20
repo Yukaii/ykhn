@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
       </div>
     </template>
     
-    <div v-else-if="loading" class="text-center py-20 animate-pulse">
+    <div v-else-if="loading" class="text-center py-20">
       <div>LOADING...</div>
       <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>
     </div>
