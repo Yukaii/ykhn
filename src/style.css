@@ -83,7 +83,7 @@
   }
   
   .prose pre {
-    @apply p-2 bg-black/30 border border-tui-active/30 my-2 font-mono text-sm w-full max-w-full;
+    @apply p-2 bg-black/30 border border-tui-active/30 my-2 font-mono w-full max-w-full;
     white-space: pre-wrap !important;
     word-wrap: break-word !important;
     word-break: break-all !important;
