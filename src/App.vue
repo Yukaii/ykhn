@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+
 import AppHeader from './components/AppHeader.vue'
 import AppNav from './components/AppNav.vue'
+import KeyboardHelp from './components/KeyboardHelp.vue'
 import ToastBar from './components/ToastBar.vue'
+import { useGlobalHotkeys } from './composables/useGlobalHotkeys'
+
+useGlobalHotkeys()
 </script>
 
 <template>
@@ -19,6 +24,7 @@ import ToastBar from './components/ToastBar.vue'
       <AppNav class="flex-none z-20" />
     </div>
     
+    <KeyboardHelp />
     <ToastBar />
   </div>
 </template>

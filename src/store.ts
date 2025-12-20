@@ -17,3 +17,15 @@ export function setMenuTitle(title: string) {
 export function setLoading(loading: boolean) {
   menuState.loading = loading
 }
+
+export const uiState = reactive({
+  shortcutsOpen: false,
+})
+
+export function setShortcutsOpen(open: boolean) {
+  uiState.shortcutsOpen = open
+}
+
+export function toggleShortcuts() {
+  uiState.shortcutsOpen = !uiState.shortcutsOpen
+}

@@ -59,7 +59,7 @@ async function loadMoreTop() {
 function updateMenu() {
   setMenuTitle(`FILE: ${id.value}.TXT`)
   const actions = [
-    { label: 'Refresh', action: loadStory, shortcut: 'F5' },
+    { label: 'Refresh', action: loadStory, shortcut: 'r' },
     { label: 'Open URL', action: () => story.value?.url && window.open(story.value.url, '_blank'), disabled: !story.value?.url },
     { label: 'View Source', action: () => window.open(`https://news.ycombinator.com/item?id=${id.value}`, '_blank') },
   ]

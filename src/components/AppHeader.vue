@@ -62,8 +62,17 @@ const onWindowClick = (e: MouseEvent) => {
   }
 }
 
-onMounted(() => window.addEventListener('click', onWindowClick))
-onUnmounted(() => window.removeEventListener('click', onWindowClick))
+const onCloseMenus = () => closeMenus()
+
+onMounted(() => {
+  window.addEventListener('click', onWindowClick)
+  window.addEventListener('ykhn:close-menus', onCloseMenus as EventListener)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', onWindowClick)
+  window.removeEventListener('ykhn:close-menus', onCloseMenus as EventListener)
+})
 </script>
 
 <template>

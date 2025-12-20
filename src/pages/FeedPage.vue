@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch, onMounted } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useAsyncState } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 
 import { fetchFeedIds, fetchItems } from '../api/hn'
+import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
 import { setMenuActions, setMenuTitle, setLoading } from '../store'
+import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
 
 const props = defineProps<{
   feed: FeedKind
 }>()
+
+const router = useRouter()
 
 const feedTitle: Record<FeedKind, string> = {
   top: 'Top',
@@ -23,6 +28,14 @@ const feedTitle: Record<FeedKind, string> = {
 const title = computed(() => feedTitle[props.feed])
 const page = ref(1)
 const pageSize = 30
+
+const selectedIndex = ref(0)
+const selectionActive = ref(true)
+const rowEls = ref<(HTMLElement | null)[]>([])
+
+let countBuffer = ''
+let pendingGAt = 0
+let pendingZAt = 0
 
 const { state: ids, isLoading: loadingIds, error: idsError, execute: executeLoadIds } = useAsyncState(
   async () => {
@@ -68,11 +81,162 @@ function prev() {
 function updateMenu() {
   setMenuTitle(`DIR: ${title.value.toUpperCase()}\\*.*`)
   setMenuActions([
-    { label: 'Refresh', action: refresh, shortcut: 'F5' },
+    { label: 'Refresh', action: refresh, shortcut: 'r' },
     { label: 'Next Page', action: next, shortcut: 'PgDn', disabled: !canNext.value },
     { label: 'Prev Page', action: prev, shortcut: 'PgUp', disabled: !canPrev.value },
   ])
 }
+
+function clampIndex(i: number) {
+  const last = items.value.length - 1
+  if (last < 0) return 0
+  return Math.max(0, Math.min(last, i))
+}
+
+async function scrollSelectedIntoView(block: ScrollLogicalPosition = 'nearest') {
+  await nextTick()
+  const el = rowEls.value[selectedIndex.value]
+  if (!el) return
+  el.scrollIntoView({ block, behavior: 'auto' })
+}
+
+function setSelected(i: number, opts?: { scroll?: ScrollLogicalPosition }) {
+  selectionActive.value = true
+  selectedIndex.value = clampIndex(i)
+  if (opts?.scroll) void scrollSelectedIntoView(opts.scroll)
+  else void scrollSelectedIntoView('nearest')
+}
+
+function selectedItem() {
+  return items.value[selectedIndex.value]
+}
+
+function openComments(it: HnItem, newTab: boolean) {
+  const resolved = router.resolve({ name: 'item', params: { id: it.id } })
+  if (newTab) {
+    window.open(resolved.href, '_blank', 'noopener,noreferrer')
+    return
+  }
+  router.push(resolved)
+}
+
+function openLink(it: HnItem, newTab: boolean) {
+  if (!it?.url) {
+    openComments(it, newTab)
+    return
+  }
+
+  if (newTab) {
+    window.open(it.url, '_blank', 'noopener,noreferrer')
+    return
+  }
+
+  window.location.assign(it.url)
+}
+
+function parseCount(defaultCount: number) {
+  const n = Number(countBuffer)
+  countBuffer = ''
+  if (!Number.isFinite(n) || n <= 0) return defaultCount
+  return n
+}
+
+function onKeyDown(e: KeyboardEvent) {
+  if (shouldIgnoreKeyboardEvent(e)) return
+
+  // Count prefix: <num>j / <num>k / <num>G
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && /^\d$/.test(e.key)) {
+    if (countBuffer.length === 0 && e.key === '0') return
+    countBuffer += e.key
+    e.preventDefault()
+    return
+  }
+
+  const now = Date.now()
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'g') {
+    const isDouble = now - pendingGAt < 650
+    pendingGAt = now
+    if (isDouble) {
+      setSelected(0, { scroll: 'start' })
+    }
+    e.preventDefault()
+    return
+  }
+
+  if (now - pendingGAt >= 650) pendingGAt = 0
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'z') {
+    pendingZAt = now
+    e.preventDefault()
+    return
+  }
+
+  if (pendingZAt && now - pendingZAt < 650 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 't') {
+      pendingZAt = 0
+      void scrollSelectedIntoView('start')
+      e.preventDefault()
+      return
+    }
+    if (e.key === 'z') {
+      pendingZAt = 0
+      void scrollSelectedIntoView('center')
+      e.preventDefault()
+      return
+    }
+    if (e.key === 'b') {
+      pendingZAt = 0
+      void scrollSelectedIntoView('end')
+      e.preventDefault()
+      return
+    }
+  }
+
+  if (now - pendingZAt >= 650) pendingZAt = 0
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'j') {
+    setSelected(selectedIndex.value + parseCount(1))
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'k') {
+    setSelected(selectedIndex.value - parseCount(1))
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'G') {
+    const count = parseCount(items.value.length)
+    const idx = Math.min(items.value.length - 1, Math.max(0, count - 1))
+    setSelected(idx, { scroll: 'end' })
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'Enter' || e.key === 'd' || e.key === 'D')) {
+    const it = selectedItem()
+    if (it) openComments(it, e.key === 'D')
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'o' || e.key === 'O')) {
+    const it = selectedItem()
+    if (it) openLink(it, e.key === 'O')
+    e.preventDefault()
+    return
+  }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
+    // Unfocus selection.
+    selectionActive.value = false
+    e.preventDefault()
+    return
+  }
+}
+
 
 watch([loadingIds, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
@@ -94,11 +258,21 @@ watch(page, async () => {
   await executeLoadItems()
 })
 
+watch(
+  () => items.value.length,
+  () => {
+    rowEls.value = []
+    setSelected(0, { scroll: 'start' })
+  }
+)
+
 onMounted(() => {
   updateMenu()
+  window.addEventListener('keydown', onKeyDown)
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
   setMenuActions([])
   setMenuTitle('')
 })
@@ -124,7 +298,16 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-else class="flex flex-col">
-        <StoryRow v-for="item in items" :key="item.id" :item="item" />
+        <div
+          v-for="(item, idx) in items"
+          :key="item.id"
+          :ref="(el) => (rowEls[idx] = el as HTMLElement)"
+          role="option"
+          :aria-selected="selectionActive && idx === selectedIndex"
+          @click="setSelected(idx, { scroll: 'nearest' })"
+        >
+          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" />
+        </div>
       </div>
     </div>
   </div>
