@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useScroll } from '@vueuse/core'
 
 const route = useRoute()

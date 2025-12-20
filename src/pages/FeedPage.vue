@@ -3,7 +3,6 @@ import { computed, onBeforeUnmount, ref, watch, onMounted } from 'vue'
 import { useAsyncState } from '@vueuse/core'
 
 import { fetchFeedIds, fetchItems } from '../api/hn'
-import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
 import { setMenuActions, setMenuTitle, setLoading } from '../store'
