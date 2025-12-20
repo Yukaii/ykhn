@@ -6,16 +6,20 @@ const { online } = useOnline()
 </script>
 
 <template>
-  <header class="app-header">
-    <div class="app-header__left">
-      <RouterLink class="brand" to="/" aria-label="Go to Top stories">YKHN</RouterLink>
-      <span class="pill" :class="online ? 'pill--ok' : 'pill--warn'">
-        {{ online ? 'online' : 'offline' }}
-      </span>
+  <div class="tui-title-bar sticky top-0 z-10">
+    <div class="flex items-center gap-2">
+      <span class="bg-tui-bg text-tui-cyan px-1">≡</span>
+      <RouterLink to="/" class="hover:bg-tui-bg hover:text-tui-cyan px-1 transition-none">
+        YKHN_OS V1.0
+      </RouterLink>
     </div>
-
-    <nav class="app-header__right" aria-label="Top links">
-      <RouterLink class="link" to="/about">About</RouterLink>
-    </nav>
-  </header>
+    
+    <div class="flex items-center gap-4 text-xs">
+      <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1 animate-pulse'">
+        {{ online ? '[ONLINE]' : '[OFFLINE]' }}
+      </span>
+      <RouterLink to="/about" class="hover:bg-tui-bg hover:text-tui-cyan px-1">F9 SETUP</RouterLink>
+      <span class="hidden md:inline">C:\HN\STORIES\</span>
+    </div>
+  </div>
 </template>

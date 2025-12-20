@@ -5,7 +5,6 @@ import { fetchFeedIds, fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
-import { useOnline } from '../composables/useOnline'
 
 const props = defineProps<{
   feed: FeedKind
@@ -21,8 +20,6 @@ const feedTitle: Record<FeedKind, string> = {
 }
 
 const title = computed(() => feedTitle[props.feed])
-
-const { online } = useOnline()
 
 const ids = ref<number[]>([])
 const items = ref<HnItem[]>([])
@@ -114,57 +111,58 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="page">
-    <header class="page-header">
-      <div class="page-header__row">
-        <h1>{{ title }}</h1>
-        <button class="btn btn--ghost" type="button" :disabled="loadingIds" @click="refresh">
-          Refresh
-        </button>
+  <div class="flex flex-col h-full">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 bg-tui-active/20 p-2 border border-tui-border/50">
+      <div class="flex flex-col">
+        <h1 class="text-xl font-black text-tui-yellow uppercase">
+          DIRECTORY: {{ title }}\*.*
+        </h1>
+        <div class="text-[10px] opacity-70">
+          SELECTING {{ items.length }} OF {{ ids.length }} OBJECTS
+        </div>
       </div>
-
-      <p class="muted">
-        <span v-if="loadingIds">Loading…</span>
-        <span v-else-if="ids.length">{{ ids.length }} stories</span>
-        <span v-else>—</span>
-        <span class="muted">·</span>
-        <span class="muted">Page {{ page }} / {{ totalPages }}</span>
-        <span v-if="!online" class="muted">· offline</span>
-      </p>
-
-      <div v-if="!online" class="note">
-        You’re offline. If you’ve opened this feed before, cached stories will still show.
-      </div>
-    </header>
-
-    <div v-if="error" class="card">
-      <div class="error-title">Couldn’t load</div>
-      <div class="muted">{{ error }}</div>
-      <div class="actions">
-        <button class="btn" type="button" @click="refresh">Try again</button>
+      
+      <div class="flex gap-2 mt-2 md:mt-0">
+        <button class="tui-btn text-xs" @click="refresh">REFRESH</button>
+        <div class="flex border border-tui-border">
+          <button 
+            class="px-2 bg-tui-gray text-tui-bg hover:bg-tui-cyan disabled:opacity-30 transition-none" 
+            :disabled="!canPrev" 
+            @click="prev"
+          >
+            ↑
+          </button>
+          <div class="px-3 bg-tui-bg text-tui-cyan text-xs flex items-center">
+            P{{ page }}/{{ totalPages }}
+          </div>
+          <button 
+            class="px-2 bg-tui-gray text-tui-bg hover:bg-tui-cyan disabled:opacity-30 transition-none" 
+            :disabled="!canNext" 
+            @click="next"
+          >
+            ↓
+          </button>
+        </div>
       </div>
     </div>
 
-    <section v-else class="stack">
-      <div v-if="loadingItems && items.length === 0" class="stack">
-        <div v-for="n in 10" :key="n" class="story story--skeleton">
-          <div class="story__main">
-            <div class="skeleton" />
-            <div class="skeleton skeleton--short" />
-          </div>
+    <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000] text-center">
+      <div class="text-xl font-bold mb-2 uppercase">!! DISK READ ERROR !!</div>
+      <div class="text-sm mb-4">{{ error }}</div>
+      <button class="tui-btn" @click="refresh">RETRY</button>
+    </div>
+
+    <div v-else class="flex-1">
+      <div v-if="loadingItems && items.length === 0" class="flex flex-col divide-y divide-tui-active/30">
+        <div v-for="n in 15" :key="n" class="p-2 animate-pulse flex gap-2">
+          <div class="w-8 h-4 bg-tui-active/40"></div>
+          <div class="flex-1 h-4 bg-tui-active/20"></div>
         </div>
       </div>
 
-      <div v-else class="stack">
+      <div v-else class="flex flex-col">
         <StoryRow v-for="item in items" :key="item.id" :item="item" />
       </div>
-
-      <div class="pager">
-        <button class="btn btn--ghost" type="button" :disabled="!canPrev" @click="prev">
-          Prev
-        </button>
-        <button class="btn" type="button" :disabled="!canNext" @click="next">Next</button>
-      </div>
-    </section>
+    </div>
   </div>
 </template>

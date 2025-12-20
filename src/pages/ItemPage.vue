@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { computed, onBeforeUnmount, reactive, ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { fetchItem } from '../api/hn'
 import type { HnItem } from '../api/types'
 import CommentNode from '../components/CommentNode.vue'
-import { useOnline } from '../composables/useOnline'
-import { hostFromUrl, pluralize, timeAgo } from '../lib/format'
+import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
 
 const route = useRoute()
-const { online } = useOnline()
 
 const id = computed(() => Number(route.params.id))
 
@@ -75,85 +73,78 @@ watch(id, async () => {
   await loadStory()
 })
 
+onMounted(async () => {
+  await loadStory()
+})
+
 onBeforeUnmount(() => {
   abort?.abort()
 })
 </script>
 
 <template>
-  <div class="page">
-    <div class="page-header">
-      <div class="page-header__row">
-        <RouterLink class="btn btn--ghost" to="/">Back</RouterLink>
-        <button class="btn btn--ghost" type="button" :disabled="loading" @click="loadStory">
-          Refresh
-        </button>
-      </div>
-
-      <div v-if="loading" class="muted">Loading…</div>
-      <div v-else-if="!online" class="note">
-        You’re offline. If you’ve opened this item before, cached content may still show.
-      </div>
+  <div class="flex flex-col gap-4">
+    <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000]">
+      <div class="font-bold mb-2 uppercase">!! ACCESS DENIED !!</div>
+      <div class="text-sm mb-4">{{ error }}</div>
+      <button class="tui-btn" @click="loadStory">RETRY</button>
     </div>
 
-    <div v-if="error" class="card">
-      <div class="error-title">Couldn’t load</div>
-      <div class="muted">{{ error }}</div>
-      <div class="actions">
-        <button class="btn" type="button" @click="loadStory">Try again</button>
+    <template v-else-if="story">
+      <div class="bg-tui-cyan text-tui-bg px-2 font-bold uppercase text-sm mb-2">
+        FILE_CONTENT: {{ id }}.TXT
       </div>
+      
+      <div class="p-4 border-2 border-tui-border bg-tui-bg">
+        <h1 class="text-2xl font-black mb-4 uppercase">{{ story.title ?? 'UNTITLED' }}</h1>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] mb-4 bg-tui-active p-2">
+          <div>USER: {{ story.by }}</div>
+          <div>SCORE: {{ story.score }}</div>
+          <div>DATE: {{ timeAgo(story.time).toUpperCase() }}</div>
+          <div class="truncate">HOST: {{ storyHost }}</div>
+        </div>
+
+        <div v-if="storyText" class="font-sans text-[0.9rem] md:text-base border-l-4 border-tui-active pl-4 py-2 mb-6 bg-tui-active/10 break-words" v-html="storyText" />
+
+        <div class="flex gap-4">
+          <a v-if="story.url" class="tui-btn" :href="story.url" target="_blank" rel="noreferrer">OPEN_FILE</a>
+          <button class="tui-btn bg-tui-active text-white" @click="loadStory">REFRESH</button>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <div class="bg-tui-active text-white px-2 font-bold uppercase text-sm mb-2">
+          SUBDIRECTORY: {{ topCommentIds.length }} ENTRIES
+        </div>
+
+        <div v-if="topCommentIds.length === 0" class="text-center py-8 opacity-50 italic">
+          -- EMPTY DIRECTORY --
+        </div>
+
+        <div v-else class="flex flex-col gap-4">
+          <CommentNode
+            v-for="commentId in visibleTopIds"
+            :key="commentId"
+            :id="commentId"
+            :items-by-id="itemsById"
+            :load-kids="ensureItems"
+          />
+
+          <button
+            v-if="visibleTopIds.length < topCommentIds.length"
+            class="tui-btn w-full"
+            @click="loadMoreTop"
+          >
+            LOAD_MORE_RECORDS
+          </button>
+        </div>
+      </div>
+    </template>
+    
+    <div v-else-if="loading" class="text-center py-20 animate-pulse">
+      <div class="text-2xl">LOADING...</div>
+      <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>
     </div>
-
-    <article v-else-if="story" class="card">
-      <h1 class="item-title">{{ story.title ?? 'Untitled' }}</h1>
-
-      <div class="item-meta">
-        <span v-if="story.score !== undefined">{{ story.score }} pts</span>
-        <span v-if="story.by">by {{ story.by }}</span>
-        <span v-if="story.time">{{ timeAgo(story.time) }}</span>
-        <span v-if="storyHost">· {{ storyHost }}</span>
-      </div>
-
-      <div v-if="storyText" class="item-text" v-html="storyText" />
-
-      <div class="actions">
-        <a v-if="story.url" class="btn" :href="story.url" target="_blank" rel="noreferrer">Open link</a>
-        <a
-          class="btn btn--ghost"
-          :href="`https://news.ycombinator.com/item?id=${story.id}`"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Open on HN
-        </a>
-      </div>
-    </article>
-
-    <section v-if="story" class="stack">
-      <div class="section-title">
-        {{ topCommentIds.length }} {{ pluralize(topCommentIds.length, 'comment') }}
-      </div>
-
-      <div v-if="topCommentIds.length === 0" class="card muted">No comments.</div>
-
-      <div v-else class="stack">
-        <CommentNode
-          v-for="commentId in visibleTopIds"
-          :key="commentId"
-          :id="commentId"
-          :items-by-id="itemsById"
-          :load-kids="ensureItems"
-        />
-
-        <button
-          v-if="visibleTopIds.length < topCommentIds.length"
-          class="btn"
-          type="button"
-          @click="loadMoreTop"
-        >
-          Load more
-        </button>
-      </div>
-    </section>
   </div>
 </template>

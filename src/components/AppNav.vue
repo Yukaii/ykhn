@@ -18,15 +18,15 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <nav class="app-nav" aria-label="Feeds">
+  <nav class="bg-tui-active border-t-2 border-tui-border flex flex-wrap md:flex-nowrap" aria-label="Feeds">
     <RouterLink
-      v-for="tab in tabs"
+      v-for="(tab, index) in tabs"
       :key="tab.to"
-      class="app-nav__tab"
-      :class="isActive(tab.to) ? 'app-nav__tab--active' : ''"
+      class="tui-f-key hover:bg-tui-cyan hover:text-tui-bg transition-none"
+      :class="isActive(tab.to) ? 'bg-tui-yellow text-tui-bg' : ''"
       :to="tab.to"
     >
-      {{ tab.label }}
+      <span>F{{ index + 1 }}</span>{{ tab.label }}
     </RouterLink>
   </nav>
 </template>

@@ -6,14 +6,19 @@ import ToastBar from './components/ToastBar.vue'
 </script>
 
 <template>
-  <div class="app">
-    <AppHeader />
+  <div class="flex-1 flex flex-col p-2 md:p-4 overflow-hidden h-screen">
+    <!-- Main Window -->
+    <div class="tui-window flex-1 flex flex-col overflow-hidden relative">
+      <AppHeader />
 
-    <main class="app-main">
-      <RouterView />
-    </main>
+      <main class="flex-1 overflow-y-auto p-2 md:p-4">
+        <RouterView />
+      </main>
 
-    <AppNav />
+      <!-- TUI Status/Nav Bar -->
+      <AppNav />
+    </div>
+    
     <ToastBar />
   </div>
 </template>
