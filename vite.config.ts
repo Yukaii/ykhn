@@ -11,7 +11,12 @@ export default defineConfig({
     VitePWA({
       injectRegister: false,
       registerType: 'autoUpdate',
-      includeAssets: ['pwa.svg'],
+      includeAssets: [
+        'pwa.svg',
+        'icons/ykhn-32.png',
+        'icons/ykhn-192.png',
+        'icons/ykhn-512.png',
+      ],
       manifest: {
         name: 'YKHN',
         short_name: 'YKHN',
@@ -21,6 +26,18 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
+          {
+            src: '/icons/ykhn-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
+            src: '/icons/ykhn-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
           {
             src: '/pwa.svg',
             sizes: 'any',
