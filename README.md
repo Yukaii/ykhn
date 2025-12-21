@@ -43,6 +43,7 @@ Shortcuts are ignored while typing in inputs.
 - `?` toggle shortcuts overlay
 - `Esc` close menus/help
 - `F1..F6` switch feeds
+- `g1..g6` go to feed
 - `F9` open About / System Setup
 - `r` refresh (current page action)
 - `PgUp` / `PgDn` prev/next (or load more)

@@ -34,6 +34,7 @@ function close() {
           <div class="flex justify-between"><span>?</span><span>Toggle help</span></div>
           <div class="flex justify-between"><span>Esc</span><span>Close menus/help</span></div>
           <div class="flex justify-between"><span>F1..F6</span><span>Switch feeds</span></div>
+          <div class="flex justify-between"><span>g1..g6</span><span>Go to feed</span></div>
           <div class="flex justify-between"><span>F9</span><span>About</span></div>
           <div class="flex justify-between"><span>r</span><span>Refresh</span></div>
           <div class="flex justify-between"><span>PgUp/PgDn</span><span>Prev/Next (or load more)</span></div>

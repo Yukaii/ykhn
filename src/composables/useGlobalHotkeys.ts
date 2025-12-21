@@ -28,6 +28,8 @@ function scrollMainBy(deltaPx: number) {
 export function useGlobalHotkeys() {
   const router = useRouter()
 
+  let pendingGotoAt = 0
+
   const onKeyDown = (e: KeyboardEvent) => {
     // Always allow closing overlays/menus.
     if (e.key === 'Escape') {
@@ -70,6 +72,34 @@ export function useGlobalHotkeys() {
       if (e.key === 'F9') {
         router.push('/about')
         e.preventDefault()
+        return
+      }
+    }
+
+    // Go-to feed via 'g' + number (e.g. g1..g6).
+    if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+      const now = Date.now()
+
+      if (pendingGotoAt && now - pendingGotoAt < 650 && /^[1-6]$/.test(e.key)) {
+        const map: Record<string, string> = {
+          '1': '/',
+          '2': '/new',
+          '3': '/best',
+          '4': '/ask',
+          '5': '/show',
+          '6': '/jobs',
+        }
+        router.push(map[e.key] as string)
+        pendingGotoAt = 0
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+
+      if (now - pendingGotoAt >= 650) pendingGotoAt = 0
+
+      if (e.key === 'g') {
+        pendingGotoAt = now
         return
       }
     }
