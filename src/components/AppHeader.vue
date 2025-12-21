@@ -87,8 +87,8 @@ onUnmounted(() => {
       <div class="flex items-center gap-2 tui-menu-container relative">
         <button 
           @click.stop="toggleSysMenu" 
-          class="bg-tui-bg text-tui-cyan px-2 hover:bg-tui-cyan hover:text-tui-bg transition-none font-bold"
-          :class="sysMenuOpen ? 'bg-tui-cyan text-tui-bg' : ''"
+          class="bg-tui-bg text-tui-cyan px-2 transition-none font-bold border border-tui-cyan/30"
+          :class="sysMenuOpen ? 'text-tui-yellow border-tui-yellow/60' : ''"
         >
           ≡
         </button>

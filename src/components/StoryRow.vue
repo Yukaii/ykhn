@@ -18,8 +18,8 @@ const host = computed(() => hostFromUrl(props.item.url))
     :class="selected ? 'bg-tui-cyan text-tui-bg' : ''"
   >
     <div
-      class="flex-none w-10 text-right"
-      :class="selected ? 'text-tui-bg' : 'text-tui-gray group-hover:text-tui-bg'"
+      class="flex-none w-10 text-right font-bold"
+      :class="selected ? 'text-tui-bg' : 'text-tui-text/60 group-hover:text-tui-bg'"
     >
       {{ item.score ?? 0 }}
     </div>

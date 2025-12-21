@@ -22,7 +22,7 @@
     --color-tui-bg: #000000;
     --color-tui-text: #ffffff;
     --color-tui-border: #ffffff;
-    --color-tui-gray: #141414;
+    --color-tui-gray: #444444;
     --color-tui-active: #1f1f1f;
     --color-tui-cyan: #ffffff;
     --color-tui-yellow: #ffffff;
@@ -32,7 +32,7 @@
     --color-tui-bg: #ffffff;
     --color-tui-text: #000000;
     --color-tui-border: #000000;
-    --color-tui-gray: #e6e6e6;
+    --color-tui-gray: #333333;
     --color-tui-active: #dcdcdc;
     --color-tui-cyan: #000000;
     --color-tui-yellow: #000000;
@@ -174,6 +174,11 @@
     @apply bg-tui-gray text-tui-text flex font-mono border-b border-tui-bg sticky top-0 z-10;
   }
 
+  :root[data-theme='light'] .tui-menu-bar,
+  :root[data-theme='dark'] .tui-menu-bar {
+    @apply text-white;
+  }
+
   :root[data-theme='commander'] .tui-menu-bar {
     @apply text-black;
   }
@@ -184,6 +189,10 @@
 
   .tui-menu-dropdown {
     @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px] text-tui-text;
+  }
+
+  :root[data-theme='light'] .tui-menu-dropdown {
+    @apply text-white;
   }
 
   :root[data-theme='commander'] .tui-menu-dropdown {
