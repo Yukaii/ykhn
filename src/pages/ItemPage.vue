@@ -126,13 +126,64 @@ async function setupTopInfiniteScroll() {
   loadMoreObserver.value.observe(loadMoreSentinel.value)
 }
 
+function hnItemUrl(itemId: number) {
+  return `https://news.ycombinator.com/item?id=${itemId}`
+}
+
+function appItemUrl() {
+  if (typeof window === 'undefined') return route.fullPath
+  return `${window.location.origin}${route.fullPath}`
+}
+
+async function shareOrCopy(url: string, opts?: { title?: string }) {
+  const title = opts?.title
+
+  // Prefer Web Share when available.
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      const data: ShareData = { url }
+      if (title) data.title = title
+      await navigator.share(data)
+      return
+    }
+  } catch (e) {
+    // Ignore user-cancel.
+    if (e instanceof DOMException && e.name === 'AbortError') return
+  }
+
+  // Fallback: clipboard or prompt.
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url)
+      window.alert('Copied link to clipboard.')
+      return
+    }
+  } catch {
+    // ignore
+  }
+
+  window.prompt('Copy link:', url)
+}
+
 function updateMenu() {
   setMenuTitle(`FILE: ${id.value}.TXT`)
+
+  const shareTitle = story.value?.title ?? `HN Item ${id.value}`
+  const hnUrl = hnItemUrl(id.value)
+
   const actions = [
     { label: 'Refresh', action: () => loadStory({ keepTopLimit: true }), shortcut: 'r' },
+    { label: 'Share (YKHN)', action: () => void shareOrCopy(appItemUrl(), { title: shareTitle }) },
+    { label: 'Share (HN)', action: () => void shareOrCopy(hnUrl, { title: shareTitle }) },
+    {
+      label: 'Share (Link)',
+      action: () => story.value?.url && void shareOrCopy(story.value.url, { title: shareTitle }),
+      disabled: !story.value?.url,
+    },
     { label: 'Open URL', action: () => story.value?.url && window.open(story.value.url, '_blank'), disabled: !story.value?.url },
-    { label: 'View Source', action: () => window.open(`https://news.ycombinator.com/item?id=${id.value}`, '_blank') },
+    { label: 'View Source', action: () => window.open(hnUrl, '_blank') },
   ]
+
   if (visibleTopIds.value.length < topCommentIds.value.length) {
     actions.push({ label: 'Load More', action: loadMoreTop, shortcut: 'PgDn' })
   }
