@@ -53,6 +53,8 @@ export function useGlobalHotkeys() {
 
     // Feed navigation via function keys (mirrors the bottom bar).
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+      const feeds = ['/', '/new', '/best', '/ask', '/show', '/jobs'] as const
+
       const map: Record<string, string> = {
         F1: '/',
         F2: '/new',
@@ -67,6 +69,20 @@ export function useGlobalHotkeys() {
         router.push(to)
         e.preventDefault()
         return
+      }
+
+      // Switch feeds with '[' / ']'. Only active on feed routes.
+      if (e.key === '[' || e.key === ']') {
+        const path = router.currentRoute.value.path
+        const idx = feeds.indexOf(path as (typeof feeds)[number])
+        if (idx >= 0) {
+          const delta = e.key === '[' ? -1 : 1
+          const nextIndex = (idx + delta + feeds.length) % feeds.length
+          const nextPath = feeds[nextIndex] ?? feeds[0]
+          router.push(nextPath)
+          e.preventDefault()
+          return
+        }
       }
 
       if (e.key === 'F9') {
