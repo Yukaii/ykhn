@@ -11,9 +11,9 @@ function parseArgs(argv) {
     desktopViewport: { width: 1440, height: 900 },
     mobileViewport: { width: 390, height: 844 },
     themes: [
-      { id: 'dark', label: 'THEME_DARK', fileBase: 'screenshot-dark' },
-      { id: 'light', label: 'THEME_LIGHT', fileBase: 'screenshot-light' },
-      { id: 'cmd', label: 'THEME_CMD', fileBase: 'screenshot-cmd' },
+      { id: 'dark', domTheme: 'dark', fileBase: 'screenshot-dark' },
+      { id: 'light', domTheme: 'light', fileBase: 'screenshot-light' },
+      { id: 'commander', domTheme: 'commander', fileBase: 'screenshot-cmd' },
     ],
     headless: true,
   }
@@ -68,25 +68,130 @@ async function ensureDir(dirPath) {
 
 async function clickFirstByText(page, needle) {
   const clicked = await page.evaluate((text) => {
-    const elements = Array.from(document.querySelectorAll('button, [role="button"], a'))
-    const match = elements.find((el) => (el.textContent || '').trim().includes(text))
+    const isVisible = (el) => {
+      const rect = el.getBoundingClientRect()
+      return rect.width > 0 && rect.height > 0
+    }
+
+    const selectors = [
+      'button',
+      '[role="button"]',
+      '[role="menuitem"]',
+      '[role="option"]',
+      'a',
+      'li',
+      'div',
+      'span',
+    ]
+
+    const elements = selectors.flatMap((sel) => Array.from(document.querySelectorAll(sel)))
+
+    const match = elements.find((el) => {
+      if (!isVisible(el)) return false
+      const t = (el.textContent || '').trim()
+      return t === text || t.includes(text)
+    })
+
     if (!match) return false
-    ;(match).click()
+
+    match.scrollIntoView({ block: 'center' })
+    match.click()
     return true
   }, needle)
 
   if (!clicked) {
-    throw new Error(`Could not find clickable element containing text: ${needle}`)
+    throw new Error(`Could not find element containing text: ${needle}`)
   }
 }
 
-async function openMenu(page) {
-  await clickFirstByText(page, '≡')
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function setTheme(page, themeLabel) {
-  await openMenu(page)
-  await clickFirstByText(page, themeLabel)
+async function applyTheme(page, domTheme) {
+  await page.evaluate((theme) => {
+    try {
+      localStorage.setItem('ykhn-theme', theme)
+    } catch {
+      // ignore
+    }
+
+    document.documentElement.dataset.theme = theme
+  }, domTheme)
+
+  await sleep(50)
+
+  const applied = await page.evaluate(() => document.documentElement.dataset.theme)
+  if (applied !== domTheme) {
+    throw new Error(`Theme did not apply (wanted ${domTheme}, got ${applied})`)
+  }
+}
+
+async function dismissOverlays(page, { timeoutMs = 8000 } = {}) {
+  const start = Date.now()
+
+  const clickDismiss = async () => {
+    const point = await page.evaluate(() => {
+      const isVisible = (el) => {
+        const rect = el.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0
+      }
+
+      const button = Array.from(document.querySelectorAll('button')).find((el) => {
+        if (!isVisible(el)) return false
+        const t = (el.textContent || '').trim().toUpperCase()
+        return t.includes('[DISMISS]')
+      })
+
+      if (!button) return null
+
+      const rect = button.getBoundingClientRect()
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      }
+    })
+
+    if (!point) return false
+
+    await page.mouse.click(point.x, point.y)
+    return true
+  }
+
+  const hasDismiss = async () => {
+    return page.evaluate(() => {
+      const isVisible = (el) => {
+        const rect = el.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0
+      }
+
+      const button = Array.from(document.querySelectorAll('button')).find((el) => {
+        if (!isVisible(el)) return false
+        const t = (el.textContent || '').trim().toUpperCase()
+        return t.includes('[DISMISS]')
+      })
+
+      return Boolean(button)
+    })
+  }
+
+  while (Date.now() - start < timeoutMs) {
+    const clicked = await clickDismiss()
+    if (clicked) {
+      await sleep(250)
+      continue
+    }
+
+    const stillThere = await hasDismiss()
+    if (!stillThere) return
+
+    await sleep(250)
+  }
+
+  const stillThere = await hasDismiss()
+  if (stillThere) {
+    throw new Error('Timed out waiting for DISMISS overlay to disappear')
+  }
 }
 
 async function gotoApp(page, url) {
@@ -99,11 +204,24 @@ async function gotoApp(page, url) {
 }
 
 async function captureTheme(page, { url, outDir, viewport, theme }) {
-  await page.setViewport(viewport)
-  await gotoApp(page, url)
-  await setTheme(page, theme.label)
+  await page.setViewport({
+    width: viewport.width,
+    height: viewport.height,
+    isMobile: viewport.isMobile,
+    hasTouch: viewport.isMobile,
+    deviceScaleFactor: viewport.isMobile ? 2 : 1,
+  })
 
-  const outPath = path.join(outDir, `${theme.fileBase}${viewport.isMobile ? '-mobile' : ''}.png`)
+  await gotoApp(page, url)
+  await applyTheme(page, theme.domTheme)
+  await sleep(600)
+  await dismissOverlays(page)
+
+  const outPath = path.join(
+    outDir,
+    `${theme.fileBase}${viewport.isMobile ? '-mobile' : ''}.png`,
+  )
+
   await page.screenshot({ path: outPath, fullPage: true })
 }
 
