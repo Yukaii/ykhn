@@ -14,6 +14,7 @@ const tabs = [
   { to: '/ask', label: 'Ask' },
   { to: '/show', label: 'Show' },
   { to: '/jobs', label: 'Jobs' },
+  { to: '/search', label: 'Search' },
 ]
 
 function scroll(dir: 'left' | 'right') {

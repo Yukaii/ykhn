@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 
 import FeedPage from '../pages/FeedPage.vue'
+import SearchPage from '../pages/SearchPage.vue'
 import ItemPage from '../pages/ItemPage.vue'
 import AboutPage from '../pages/AboutPage.vue'
 import NotFoundPage from '../pages/NotFoundPage.vue'
@@ -18,6 +19,7 @@ const feedRoutes: RouteRecordRaw[] = [
 
 const routes: RouteRecordRaw[] = [
   ...feedRoutes,
+  { path: '/search', name: 'search', component: SearchPage, meta: { title: 'Search' } },
   { path: '/item/:id(\\d+)', name: 'item', component: ItemPage, meta: { title: 'Item' } },
   { path: '/about', name: 'about', component: AboutPage, meta: { title: 'About' } },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundPage, meta: { title: 'Not found' } },

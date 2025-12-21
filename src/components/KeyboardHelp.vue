@@ -33,11 +33,12 @@ function close() {
           <div class="font-bold uppercase text-tui-cyan mb-2">Global</div>
           <div class="flex justify-between"><span>?</span><span>Toggle help</span></div>
           <div class="flex justify-between"><span>Esc</span><span>Close menus/help</span></div>
-          <div class="flex justify-between"><span>F1..F6</span><span>Switch feeds</span></div>
-          <div class="flex justify-between"><span>g1..g6</span><span>Go to feed</span></div>
-          <div class="flex justify-between"><span>[ / ]</span><span>Prev/Next feed</span></div>
+          <div class="flex justify-between"><span>F1..F7</span><span>Switch modes</span></div>
+          <div class="flex justify-between"><span>g1..g7</span><span>Go to mode</span></div>
+          <div class="flex justify-between"><span>[ / ]</span><span>Prev/Next mode</span></div>
           <div class="flex justify-between"><span>F9</span><span>About</span></div>
           <div class="flex justify-between"><span>r</span><span>Refresh</span></div>
+          <div class="flex justify-between"><span>/</span><span>Focus search (Search page)</span></div>
           <div class="flex justify-between"><span>PgUp/PgDn</span><span>Prev/Next (or load more)</span></div>
           <div class="flex justify-between"><span>Ctrl+o / Ctrl+i</span><span>Back / Forward</span></div>
           <div class="flex justify-between"><span>Ctrl+e / Ctrl+y</span><span>Scroll one row</span></div>

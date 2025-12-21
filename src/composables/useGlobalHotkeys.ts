@@ -53,7 +53,7 @@ export function useGlobalHotkeys() {
 
     // Feed navigation via function keys (mirrors the bottom bar).
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-      const feeds = ['/', '/new', '/best', '/ask', '/show', '/jobs'] as const
+      const feeds = ['/', '/new', '/best', '/ask', '/show', '/jobs', '/search'] as const
 
       const map: Record<string, string> = {
         F1: '/',
@@ -62,6 +62,7 @@ export function useGlobalHotkeys() {
         F4: '/ask',
         F5: '/show',
         F6: '/jobs',
+        F7: '/search',
       }
 
       const to = map[e.key as keyof typeof map]
@@ -96,15 +97,17 @@ export function useGlobalHotkeys() {
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const now = Date.now()
 
-      if (pendingGotoAt && now - pendingGotoAt < 650 && /^[1-6]$/.test(e.key)) {
-        const map: Record<string, string> = {
-          '1': '/',
-          '2': '/new',
-          '3': '/best',
-          '4': '/ask',
-          '5': '/show',
-          '6': '/jobs',
-        }
+       if (pendingGotoAt && now - pendingGotoAt < 650 && /^[1-7]$/.test(e.key)) {
+         const map: Record<string, string> = {
+           '1': '/',
+           '2': '/new',
+           '3': '/best',
+           '4': '/ask',
+           '5': '/show',
+           '6': '/jobs',
+           '7': '/search',
+         }
+
         router.push(map[e.key] as string)
         pendingGotoAt = 0
         e.preventDefault()

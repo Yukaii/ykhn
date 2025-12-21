@@ -106,6 +106,10 @@ onUnmounted(() => {
               <span>NEW_STORIES</span>
               <span class="tui-shortcut">F2</span>
             </div>
+            <div class="tui-dropdown-item" @click="navigate('/search')">
+              <span>SEARCH</span>
+              <span class="tui-shortcut">F7</span>
+            </div>
             <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
             <div class="tui-dropdown-item opacity-30 cursor-not-allowed" aria-disabled="true">
               <span>EDIT</span>
