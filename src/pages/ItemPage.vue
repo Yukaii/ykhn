@@ -314,21 +314,45 @@ function currentCommentIndex() {
   return idx >= 0 ? idx : 0
 }
 
+let selectionScrollSeq = 0
+
+function nextFrame() {
+  return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+}
+
 async function selectCommentByIndex(idx: number, opts?: { scroll?: ScrollLogicalPosition }) {
   const els = visibleCommentElements()
   if (els.length === 0) return
 
   const clamped = Math.max(0, Math.min(els.length - 1, idx))
-  const el = els[clamped]
-  if (!el) return
+  const initialEl = els[clamped]
+  if (!initialEl) return
 
-  const nextId = Number(el.dataset.ykhnCommentId)
+  const nextId = Number(initialEl.dataset.ykhnCommentId)
 
   selectionActive.value = true
   selectedCommentId.value = Number.isFinite(nextId) ? nextId : null
 
+  const seq = ++selectionScrollSeq
+
   await nextTick()
-  scrollElementIntoMain(el, opts?.scroll ?? 'nearest')
+  if (seq !== selectionScrollSeq) return
+
+  const root = getMainScrollContainer() ?? document
+  const selector = `[data-ykhn-comment-id="${String(nextId)}"]`
+
+  const resolvedInitial = root.querySelector<HTMLElement>(selector) ?? (initialEl.isConnected ? initialEl : null)
+  if (resolvedInitial) {
+    scrollElementIntoMain(resolvedInitial, opts?.scroll ?? 'nearest')
+
+    await nextTick()
+    await nextFrame()
+    if (seq !== selectionScrollSeq) return
+
+    const resolvedAfter = root.querySelector<HTMLElement>(selector) ?? (resolvedInitial.isConnected ? resolvedInitial : null)
+    if (resolvedAfter) scrollElementIntoMain(resolvedAfter, opts?.scroll ?? 'nearest')
+  }
+
   saveViewState()
 }
 
