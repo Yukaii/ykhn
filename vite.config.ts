@@ -16,6 +16,7 @@ export default defineConfig({
         'icons/ykhn-32.png',
         'icons/ykhn-192.png',
         'icons/ykhn-512.png',
+        'icons/ykhn-192-rounded.png',
       ],
       manifest: {
         name: 'YKHN',
