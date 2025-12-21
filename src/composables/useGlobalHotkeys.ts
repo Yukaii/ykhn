@@ -25,6 +25,18 @@ function scrollMainBy(deltaPx: number) {
   return true
 }
 
+type SelectionScrollDetail = {
+  kind: 'halfPage'
+  direction: 'up' | 'down'
+  deltaPx: number
+}
+
+function dispatchSelectionScroll(detail: SelectionScrollDetail) {
+  const ev = new CustomEvent<SelectionScrollDetail>('ykhn:selection-scroll', { detail, cancelable: true })
+  const notCanceled = window.dispatchEvent(ev)
+  return !notCanceled
+}
+
 export function useGlobalHotkeys() {
   const router = useRouter()
 
@@ -167,10 +179,18 @@ export function useGlobalHotkeys() {
       }
 
       if (e.key === 'd' && page) {
+        if (dispatchSelectionScroll({ kind: 'halfPage', direction: 'down', deltaPx: page / 2 })) {
+          e.preventDefault()
+          return
+        }
         if (scrollMainBy(page / 2)) e.preventDefault()
         return
       }
       if (e.key === 'u' && page) {
+        if (dispatchSelectionScroll({ kind: 'halfPage', direction: 'up', deltaPx: -page / 2 })) {
+          e.preventDefault()
+          return
+        }
         if (scrollMainBy(-page / 2)) e.preventDefault()
         return
       }

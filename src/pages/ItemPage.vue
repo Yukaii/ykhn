@@ -301,6 +301,47 @@ function parseCount(defaultCount: number) {
   return n
 }
 
+type SelectionScrollDetail = {
+  kind: 'halfPage'
+  direction: 'up' | 'down'
+  deltaPx: number
+}
+
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function halfPageCommentJumpCount(deltaPx: number) {
+  const els = visibleCommentElements()
+  if (els.length === 0) return 1
+
+  const idx = clamp(currentCommentIndex(), 0, els.length - 1)
+  const raw = els[idx]?.offsetHeight
+  const px = typeof raw === 'number' && Number.isFinite(raw) && raw > 0 ? raw : 60
+  const rowPx = clamp(px, 24, 160)
+
+  return Math.max(1, Math.floor(Math.abs(deltaPx) / rowPx))
+}
+
+function onSelectionScroll(ev: Event) {
+  const e = ev as CustomEvent<SelectionScrollDetail>
+  if (e.detail?.kind !== 'halfPage') return
+
+  const els = visibleCommentElements()
+  if (els.length === 0) return
+
+  e.preventDefault()
+
+  const main = getMainScrollContainer()
+  main?.scrollBy({ top: e.detail.deltaPx, behavior: 'auto' })
+
+  void (async () => {
+    const direction = e.detail.direction === 'down' ? 1 : -1
+    const targetIndex = currentCommentIndex() + direction * halfPageCommentJumpCount(e.detail.deltaPx)
+    await selectCommentByIndex(targetIndex)
+  })()
+}
+
 async function ensureInitialCommentSelection() {
   if (!selectionActive.value) return
 
@@ -480,10 +521,12 @@ onMounted(async () => {
   await ensureInitialCommentSelection()
 
   window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('ykhn:selection-scroll', onSelectionScroll)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('ykhn:selection-scroll', onSelectionScroll)
   saveViewState()
   teardownTopInfiniteScroll()
   setMenuActions([])

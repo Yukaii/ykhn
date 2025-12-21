@@ -8,7 +8,7 @@ import { searchStoryIds } from '../api/algolia'
 import { fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import StoryRow from '../components/StoryRow.vue'
-import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { estimateRowScrollStepPx, getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
 import { readSessionJson, writeSessionJson } from '../lib/persist'
 import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
 
@@ -257,6 +257,45 @@ function parseCount(defaultCount: number) {
   return n
 }
 
+type SelectionScrollDetail = {
+  kind: 'halfPage'
+  direction: 'up' | 'down'
+  deltaPx: number
+}
+
+function halfPageRowJumpCount(deltaPx: number) {
+  const main = getMainScrollContainer()
+  const rowPx = estimateRowScrollStepPx(main)
+  const raw = Math.floor(Math.abs(deltaPx) / rowPx)
+  return Math.max(1, raw)
+}
+
+function onSelectionScroll(ev: Event) {
+  const e = ev as CustomEvent<SelectionScrollDetail>
+  if (e.detail?.kind !== 'halfPage') return
+  if (items.value.length === 0) return
+
+  e.preventDefault()
+
+  const main = getMainScrollContainer()
+  main?.scrollBy({ top: e.detail.deltaPx, behavior: 'auto' })
+
+  void (async () => {
+    const direction = e.detail.direction === 'down' ? 1 : -1
+    const targetIndex = selectedIndex.value + direction * halfPageRowJumpCount(e.detail.deltaPx)
+
+    if (direction > 0) {
+      while (targetIndex >= items.value.length && canLoadMore.value) {
+        if (loadingMore.value) break
+        await loadMore()
+        if (itemsError.value) break
+      }
+    }
+
+    setSelected(targetIndex)
+  })()
+}
+
 async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
   if (shouldIgnoreKeyboardEvent(e)) return
@@ -443,11 +482,13 @@ watch(canLoadMore, async () => {
 onMounted(() => {
   updateMenu()
   window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('ykhn:selection-scroll', onSelectionScroll)
   void executeInit()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('ykhn:selection-scroll', onSelectionScroll)
   saveViewState(submittedQuery.value)
   teardownInfiniteScroll()
   searchAbort?.abort()
