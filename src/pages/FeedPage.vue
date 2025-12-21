@@ -18,11 +18,14 @@ const props = defineProps<{
 
 const router = useRouter()
 
+const pageSize = 30
+
 type FeedViewState = {
-  page: number
-  selectedIndex: number
-  selectionActive: boolean
-  scrollTop: number
+  cursor?: number
+  page?: number
+  selectedIndex?: number
+  selectionActive?: boolean
+  scrollTop?: number
 }
 
 function stateKey(feed: FeedKind) {
@@ -32,7 +35,7 @@ function stateKey(feed: FeedKind) {
 function saveViewState(feed: FeedKind) {
   const main = getMainScrollContainer()
   const state: FeedViewState = {
-    page: page.value,
+    cursor: cursor.value,
     selectedIndex: selectedIndex.value,
     selectionActive: selectionActive.value,
     scrollTop: main?.scrollTop ?? 0,
@@ -42,6 +45,41 @@ function saveViewState(feed: FeedKind) {
 
 function readViewState(feed: FeedKind) {
   return readSessionJson<FeedViewState>(stateKey(feed))
+}
+
+function normalizedViewState(feed: FeedKind) {
+  const st = readViewState(feed)
+  if (!st) return null
+
+  const selectionActive = typeof st.selectionActive === 'boolean' ? st.selectionActive : true
+
+  const scrollTop = Number(st.scrollTop)
+  const resolvedScrollTop = Number.isFinite(scrollTop) ? scrollTop : 0
+
+  const rawCursor = Number(st.cursor)
+  const rawPage = Number(st.page)
+
+  const cursor = Number.isFinite(rawCursor)
+    ? Math.max(0, rawCursor)
+    : Number.isFinite(rawPage)
+      ? Math.max(1, rawPage) * pageSize
+      : pageSize
+
+  const rawSelectedIndex = Number(st.selectedIndex)
+  const baseSelectedIndex = Number.isFinite(rawSelectedIndex) ? rawSelectedIndex : 0
+
+  const selectedIndex = Number.isFinite(rawCursor)
+    ? Math.max(0, baseSelectedIndex)
+    : Number.isFinite(rawPage)
+      ? Math.max(0, (Math.max(1, rawPage) - 1) * pageSize + baseSelectedIndex)
+      : Math.max(0, baseSelectedIndex)
+
+  return {
+    cursor,
+    selectedIndex,
+    selectionActive,
+    scrollTop: resolvedScrollTop,
+  }
 }
 
 const feedTitle: Record<FeedKind, string> = {
@@ -54,19 +92,20 @@ const feedTitle: Record<FeedKind, string> = {
 }
 
 const title = computed(() => feedTitle[props.feed])
-const page = ref(1)
-const pageSize = 30
 
 const selectedIndex = ref(0)
 const selectionActive = ref(true)
 const rowEls = ref<(HTMLElement | null)[]>([])
 
-let suppressPageWatch = false
-let restoring = false
+const cursor = ref(0)
+const loadingMore = ref(false)
 
 let countBuffer = ''
 let pendingGAt = 0
 let pendingZAt = 0
+
+const loadMoreSentinel = ref<HTMLElement | null>(null)
+let loadMoreObserver: IntersectionObserver | null = null
 
 const { state: ids, isLoading: loadingIds, error: idsError, execute: executeLoadIds } = useAsyncState(
   async () => {
@@ -76,50 +115,13 @@ const { state: ids, isLoading: loadingIds, error: idsError, execute: executeLoad
   { immediate: false, shallow: true }
 )
 
-const { state: items, isLoading: loadingItems, error: itemsError, execute: executeLoadItems } = useAsyncState(
-  async () => {
-    if (ids.value.length === 0) return []
-    const start = (page.value - 1) * pageSize
-    const slice = ids.value.slice(start, start + pageSize)
-    return await fetchItems(slice)
-  },
-  [],
-  { immediate: false, shallow: true }
-)
+const items = ref<HnItem[]>([])
+const itemsError = ref<unknown>(null)
+
+const hasMore = computed(() => cursor.value < ids.value.length)
+const loadingItems = computed(() => loadingMore.value)
 
 const error = computed(() => idsError.value || itemsError.value)
-
-const totalPages = computed(() => Math.max(1, Math.ceil(ids.value.length / pageSize)))
-const canPrev = computed(() => page.value > 1)
-const canNext = computed(() => page.value < totalPages.value)
-
-async function refresh() {
-  await executeLoadIds()
-  await executeLoadItems()
-}
-
-function next() {
-  if (!canNext.value) return
-  selectionActive.value = true
-  selectedIndex.value = 0
-  page.value++
-}
-
-function prev() {
-  if (!canPrev.value) return
-  selectionActive.value = true
-  selectedIndex.value = 0
-  page.value--
-}
-
-function updateMenu() {
-  setMenuTitle(`DIR: ${title.value.toUpperCase()}\\*.*`)
-  setMenuActions([
-    { label: 'Refresh', action: refresh, shortcut: 'r' },
-    { label: 'Next Page', action: next, shortcut: 'PgDn', disabled: !canNext.value },
-    { label: 'Prev Page', action: prev, shortcut: 'PgUp', disabled: !canPrev.value },
-  ])
-}
 
 function clampIndex(i: number) {
   const last = items.value.length - 1
@@ -143,6 +145,37 @@ function setSelected(i: number, opts?: { scroll?: ScrollLogicalPosition }) {
 
 function selectedItem() {
   return items.value[selectedIndex.value]
+}
+
+async function loadMore() {
+  if (loadingMore.value) return
+  if (!hasMore.value) return
+
+  loadingMore.value = true
+  itemsError.value = null
+
+  try {
+    const slice = ids.value.slice(cursor.value, cursor.value + pageSize)
+    cursor.value += slice.length
+
+    const next = await fetchItems(slice)
+    items.value.push(...next)
+  } catch (e) {
+    itemsError.value = e
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+async function refresh() {
+  await executeLoadIds()
+  items.value = []
+  rowEls.value = []
+  cursor.value = 0
+  selectedIndex.value = 0
+  selectionActive.value = true
+  await loadMore()
+  saveViewState(props.feed)
 }
 
 function openComments(it: HnItem, newTab: boolean) {
@@ -180,7 +213,7 @@ function parseCount(defaultCount: number) {
   return n
 }
 
-function onKeyDown(e: KeyboardEvent) {
+async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
   if (shouldIgnoreKeyboardEvent(e)) return
 
@@ -236,7 +269,11 @@ function onKeyDown(e: KeyboardEvent) {
   }
 
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'j') {
-    setSelected(selectedIndex.value + parseCount(1))
+    const nextIndex = selectedIndex.value + parseCount(1)
+    if (nextIndex >= items.value.length && hasMore.value) {
+      await loadMore()
+    }
+    setSelected(nextIndex)
     e.preventDefault()
     return
   }
@@ -276,53 +313,80 @@ function onKeyDown(e: KeyboardEvent) {
   }
 }
 
+function updateMenu() {
+  setMenuTitle(`DIR: ${title.value.toUpperCase()}\\*.*`)
+  setMenuActions([
+    { label: 'Refresh', action: refresh, shortcut: 'r' },
+    { label: 'Load More', action: loadMore, shortcut: 'PgDn', disabled: !hasMore.value },
+  ])
+}
+
+function teardownInfiniteScroll() {
+  loadMoreObserver?.disconnect()
+  loadMoreObserver = null
+}
+
+async function setupInfiniteScroll() {
+  teardownInfiniteScroll()
+
+  await nextTick()
+  const root = getMainScrollContainer()
+  if (!root || !loadMoreSentinel.value) return
+
+  loadMoreObserver = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return
+      void loadMore()
+    },
+    {
+      root,
+      // Start loading a bit before the user hits the end.
+      rootMargin: '400px',
+    }
+  )
+
+  loadMoreObserver.observe(loadMoreSentinel.value)
+}
+
 async function loadWithOptionalRestore(feed: FeedKind) {
-  restoring = true
+  const restored = normalizedViewState(feed)
 
-  const restored = readViewState(feed)
-  suppressPageWatch = true
-  page.value = restored?.page && restored.page >= 1 ? restored.page : 1
-  selectedIndex.value = restored?.selectedIndex ?? 0
+  items.value = []
+  rowEls.value = []
+  cursor.value = 0
+  selectedIndex.value = 0
   selectionActive.value = restored?.selectionActive ?? true
-  suppressPageWatch = false
 
-  await refresh()
+  await executeLoadIds()
+
+  const targetCursor = Math.min(restored?.cursor ?? pageSize, ids.value.length)
+  while (cursor.value < targetCursor) {
+    await loadMore()
+  }
+
+  await setupInfiniteScroll()
 
   await nextTick()
   const main = getMainScrollContainer()
   if (main && restored) {
     main.scrollTop = restored.scrollTop
+    await nextTick()
+    main.scrollTop = restored.scrollTop
   }
 
   if (selectionActive.value) {
-    setSelected(selectedIndex.value)
+    selectedIndex.value = clampIndex(restored?.selectedIndex ?? 0)
+    await scrollSelectedIntoView('nearest')
   }
-
-  restoring = false
 }
 
 watch([loadingIds, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
 })
 
-watch([() => props.feed, canNext, canPrev, title], () => {
+watch([() => props.feed, hasMore, title], () => {
   updateMenu()
 })
-
-watch(page, async () => {
-  if (suppressPageWatch) return
-  await executeLoadItems()
-  saveViewState(props.feed)
-})
-
-watch(
-  () => items.value.length,
-  () => {
-    rowEls.value = []
-    if (restoring) return
-    setSelected(0, { scroll: 'start' })
-  }
-)
 
 watch([selectedIndex, selectionActive], () => {
   saveViewState(props.feed)
@@ -337,6 +401,11 @@ watch(
   { immediate: true }
 )
 
+watch(hasMore, async () => {
+  // Keep observer alive across list changes.
+  await setupInfiniteScroll()
+})
+
 onMounted(() => {
   updateMenu()
   window.addEventListener('keydown', onKeyDown)
@@ -345,6 +414,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
   saveViewState(props.feed)
+  teardownInfiniteScroll()
   setMenuActions([])
   setMenuTitle('')
 })
@@ -380,6 +450,14 @@ onBeforeUnmount(() => {
         >
           <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" />
         </div>
+
+        <div v-if="hasMore" class="mt-2">
+          <button class="tui-btn w-full" :disabled="loadingItems" @click="loadMore">
+            {{ loadingItems ? 'LOADING...' : 'LOAD_MORE_RECORDS' }}
+          </button>
+        </div>
+
+        <div ref="loadMoreSentinel" class="h-2"></div>
       </div>
     </div>
   </div>

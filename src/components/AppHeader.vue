@@ -107,6 +107,10 @@ onUnmounted(() => {
               <span class="tui-shortcut">F2</span>
             </div>
             <div class="tui-dropdown-item border-b border-tui-bg/20"></div>
+            <div class="tui-dropdown-item opacity-30 cursor-not-allowed" aria-disabled="true">
+              <span>EDIT</span>
+              <span class="tui-shortcut">N/A</span>
+            </div>
             <div class="tui-dropdown-item" @click="setThemeAndClose('dark')">
               <span>{{ uiState.theme === 'dark' ? '● ' : '  ' }}THEME_DARK</span>
               <span class="tui-shortcut">BW</span>
@@ -160,7 +164,6 @@ onUnmounted(() => {
           <div v-else class="px-4 py-2 opacity-50 italic">NO_ACTIONS</div>
         </div>
       </div>
-      <div class="tui-menu-item opacity-50"><u>E</u>dit</div>
       <div class="tui-menu-item" @click.stop="toggleHelpMenu" :class="helpMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''">
         <u>H</u>elp
         <!-- Help Dropdown -->

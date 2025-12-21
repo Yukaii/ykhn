@@ -18,6 +18,10 @@ const id = computed(() => Number(route.params.id))
 const itemsById = reactive(new Map<number, HnItem>())
 const topLimit = ref(40)
 
+const loadMoreSentinel = ref<HTMLElement | null>(null)
+const loadMoreObserver = ref<IntersectionObserver | null>(null)
+const loadingMoreTop = ref(false)
+
 type ItemViewState = {
   selectedCommentId: number | null
   selectionActive: boolean
@@ -82,10 +86,44 @@ async function loadStory(opts?: { keepTopLimit?: boolean }) {
 }
 
 async function loadMoreTop() {
+  if (loadingMoreTop.value) return
   if (visibleTopIds.value.length >= topCommentIds.value.length) return
-  topLimit.value += 40
-  await ensureItems(visibleTopIds.value)
-  saveViewState()
+
+  loadingMoreTop.value = true
+  try {
+    topLimit.value += 40
+    await ensureItems(visibleTopIds.value)
+    saveViewState()
+  } finally {
+    loadingMoreTop.value = false
+  }
+}
+
+function teardownTopInfiniteScroll() {
+  loadMoreObserver.value?.disconnect()
+  loadMoreObserver.value = null
+}
+
+async function setupTopInfiniteScroll() {
+  teardownTopInfiniteScroll()
+
+  await nextTick()
+  const root = getMainScrollContainer()
+  if (!root || !loadMoreSentinel.value) return
+
+  loadMoreObserver.value = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return
+      if (isLoading.value) return
+      void loadMoreTop()
+    },
+    {
+      root,
+      rootMargin: '400px',
+    }
+  )
+
+  loadMoreObserver.value.observe(loadMoreSentinel.value)
 }
 
 function updateMenu() {
@@ -358,8 +396,9 @@ watch(isLoading, (l) => {
   setLoading(l)
 })
 
-watch([id, story, visibleTopIds], () => {
+watch([id, story, visibleTopIds], async () => {
   updateMenu()
+  await setupTopInfiniteScroll()
 })
 
 watch([selectedCommentId, selectionActive], () => {
@@ -379,6 +418,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
   saveViewState()
+  teardownTopInfiniteScroll()
   setMenuActions([])
   setMenuTitle('')
 })
@@ -442,6 +482,8 @@ onBeforeUnmount(() => {
           <button v-if="visibleTopIds.length < topCommentIds.length" class="tui-btn w-full" @click="loadMoreTop">
             LOAD_MORE_RECORDS
           </button>
+
+          <div ref="loadMoreSentinel" class="h-2"></div>
         </div>
       </div>
     </template>
