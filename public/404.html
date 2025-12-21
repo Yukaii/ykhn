@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting…</title>
+    <meta http-equiv="refresh" content="0; url=/" />
+    <script>
+      // GitHub Pages (and other static hosts) don't support History API
+      // routing without server-side rewrites. Redirect unknown paths to
+      // the hash-based router so deep links keep working.
+      ;(() => {
+        const { origin, pathname, search, hash } = window.location
+
+        // Avoid redirect loops if we somehow land here already hashed.
+        if (hash && hash.startsWith('#/')) return
+
+        const target = `${origin}/#${pathname}${search}${hash}`
+        window.location.replace(target)
+      })()
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <p>This app requires JavaScript. Go to <a href="/">home</a>.</p>
+    </noscript>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAsyncState } from '@vueuse/core'
 
 import { fetchItem } from '../api/hn'
@@ -13,6 +13,7 @@ import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEven
 import { readSessionJson, writeSessionJson } from '../lib/persist'
 
 const route = useRoute()
+const router = useRouter()
 
 const id = computed(() => Number(route.params.id))
 const itemsById = reactive(new Map<number, HnItem>())
@@ -131,8 +132,9 @@ function hnItemUrl(itemId: number) {
 }
 
 function appItemUrl() {
-  if (typeof window === 'undefined') return route.fullPath
-  return `${window.location.origin}${route.fullPath}`
+  const href = router.resolve(route.fullPath).href
+  if (typeof window === 'undefined') return href
+  return new URL(href, window.location.origin).toString()
 }
 
 async function shareOrCopy(url: string, opts?: { title?: string }) {
