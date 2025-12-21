@@ -33,6 +33,8 @@ function close() {
           <div class="font-bold uppercase text-tui-cyan mb-2">Global</div>
           <div class="flex justify-between"><span>?</span><span>Toggle help</span></div>
           <div class="flex justify-between"><span>Esc</span><span>Close menus/help</span></div>
+          <div class="flex justify-between"><span>Alt (hold)</span><span>Show menu letters</span></div>
+          <div class="flex justify-between"><span>Alt+S / A / H</span><span>Open System / Actions / Help</span></div>
           <div class="flex justify-between"><span>F1..F7</span><span>Switch modes</span></div>
           <div class="flex justify-between"><span>g1..g7</span><span>Go to mode</span></div>
           <div class="flex justify-between"><span>[ / ]</span><span>Prev/Next mode</span></div>

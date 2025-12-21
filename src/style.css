@@ -190,6 +190,7 @@
 
   .tui-menu-item {
     @apply px-4 py-0.5 hover:bg-tui-bg hover:text-tui-cyan cursor-pointer transition-none relative font-bold;
+    @apply focus-visible:bg-tui-bg focus-visible:text-tui-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-tui-yellow;
   }
 
   .tui-menu-dropdown {
@@ -206,6 +207,7 @@
 
   .tui-dropdown-item {
     @apply px-4 py-1 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
+    @apply focus-visible:bg-tui-bg focus-visible:text-tui-cyan focus-visible:outline focus-visible:outline-1 focus-visible:outline-tui-yellow;
   }
 
   /* System dropdown uses theme-aware text color */
