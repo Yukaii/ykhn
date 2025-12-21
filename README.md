@@ -2,7 +2,13 @@
 
 Retro terminal Hacker News client.
 
-![Screenshot](public/screenshot.png)
+## Screenshots
+
+| Theme | Desktop | Mobile |
+| --- | --- | --- |
+| Dark | ![Dark theme desktop screenshot](public/screenshot-dark.png) | ![Dark theme mobile screenshot](public/screenshot-dark-mobile.png) |
+| Light | ![Light theme desktop screenshot](public/screenshot-light.png) | ![Light theme mobile screenshot](public/screenshot-light-mobile.png) |
+| Commander | ![Commander theme desktop screenshot](public/screenshot-cmd.png) | ![Commander theme mobile screenshot](public/screenshot-cmd-mobile.png) |
 
 ## Development
 
