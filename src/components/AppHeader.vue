@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core'
-import { nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useOnline } from '../composables/useOnline'
 import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
@@ -16,6 +16,190 @@ const actionsMenuOpen = ref(false)
 const helpMenuOpen = ref(false)
 
 const mnemonicMode = ref(false)
+
+type MnemonicParts = { before: string; key: string; after: string }
+
+const reservedTopMnemonics = new Set(['s', 'a', 'h'])
+
+function mnemonicFromEvent(e: KeyboardEvent) {
+  const raw = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.key
+  return raw.toLowerCase()
+}
+
+function splitMnemonic(label: string, mnemonic: string): MnemonicParts {
+  const idx = label.toLowerCase().indexOf(mnemonic.toLowerCase())
+  if (idx < 0) return { before: label, key: '', after: '' }
+  return {
+    before: label.slice(0, idx),
+    key: label.slice(idx, idx + 1),
+    after: label.slice(idx + 1),
+  }
+}
+
+function pickMnemonic(label: string, used: Set<string>, reserved: Set<string>) {
+  const chars = label.toLowerCase().split('')
+
+  const pick = (allowReserved: boolean) => {
+    for (const ch of chars) {
+      if (!/[a-z0-9]/.test(ch)) continue
+      if (used.has(ch)) continue
+      if (!allowReserved && reserved.has(ch)) continue
+      used.add(ch)
+      return ch
+    }
+    return ''
+  }
+
+  return pick(false) || pick(true)
+}
+
+function getOpenMenu(): MenuName | null {
+  if (sysMenuOpen.value) return 'sys'
+  if (actionsMenuOpen.value) return 'actions'
+  if (helpMenuOpen.value) return 'help'
+  return null
+}
+
+type MenuItemEntry = {
+  kind: 'item'
+  id: string
+  displayLabel: string
+  mnemonic: string
+  parts: MnemonicParts
+  shortcut?: string
+  disabled?: boolean
+  role: 'menuitem' | 'menuitemradio'
+  ariaChecked?: boolean
+  prefix?: string
+  onSelect?: () => void
+}
+
+type MenuSeparatorEntry = { kind: 'separator'; id: string }
+
+type StaticMenuEntry = MenuItemEntry | MenuSeparatorEntry
+
+function makeSeparator(id: string): MenuSeparatorEntry {
+  return { kind: 'separator', id }
+}
+
+function makeItem(entry: Omit<MenuItemEntry, 'kind' | 'parts' | 'role'> & { role?: MenuItemEntry['role'] }): MenuItemEntry {
+  const role = entry.role ?? 'menuitem'
+  return {
+    kind: 'item',
+    ...entry,
+    role,
+    parts: splitMnemonic(entry.displayLabel, entry.mnemonic),
+  }
+}
+
+const sysEntries = computed<StaticMenuEntry[]>(() => [
+  makeItem({
+    id: 'top',
+    displayLabel: 'TOP_STORIES',
+    mnemonic: 't',
+    shortcut: 'F1',
+    onSelect: () => navigate('/'),
+  }),
+  makeItem({
+    id: 'new',
+    displayLabel: 'NEW_STORIES',
+    mnemonic: 'n',
+    shortcut: 'F2',
+    onSelect: () => navigate('/new'),
+  }),
+  makeItem({
+    id: 'search',
+    displayLabel: 'SEARCH',
+    mnemonic: 'c',
+    shortcut: 'F7',
+    onSelect: () => navigate('/search'),
+  }),
+  makeSeparator('sep-1'),
+  makeItem({
+    id: 'edit',
+    displayLabel: 'EDIT',
+    mnemonic: 'e',
+    shortcut: 'N/A',
+    disabled: true,
+  }),
+  makeItem({
+    id: 'theme-dark',
+    displayLabel: 'THEME_DARK',
+    mnemonic: 'd',
+    shortcut: 'BW',
+    role: 'menuitemradio',
+    ariaChecked: uiState.theme === 'dark',
+    prefix: uiState.theme === 'dark' ? '● ' : '  ',
+    onSelect: () => setThemeAndClose('dark'),
+  }),
+  makeItem({
+    id: 'theme-light',
+    displayLabel: 'THEME_LIGHT',
+    mnemonic: 'l',
+    shortcut: 'WB',
+    role: 'menuitemradio',
+    ariaChecked: uiState.theme === 'light',
+    prefix: uiState.theme === 'light' ? '● ' : '  ',
+    onSelect: () => setThemeAndClose('light'),
+  }),
+  makeItem({
+    id: 'theme-cmd',
+    displayLabel: 'THEME_CMD',
+    mnemonic: 'm',
+    shortcut: 'NC',
+    role: 'menuitemradio',
+    ariaChecked: uiState.theme === 'commander',
+    prefix: uiState.theme === 'commander' ? '● ' : '  ',
+    onSelect: () => setThemeAndClose('commander'),
+  }),
+  makeSeparator('sep-2'),
+  makeItem({
+    id: 'system-setup',
+    displayLabel: 'SYSTEM_SETUP',
+    mnemonic: 'u',
+    shortcut: 'F9',
+    onSelect: () => navigate('/about'),
+  }),
+  makeItem({
+    id: 'reboot',
+    displayLabel: 'REBOOT_OS',
+    mnemonic: 'r',
+    shortcut: '^R',
+    onSelect: () => reboot(),
+  }),
+])
+
+const helpEntries = computed<MenuItemEntry[]>(() => [
+  makeItem({
+    id: 'about',
+    displayLabel: 'ABOUT',
+    mnemonic: 'b',
+    shortcut: 'F9',
+    onSelect: () => navigate('/about'),
+  }),
+  makeItem({
+    id: 'open-repo',
+    displayLabel: 'OPEN_REPO',
+    mnemonic: 'o',
+    shortcut: 'WEB',
+    onSelect: () => openExternal('https://github.com/Yukaii/ykhn'),
+  }),
+])
+
+const actionEntries = computed(() => {
+  const used = new Set<string>()
+
+  return menuState.actions.map((item) => {
+    const displayLabel = item.label.toUpperCase()
+    const mnemonic = pickMnemonic(displayLabel, used, reservedTopMnemonics)
+    return {
+      ...item,
+      displayLabel,
+      mnemonic,
+      parts: splitMnemonic(displayLabel, mnemonic),
+    }
+  })
+})
 
 const sysTriggerEl = ref<HTMLButtonElement | null>(null)
 const actionsTriggerEl = ref<HTMLButtonElement | null>(null)
@@ -183,8 +367,23 @@ const onWindowKeyDown = async (e: KeyboardEvent) => {
   if (!mnemonicMode.value) return
   if (shouldIgnoreKeyboardEvent(e)) return
 
-  const mnemonicKey = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.key
-  const key = mnemonicKey.toLowerCase()
+  const key = mnemonicFromEvent(e)
+
+  const currentMenu = getOpenMenu()
+  if (currentMenu) {
+    const menuEl = getMenuEl(currentMenu)
+    const match = menuEl?.querySelector<HTMLElement>(
+      `[data-mnemonic="${key}"]:not([aria-disabled="true"]):not([disabled])`
+    )
+
+    if (match) {
+      e.preventDefault()
+      e.stopPropagation()
+      match.click()
+      return
+    }
+  }
+
   const didSelect = key === 's' || key === 'a' || key === 'h'
   if (!didSelect) return
 
@@ -269,68 +468,33 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
           aria-label="System"
           @keydown="onMenuKeydown('sys', $event)"
         >
-          <button type="button" class="tui-dropdown-item w-full text-left" role="menuitem" @click="navigate('/')">
-            <span>TOP_STORIES</span>
-            <span class="tui-shortcut">F1</span>
-          </button>
-          <button type="button" class="tui-dropdown-item w-full text-left" role="menuitem" @click="navigate('/new')">
-            <span>NEW_STORIES</span>
-            <span class="tui-shortcut">F2</span>
-          </button>
-          <button type="button" class="tui-dropdown-item w-full text-left" role="menuitem" @click="navigate('/search')">
-            <span>SEARCH</span>
-            <span class="tui-shortcut">F7</span>
-          </button>
-          <div role="separator" aria-orientation="horizontal" class="border-b border-tui-bg/20 mx-2 my-1"></div>
-          <button
-            type="button"
-            class="tui-dropdown-item w-full text-left opacity-30 cursor-not-allowed"
-            role="menuitem"
-            disabled
-            aria-disabled="true"
-          >
-            <span>EDIT</span>
-            <span class="tui-shortcut">N/A</span>
-          </button>
-          <button
-            type="button"
-            class="tui-dropdown-item w-full text-left"
-            role="menuitemradio"
-            :aria-checked="uiState.theme === 'dark'"
-            @click="setThemeAndClose('dark')"
-          >
-            <span>{{ uiState.theme === 'dark' ? '● ' : '  ' }}THEME_DARK</span>
-            <span class="tui-shortcut">BW</span>
-          </button>
-          <button
-            type="button"
-            class="tui-dropdown-item w-full text-left"
-            role="menuitemradio"
-            :aria-checked="uiState.theme === 'light'"
-            @click="setThemeAndClose('light')"
-          >
-            <span>{{ uiState.theme === 'light' ? '● ' : '  ' }}THEME_LIGHT</span>
-            <span class="tui-shortcut">WB</span>
-          </button>
-          <button
-            type="button"
-            class="tui-dropdown-item w-full text-left"
-            role="menuitemradio"
-            :aria-checked="uiState.theme === 'commander'"
-            @click="setThemeAndClose('commander')"
-          >
-            <span>{{ uiState.theme === 'commander' ? '● ' : '  ' }}THEME_CMD</span>
-            <span class="tui-shortcut">NC</span>
-          </button>
-          <div role="separator" aria-orientation="horizontal" class="border-b border-tui-bg/20 mx-2 my-1"></div>
-          <button type="button" class="tui-dropdown-item w-full text-left" role="menuitem" @click="navigate('/about')">
-            <span>SYSTEM_SETUP</span>
-            <span class="tui-shortcut">F9</span>
-          </button>
-          <button type="button" class="tui-dropdown-item w-full text-left" role="menuitem" @click="reboot">
-            <span>REBOOT_OS</span>
-            <span class="tui-shortcut">^R</span>
-          </button>
+          <template v-for="entry in sysEntries" :key="entry.id">
+            <div
+              v-if="entry.kind === 'separator'"
+              role="separator"
+              aria-orientation="horizontal"
+              class="border-b border-tui-bg/20 mx-2 my-1"
+            ></div>
+            <button
+              v-else
+              type="button"
+              class="tui-dropdown-item w-full text-left"
+              :class="entry.disabled ? 'opacity-30 cursor-not-allowed' : ''"
+              :role="entry.role"
+              :data-mnemonic="entry.mnemonic"
+              :disabled="entry.disabled"
+              :aria-disabled="entry.disabled ? 'true' : undefined"
+              :aria-checked="entry.role === 'menuitemradio' ? entry.ariaChecked : undefined"
+              @click="entry.onSelect && entry.onSelect()"
+            >
+              <span>
+                <span v-if="entry.prefix" class="whitespace-pre">{{ entry.prefix }}</span>
+                <template v-if="mnemonicMode && entry.parts.key">{{ entry.parts.before }}<u>{{ entry.parts.key }}</u>{{ entry.parts.after }}</template>
+                <template v-else>{{ entry.displayLabel }}</template>
+              </span>
+              <span v-if="entry.shortcut" class="tui-shortcut">{{ entry.shortcut }}</span>
+            </button>
+          </template>
         </div>
       </div>
 
@@ -362,17 +526,21 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
         >
           <template v-if="menuState.actions.length">
             <button
-              v-for="item in menuState.actions"
+              v-for="item in actionEntries"
               :key="item.label"
               type="button"
               class="tui-dropdown-item w-full text-left"
               role="menuitem"
+              :data-mnemonic="item.mnemonic"
               :disabled="item.disabled"
               :aria-disabled="item.disabled ? 'true' : undefined"
               :class="item.disabled ? 'opacity-30 cursor-not-allowed' : ''"
               @click="runAction(item.action, item.disabled)"
             >
-              <span class="font-bold">{{ item.label.toUpperCase() }}</span>
+              <span class="font-bold">
+                <template v-if="mnemonicMode && item.parts.key">{{ item.parts.before }}<u>{{ item.parts.key }}</u>{{ item.parts.after }}</template>
+                <template v-else>{{ item.displayLabel }}</template>
+              </span>
               <span v-if="item.shortcut" class="tui-shortcut">{{ item.shortcut }}</span>
             </button>
           </template>
@@ -406,19 +574,24 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
           aria-label="Help"
           @keydown="onMenuKeydown('help', $event)"
         >
-          <button type="button" class="tui-dropdown-item w-full text-left" role="menuitem" @click="navigate('/about')">
-            <span class="font-bold">ABOUT</span>
-            <span class="tui-shortcut">F9</span>
-          </button>
-          <button
-            type="button"
-            class="tui-dropdown-item w-full text-left"
-            role="menuitem"
-            @click="openExternal('https://github.com/Yukaii/ykhn')"
-          >
-            <span class="font-bold">OPEN_REPO</span>
-            <span class="tui-shortcut">WEB</span>
-          </button>
+          <template v-for="entry in helpEntries" :key="entry.id">
+            <button
+              type="button"
+              class="tui-dropdown-item w-full text-left"
+              :class="entry.disabled ? 'opacity-30 cursor-not-allowed' : ''"
+              :role="entry.role"
+              :data-mnemonic="entry.mnemonic"
+              :disabled="entry.disabled"
+              :aria-disabled="entry.disabled ? 'true' : undefined"
+              @click="entry.onSelect && entry.onSelect()"
+            >
+              <span class="font-bold">
+                <template v-if="mnemonicMode && entry.parts.key">{{ entry.parts.before }}<u>{{ entry.parts.key }}</u>{{ entry.parts.after }}</template>
+                <template v-else>{{ entry.displayLabel }}</template>
+              </span>
+              <span v-if="entry.shortcut" class="tui-shortcut">{{ entry.shortcut }}</span>
+            </button>
+          </template>
         </div>
       </div>
       
