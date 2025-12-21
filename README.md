@@ -15,6 +15,14 @@ Retro terminal Hacker News client.
 - `bun install`
 - `bun run dev` (Vite @ `http://localhost:5173`)
 
+## Icons
+
+Generate PWA icons from `public/pwa.svg`:
+
+- `node scripts/render-icons.mjs`
+- Rounded-corner variants (for iOS): `node scripts/render-icons.mjs --rounded`
+- Custom radius / inset / background: `node scripts/render-icons.mjs --rounded --rounded-radius 0.22 --inset 0.10 --background "#fff"`
+
 ## Keyboard shortcuts
 
 - `?` toggle shortcuts overlay
