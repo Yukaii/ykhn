@@ -1,3 +1,4 @@
+import { useEventListener } from '@vueuse/core'
 import { nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -50,12 +51,12 @@ export function useMainScrollRestoration() {
       await restoreScroll(to.fullPath)
     })
 
-    window.addEventListener('beforeunload', () => {
+    useEventListener(window, 'beforeunload', () => {
       const current = router.currentRoute.value
       saveScroll(current.fullPath)
     })
 
-    window.addEventListener('popstate', () => {
+    useEventListener(window, 'popstate', () => {
       const current = router.currentRoute.value
       void restoreScroll(current.fullPath)
     })

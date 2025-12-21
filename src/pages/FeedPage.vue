@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
-import { useAsyncState } from '@vueuse/core'
+import { useAsyncState, useEventListener, useSessionStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 
 import { fetchFeedIds, fetchItems } from '../api/hn'
@@ -9,8 +9,9 @@ import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
 import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
-import { estimateRowScrollStepPx, getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
-import { readSessionJson, writeSessionJson } from '../lib/persist'
+import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { useHalfPageSelectionScrollList } from '../composables/useHalfPageSelectionScrollList'
+import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
 
 const props = defineProps<{
   feed: FeedKind
@@ -21,35 +22,25 @@ const router = useRouter()
 const pageSize = 30
 
 type FeedViewState = {
-  cursor?: number
-  page?: number
-  selectedIndex?: number
-  selectionActive?: boolean
-  scrollTop?: number
+  cursor: number
+  selectedIndex: number
+  selectionActive: boolean
+  scrollTop: number
 }
 
 function stateKey(feed: FeedKind) {
   return `ykhn:feed:${feed}`
 }
 
-function saveViewState(feed: FeedKind) {
-  const main = getMainScrollContainer()
-  const state: FeedViewState = {
-    cursor: cursor.value,
-    selectedIndex: selectedIndex.value,
-    selectionActive: selectionActive.value,
-    scrollTop: main?.scrollTop ?? 0,
-  }
-  writeSessionJson(stateKey(feed), state)
+const defaultFeedViewState: FeedViewState = {
+  cursor: pageSize,
+  selectedIndex: 0,
+  selectionActive: true,
+  scrollTop: 0,
 }
 
-function readViewState(feed: FeedKind) {
-  return readSessionJson<FeedViewState>(stateKey(feed))
-}
-
-function normalizedViewState(feed: FeedKind) {
-  const st = readViewState(feed)
-  if (!st) return null
+function normalizeFeedViewState(raw: unknown): FeedViewState {
+  const st = typeof raw === 'object' && raw ? (raw as Record<string, unknown>) : {}
 
   const selectionActive = typeof st.selectionActive === 'boolean' ? st.selectionActive : true
 
@@ -82,6 +73,67 @@ function normalizedViewState(feed: FeedKind) {
   }
 }
 
+function parseJson(value: string | null) {
+  try {
+    return value ? JSON.parse(value) : null
+  } catch {
+    return null
+  }
+}
+
+const feedViewStates = {
+  top: useSessionStorage<FeedViewState>(stateKey('top'), defaultFeedViewState, {
+    serializer: {
+      read: (v) => normalizeFeedViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  }),
+  new: useSessionStorage<FeedViewState>(stateKey('new'), defaultFeedViewState, {
+    serializer: {
+      read: (v) => normalizeFeedViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  }),
+  best: useSessionStorage<FeedViewState>(stateKey('best'), defaultFeedViewState, {
+    serializer: {
+      read: (v) => normalizeFeedViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  }),
+  ask: useSessionStorage<FeedViewState>(stateKey('ask'), defaultFeedViewState, {
+    serializer: {
+      read: (v) => normalizeFeedViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  }),
+  show: useSessionStorage<FeedViewState>(stateKey('show'), defaultFeedViewState, {
+    serializer: {
+      read: (v) => normalizeFeedViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  }),
+  jobs: useSessionStorage<FeedViewState>(stateKey('jobs'), defaultFeedViewState, {
+    serializer: {
+      read: (v) => normalizeFeedViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  }),
+} satisfies Record<FeedKind, ReturnType<typeof useSessionStorage<FeedViewState>>>
+
+function saveViewState(feed: FeedKind) {
+  const main = getMainScrollContainer()
+  feedViewStates[feed].value = {
+    cursor: cursor.value,
+    selectedIndex: selectedIndex.value,
+    selectionActive: selectionActive.value,
+    scrollTop: main?.scrollTop ?? 0,
+  }
+}
+
+function normalizedViewState(feed: FeedKind) {
+  return feedViewStates[feed].value
+}
+
 const feedTitle: Record<FeedKind, string> = {
   top: 'Top',
   new: 'New',
@@ -105,7 +157,6 @@ let pendingGAt = 0
 let pendingZAt = 0
 
 const loadMoreSentinel = ref<HTMLElement | null>(null)
-let loadMoreObserver: IntersectionObserver | null = null
 
 const { state: ids, isLoading: loadingIds, error: idsError, execute: executeLoadIds } = useAsyncState(
   async () => {
@@ -142,6 +193,16 @@ function setSelected(i: number, opts?: { scroll?: ScrollLogicalPosition }) {
   if (opts?.scroll) void scrollSelectedIntoView(opts.scroll)
   else void scrollSelectedIntoView('nearest')
 }
+
+useHalfPageSelectionScrollList({
+  itemsLength: computed(() => items.value.length),
+  selectedIndex,
+  setSelected: (index) => setSelected(index),
+  canLoadMore: hasMore,
+  isLoadingMore: loadingMore,
+  loadMore,
+  itemsError,
+})
 
 function selectedItem() {
   return items.value[selectedIndex.value]
@@ -213,44 +274,6 @@ function parseCount(defaultCount: number) {
   return n
 }
 
-type SelectionScrollDetail = {
-  kind: 'halfPage'
-  direction: 'up' | 'down'
-  deltaPx: number
-}
-
-function halfPageRowJumpCount(deltaPx: number) {
-  const main = getMainScrollContainer()
-  const rowPx = estimateRowScrollStepPx(main)
-  const raw = Math.floor(Math.abs(deltaPx) / rowPx)
-  return Math.max(1, raw)
-}
-
-function onSelectionScroll(ev: Event) {
-  const e = ev as CustomEvent<SelectionScrollDetail>
-  if (e.detail?.kind !== 'halfPage') return
-  if (items.value.length === 0) return
-
-  e.preventDefault()
-
-  const main = getMainScrollContainer()
-  main?.scrollBy({ top: e.detail.deltaPx, behavior: 'auto' })
-
-  void (async () => {
-    const direction = e.detail.direction === 'down' ? 1 : -1
-    const targetIndex = selectedIndex.value + direction * halfPageRowJumpCount(e.detail.deltaPx)
-
-    if (direction > 0) {
-      while (targetIndex >= items.value.length && hasMore.value) {
-        if (loadingMore.value) break
-        await loadMore()
-        if (itemsError.value) break
-      }
-    }
-
-    setSelected(targetIndex)
-  })()
-}
 
 async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
@@ -360,32 +383,18 @@ function updateMenu() {
   ])
 }
 
-function teardownInfiniteScroll() {
-  loadMoreObserver?.disconnect()
-  loadMoreObserver = null
-}
-
-async function setupInfiniteScroll() {
-  teardownInfiniteScroll()
-
-  await nextTick()
-  const root = getMainScrollContainer()
-  if (!root || !loadMoreSentinel.value) return
-
-  loadMoreObserver = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return
-      void loadMore()
-    },
-    {
-      root,
-      // Start loading a bit before the user hits the end.
+onMounted(() => {
+  void (async () => {
+    await nextTick()
+    useInfiniteScrollSentinel({
+      target: loadMoreSentinel,
+      canLoadMore: hasMore,
+      isLoading: loadingMore,
+      onLoadMore: loadMore,
       rootMargin: '400px',
-    }
-  )
-
-  loadMoreObserver.observe(loadMoreSentinel.value)
-}
+    })
+  })()
+})
 
 async function loadWithOptionalRestore(feed: FeedKind) {
   const restored = normalizedViewState(feed)
@@ -394,27 +403,25 @@ async function loadWithOptionalRestore(feed: FeedKind) {
   rowEls.value = []
   cursor.value = 0
   selectedIndex.value = 0
-  selectionActive.value = restored?.selectionActive ?? true
+  selectionActive.value = restored.selectionActive
 
   await executeLoadIds()
 
-  const targetCursor = Math.min(restored?.cursor ?? pageSize, ids.value.length)
+  const targetCursor = Math.min(restored.cursor, ids.value.length)
   while (cursor.value < targetCursor) {
     await loadMore()
   }
 
-  await setupInfiniteScroll()
-
   await nextTick()
   const main = getMainScrollContainer()
-  if (main && restored) {
+  if (main) {
     main.scrollTop = restored.scrollTop
     await nextTick()
     main.scrollTop = restored.scrollTop
   }
 
   if (selectionActive.value) {
-    selectedIndex.value = clampIndex(restored?.selectedIndex ?? 0)
+    selectedIndex.value = clampIndex(restored.selectedIndex)
     await scrollSelectedIntoView('nearest')
   }
 }
@@ -440,22 +447,15 @@ watch(
   { immediate: true }
 )
 
-watch(hasMore, async () => {
-  // Keep observer alive across list changes.
-  await setupInfiniteScroll()
-})
+
+useEventListener(window, 'keydown', onKeyDown)
 
 onMounted(() => {
   updateMenu()
-  window.addEventListener('keydown', onKeyDown)
-  window.addEventListener('ykhn:selection-scroll', onSelectionScroll)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
-  window.removeEventListener('ykhn:selection-scroll', onSelectionScroll)
   saveViewState(props.feed)
-  teardownInfiniteScroll()
   setMenuActions([])
   setMenuTitle('')
 })

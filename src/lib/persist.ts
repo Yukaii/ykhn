@@ -1,3 +1,5 @@
+import { StorageSerializers, useSessionStorage } from '@vueuse/core'
+
 export function safeJsonParse<T>(value: string | null): T | null {
   if (!value) return null
   try {
@@ -13,4 +15,11 @@ export function readSessionJson<T>(key: string): T | null {
 
 export function writeSessionJson<T>(key: string, value: T) {
   sessionStorage.setItem(key, JSON.stringify(value))
+}
+
+export function useSessionJsonStorage<T>(key: string, defaults: T) {
+  return useSessionStorage<T>(key, defaults, {
+    serializer: StorageSerializers.object,
+    mergeDefaults: true,
+  })
 }

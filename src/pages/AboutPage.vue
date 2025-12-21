@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
-import { setTheme, uiState, type Theme } from '../store'
+import { computed } from 'vue'
+import { fontSizePx, setFontSizePx, setTheme, uiState, type Theme } from '../store'
 
-const fontSize = ref(16)
+const fontSize = fontSizePx
 
 const theme = computed(() => uiState.theme)
 
@@ -10,22 +10,9 @@ function setThemeLocal(next: Theme) {
   setTheme(next)
 }
 
-onMounted(() => {
-  const saved = localStorage.getItem('ykhn-font-size')
-  if (saved) {
-    fontSize.value = Number.parseInt(saved)
-    applyFontSize()
-  }
-})
-
 function updateFontSize(delta: number) {
-  fontSize.value = Math.max(12, Math.min(24, fontSize.value + delta))
-  localStorage.setItem('ykhn-font-size', fontSize.value.toString())
-  applyFontSize()
-}
-
-function applyFontSize() {
-  document.documentElement.style.setProperty('--tui-font-size', `${fontSize.value}px`)
+  const next = Math.max(12, Math.min(24, fontSize.value + delta))
+  setFontSizePx(next)
 }
 </script>
 

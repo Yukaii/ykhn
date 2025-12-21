@@ -1,8 +1,9 @@
-import { onMounted, onUnmounted } from 'vue'
+import { useEventListener } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 
 import { menuState, setShortcutsOpen, toggleShortcuts, uiState } from '../store'
 import { estimateRowScrollStepPx, getMainScrollContainer, menuShortcutFromEvent, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import type { SelectionScrollDetail } from './useHalfPageSelectionScrollList'
 
 function runMenuActionByShortcut(shortcut: string) {
   const action = menuState.actions.find((a) => a.shortcut === shortcut && !a.disabled)
@@ -23,12 +24,6 @@ function scrollMainBy(deltaPx: number) {
   if (!el) return false
   el.scrollBy({ top: deltaPx, behavior: 'auto' })
   return true
-}
-
-type SelectionScrollDetail = {
-  kind: 'halfPage'
-  direction: 'up' | 'down'
-  deltaPx: number
 }
 
 function dispatchSelectionScroll(detail: SelectionScrollDetail) {
@@ -211,6 +206,5 @@ export function useGlobalHotkeys() {
     }
   }
 
-  onMounted(() => window.addEventListener('keydown', onKeyDown, true))
-  onUnmounted(() => window.removeEventListener('keydown', onKeyDown, true))
+  useEventListener(window, 'keydown', onKeyDown, { capture: true })
 }

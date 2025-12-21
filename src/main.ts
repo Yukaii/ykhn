@@ -17,13 +17,6 @@ const updateServiceWorker = registerSW({
   },
 })
 
-// Initialize font size from localStorage
-const savedFontSize = localStorage.getItem('ykhn-font-size')
-if (savedFontSize) {
-  document.documentElement.style.setProperty('--tui-font-size', `${savedFontSize}px`)
-}
-
-// Initialize theme (commander/dark/light)
 initThemeFromStorage()
 
 createApp(App).use(router).mount('#app')

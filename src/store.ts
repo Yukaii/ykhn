@@ -1,9 +1,10 @@
-import { reactive } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
+import { reactive, watch } from 'vue'
 
 export const menuState = reactive({
   actions: [] as { label: string; action: () => void; shortcut?: string; disabled?: boolean }[],
   title: '',
-  loading: false
+  loading: false,
 })
 
 export function setMenuActions(actions: typeof menuState.actions) {
@@ -21,6 +22,7 @@ export function setLoading(loading: boolean) {
 export type Theme = 'commander' | 'dark' | 'light'
 
 const themeStorageKey = 'ykhn-theme'
+const storedTheme = useLocalStorage<string>(themeStorageKey, 'commander')
 
 export const uiState = reactive({
   shortcutsOpen: false,
@@ -36,26 +38,51 @@ function applyThemeToDom(theme: Theme) {
   document.documentElement.dataset.theme = theme
 }
 
-export function initThemeFromStorage() {
-  try {
-    const saved = localStorage.getItem(themeStorageKey)
-    if (isTheme(saved)) uiState.theme = saved
-  } catch {
-    // ignore
-  }
+watch(
+  storedTheme,
+  (value) => {
+    if (isTheme(value)) {
+      uiState.theme = value
+      applyThemeToDom(value)
+      return
+    }
 
+    storedTheme.value = uiState.theme
+    applyThemeToDom(uiState.theme)
+  },
+  { immediate: true }
+)
+
+export function initThemeFromStorage() {
   applyThemeToDom(uiState.theme)
 }
 
 export function setTheme(theme: Theme) {
   uiState.theme = theme
+  storedTheme.value = theme
   applyThemeToDom(theme)
+}
 
-  try {
-    localStorage.setItem(themeStorageKey, theme)
-  } catch {
-    // ignore
-  }
+const fontSizeStorageKey = 'ykhn-font-size'
+export const fontSizePx = useLocalStorage<number>(fontSizeStorageKey, 16)
+
+function applyFontSizeToDom(px: number) {
+  if (typeof document === 'undefined') return
+  document.documentElement.style.setProperty('--tui-font-size', `${px}px`)
+}
+
+watch(
+  fontSizePx,
+  (value) => {
+    const px = typeof value === 'number' ? value : Number(value)
+    if (!Number.isFinite(px) || px <= 0) return
+    applyFontSizeToDom(px)
+  },
+  { immediate: true }
+)
+
+export function setFontSizePx(px: number) {
+  fontSizePx.value = px
 }
 
 export function setShortcutsOpen(open: boolean) {

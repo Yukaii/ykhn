@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { useEventListener } from '@vueuse/core'
+import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useOnline } from '../composables/useOnline'
 import { menuState, setTheme, uiState, type Theme } from '../store'
@@ -60,7 +61,6 @@ function runAction(action: () => void, disabled?: boolean) {
   closeMenus()
 }
 
-// Close menu when clicking outside
 const onWindowClick = (e: MouseEvent) => {
   if ((sysMenuOpen.value || actionsMenuOpen.value || helpMenuOpen.value) && !(e.target as HTMLElement).closest('.tui-menu-container')) {
     closeMenus()
@@ -69,15 +69,8 @@ const onWindowClick = (e: MouseEvent) => {
 
 const onCloseMenus = () => closeMenus()
 
-onMounted(() => {
-  window.addEventListener('click', onWindowClick)
-  window.addEventListener('ykhn:close-menus', onCloseMenus as EventListener)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('click', onWindowClick)
-  window.removeEventListener('ykhn:close-menus', onCloseMenus as EventListener)
-})
+useEventListener(window, 'click', onWindowClick)
+useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
 </script>
 
 <template>

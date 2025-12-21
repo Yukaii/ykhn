@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
-import { useAsyncState } from '@vueuse/core'
+import { useAsyncState, useEventListener, useSessionStorage } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 
 import { searchStoryIds } from '../api/algolia'
 import { fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import StoryRow from '../components/StoryRow.vue'
-import { estimateRowScrollStepPx, getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
-import { readSessionJson, writeSessionJson } from '../lib/persist'
+import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { useHalfPageSelectionScrollList } from '../composables/useHalfPageSelectionScrollList'
+import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
 import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
 
 const router = useRouter()
@@ -32,10 +33,10 @@ const searchPage = ref(0)
 const nbPages = ref(0)
 
 type SearchViewState = {
-  page?: number
-  selectedIndex?: number
-  selectionActive?: boolean
-  scrollTop?: number
+  page: number
+  selectedIndex: number
+  selectionActive: boolean
+  scrollTop: number
 }
 
 function stateKey(q: string) {
@@ -43,24 +44,15 @@ function stateKey(q: string) {
   return `ykhn:search:${normalized}`
 }
 
-function saveViewState(q: string) {
-  const main = getMainScrollContainer()
-  const state: SearchViewState = {
-    page: searchPage.value,
-    selectedIndex: selectedIndex.value,
-    selectionActive: selectionActive.value,
-    scrollTop: main?.scrollTop ?? 0,
-  }
-  writeSessionJson(stateKey(q), state)
+const defaultSearchViewState: SearchViewState = {
+  page: 0,
+  selectedIndex: 0,
+  selectionActive: true,
+  scrollTop: 0,
 }
 
-function readViewState(q: string) {
-  return readSessionJson<SearchViewState>(stateKey(q))
-}
-
-function normalizedViewState(q: string) {
-  const st = readViewState(q)
-  if (!st) return null
+function normalizeSearchViewState(raw: unknown): SearchViewState {
+  const st = typeof raw === 'object' && raw ? (raw as Record<string, unknown>) : {}
 
   const selectionActive = typeof st.selectionActive === 'boolean' ? st.selectionActive : true
 
@@ -74,6 +66,45 @@ function normalizedViewState(q: string) {
   const selectedIndex = Number.isFinite(rawSelectedIndex) ? Math.max(0, rawSelectedIndex) : 0
 
   return { page, selectedIndex, selectionActive, scrollTop: resolvedScrollTop }
+}
+
+function parseJson(value: string | null) {
+  try {
+    return value ? JSON.parse(value) : null
+  } catch {
+    return null
+  }
+}
+
+const searchViewStates = new Map<string, ReturnType<typeof useSessionStorage<SearchViewState>>>()
+
+function searchViewStateRef(q: string) {
+  const key = stateKey(q)
+  const existing = searchViewStates.get(key)
+  if (existing) return existing
+
+  const created = useSessionStorage<SearchViewState>(key, defaultSearchViewState, {
+    serializer: {
+      read: (v) => normalizeSearchViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  })
+  searchViewStates.set(key, created)
+  return created
+}
+
+function saveViewState(q: string) {
+  const main = getMainScrollContainer()
+  searchViewStateRef(q).value = {
+    page: searchPage.value,
+    selectedIndex: selectedIndex.value,
+    selectionActive: selectionActive.value,
+    scrollTop: main?.scrollTop ?? 0,
+  }
+}
+
+function normalizedViewState(q: string) {
+  return searchViewStateRef(q).value
 }
 
 const loadingMore = ref(false)
@@ -109,6 +140,16 @@ function setSelected(i: number, opts?: { scroll?: ScrollLogicalPosition }) {
   if (opts?.scroll) void scrollSelectedIntoView(opts.scroll)
   else void scrollSelectedIntoView('nearest')
 }
+
+useHalfPageSelectionScrollList({
+  itemsLength: computed(() => items.value.length),
+  selectedIndex,
+  setSelected: (index) => setSelected(index),
+  canLoadMore,
+  isLoadingMore: loadingMore,
+  loadMore,
+  itemsError,
+})
 
 function selectedItem() {
   return items.value[selectedIndex.value]
@@ -172,7 +213,7 @@ async function loadWithOptionalRestore(q: string) {
   items.value = []
   rowEls.value = []
   selectedIndex.value = 0
-  selectionActive.value = restored?.selectionActive ?? true
+  selectionActive.value = restored.selectionActive
 
   itemsError.value = null
   searchPage.value = 0
@@ -181,7 +222,7 @@ async function loadWithOptionalRestore(q: string) {
 
   if (!q) return
 
-  const targetPages = Math.max(1, restored?.page ?? 1)
+  const targetPages = Math.max(1, restored.page)
   const cappedTargetPages = Math.min(targetPages, 50)
 
   while (searchPage.value < cappedTargetPages) {
@@ -190,18 +231,16 @@ async function loadWithOptionalRestore(q: string) {
     if (!canLoadMore.value) break
   }
 
-  await setupInfiniteScroll()
-
   await nextTick()
   const main = getMainScrollContainer()
-  if (main && restored) {
-    main.scrollTop = restored.scrollTop ?? 0
+  if (main) {
+    main.scrollTop = restored.scrollTop
     await nextTick()
-    main.scrollTop = restored.scrollTop ?? 0
+    main.scrollTop = restored.scrollTop
   }
 
   if (selectionActive.value) {
-    selectedIndex.value = clampIndex(restored?.selectedIndex ?? 0)
+    selectedIndex.value = clampIndex(restored.selectedIndex)
     await scrollSelectedIntoView('nearest')
   }
 }
@@ -257,44 +296,6 @@ function parseCount(defaultCount: number) {
   return n
 }
 
-type SelectionScrollDetail = {
-  kind: 'halfPage'
-  direction: 'up' | 'down'
-  deltaPx: number
-}
-
-function halfPageRowJumpCount(deltaPx: number) {
-  const main = getMainScrollContainer()
-  const rowPx = estimateRowScrollStepPx(main)
-  const raw = Math.floor(Math.abs(deltaPx) / rowPx)
-  return Math.max(1, raw)
-}
-
-function onSelectionScroll(ev: Event) {
-  const e = ev as CustomEvent<SelectionScrollDetail>
-  if (e.detail?.kind !== 'halfPage') return
-  if (items.value.length === 0) return
-
-  e.preventDefault()
-
-  const main = getMainScrollContainer()
-  main?.scrollBy({ top: e.detail.deltaPx, behavior: 'auto' })
-
-  void (async () => {
-    const direction = e.detail.direction === 'down' ? 1 : -1
-    const targetIndex = selectedIndex.value + direction * halfPageRowJumpCount(e.detail.deltaPx)
-
-    if (direction > 0) {
-      while (targetIndex >= items.value.length && canLoadMore.value) {
-        if (loadingMore.value) break
-        await loadMore()
-        if (itemsError.value) break
-      }
-    }
-
-    setSelected(targetIndex)
-  })()
-}
 
 async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
@@ -413,33 +414,19 @@ function updateMenu() {
 }
 
 const loadMoreSentinel = ref<HTMLElement | null>(null)
-let loadMoreObserver: IntersectionObserver | null = null
 
-function teardownInfiniteScroll() {
-  loadMoreObserver?.disconnect()
-  loadMoreObserver = null
-}
-
-async function setupInfiniteScroll() {
-  teardownInfiniteScroll()
-
-  await nextTick()
-  const root = getMainScrollContainer()
-  if (!root || !loadMoreSentinel.value) return
-
-  loadMoreObserver = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return
-      void loadMore()
-    },
-    {
-      root,
+onMounted(() => {
+  void (async () => {
+    await nextTick()
+    useInfiniteScrollSentinel({
+      target: loadMoreSentinel,
+      canLoadMore,
+      isLoading: loadingMore,
+      onLoadMore: loadMore,
       rootMargin: '400px',
-    }
-  )
-
-  loadMoreObserver.observe(loadMoreSentinel.value)
-}
+    })
+  })()
+})
 
 const { isLoading: loadingInit, execute: executeInit } = useAsyncState(
   async () => {
@@ -475,22 +462,15 @@ watch(
   }
 )
 
-watch(canLoadMore, async () => {
-  await setupInfiniteScroll()
-})
+useEventListener(window, 'keydown', onKeyDown)
 
 onMounted(() => {
   updateMenu()
-  window.addEventListener('keydown', onKeyDown)
-  window.addEventListener('ykhn:selection-scroll', onSelectionScroll)
   void executeInit()
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
-  window.removeEventListener('ykhn:selection-scroll', onSelectionScroll)
   saveViewState(submittedQuery.value)
-  teardownInfiniteScroll()
   searchAbort?.abort()
   setMenuActions([])
   setMenuTitle('')

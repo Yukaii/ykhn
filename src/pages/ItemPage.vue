@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAsyncState } from '@vueuse/core'
+import { useAsyncState, useEventListener, useSessionStorage } from '@vueuse/core'
 
 import { fetchItem } from '../api/hn'
 import type { HnItem } from '../api/types'
@@ -10,7 +10,8 @@ import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
 import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
 import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
-import { readSessionJson, writeSessionJson } from '../lib/persist'
+import { useHalfPageSelectionScrollComments } from '../composables/useHalfPageSelectionScrollComments'
+import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,7 +21,6 @@ const itemsById = reactive(new Map<number, HnItem>())
 const topLimit = ref(40)
 
 const loadMoreSentinel = ref<HTMLElement | null>(null)
-const loadMoreObserver = ref<IntersectionObserver | null>(null)
 const loadingMoreTop = ref(false)
 
 type ItemViewState = {
@@ -34,19 +34,68 @@ function stateKey(itemId: number) {
   return `ykhn:item:${itemId}`
 }
 
-function saveViewState() {
+const defaultItemViewState: ItemViewState = {
+  selectedCommentId: null,
+  selectionActive: true,
+  scrollTop: 0,
+  topLimit: 40,
+}
+
+function normalizeItemViewState(raw: unknown): ItemViewState {
+  const st = typeof raw === 'object' && raw ? (raw as Record<string, unknown>) : {}
+
+  const selectedCommentIdRaw = st.selectedCommentId
+  const selectedCommentId = typeof selectedCommentIdRaw === 'number' && Number.isFinite(selectedCommentIdRaw)
+    ? selectedCommentIdRaw
+    : null
+
+  const selectionActive = typeof st.selectionActive === 'boolean' ? st.selectionActive : true
+
+  const scrollTop = Number(st.scrollTop)
+  const resolvedScrollTop = Number.isFinite(scrollTop) ? scrollTop : 0
+
+  const rawTopLimit = Number(st.topLimit)
+  const topLimit = Number.isFinite(rawTopLimit) && rawTopLimit >= 40 ? rawTopLimit : 40
+
+  return { selectedCommentId, selectionActive, scrollTop: resolvedScrollTop, topLimit }
+}
+
+function parseJson(value: string | null) {
+  try {
+    return value ? JSON.parse(value) : null
+  } catch {
+    return null
+  }
+}
+
+const itemViewStates = new Map<number, ReturnType<typeof useSessionStorage<ItemViewState>>>()
+
+function itemViewStateRef(itemId: number) {
+  const existing = itemViewStates.get(itemId)
+  if (existing) return existing
+
+  const created = useSessionStorage<ItemViewState>(stateKey(itemId), defaultItemViewState, {
+    serializer: {
+      read: (v) => normalizeItemViewState(parseJson(v)),
+      write: (v) => JSON.stringify(v),
+    },
+  })
+  itemViewStates.set(itemId, created)
+  return created
+}
+
+function saveViewState(itemId = id.value) {
   const main = getMainScrollContainer()
-  const state: ItemViewState = {
+  itemViewStateRef(itemId).value = {
     selectedCommentId: selectedCommentId.value,
     selectionActive: selectionActive.value,
     scrollTop: main?.scrollTop ?? 0,
     topLimit: topLimit.value,
   }
-  writeSessionJson(stateKey(id.value), state)
 }
 
 function readViewState(itemId: number) {
-  return readSessionJson<ItemViewState>(stateKey(itemId))
+  return itemViewStateRef(itemId).value
 }
 
 const { state: story, isLoading, error, execute: executeFetchStory } = useAsyncState(
@@ -100,32 +149,21 @@ async function loadMoreTop() {
   }
 }
 
-function teardownTopInfiniteScroll() {
-  loadMoreObserver.value?.disconnect()
-  loadMoreObserver.value = null
-}
+const canLoadMoreTop = computed(() => visibleTopIds.value.length < topCommentIds.value.length)
+const isLoadingTop = computed(() => isLoading.value || loadingMoreTop.value)
 
-async function setupTopInfiniteScroll() {
-  teardownTopInfiniteScroll()
-
-  await nextTick()
-  const root = getMainScrollContainer()
-  if (!root || !loadMoreSentinel.value) return
-
-  loadMoreObserver.value = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return
-      if (isLoading.value) return
-      void loadMoreTop()
-    },
-    {
-      root,
+onMounted(() => {
+  void (async () => {
+    await nextTick()
+    useInfiniteScrollSentinel({
+      target: loadMoreSentinel,
+      canLoadMore: canLoadMoreTop,
+      isLoading: isLoadingTop,
+      onLoadMore: loadMoreTop,
       rootMargin: '400px',
-    }
-  )
-
-  loadMoreObserver.value.observe(loadMoreSentinel.value)
-}
+    })
+  })()
+})
 
 function hnItemUrl(itemId: number) {
   return `https://news.ycombinator.com/item?id=${itemId}`
@@ -301,46 +339,13 @@ function parseCount(defaultCount: number) {
   return n
 }
 
-type SelectionScrollDetail = {
-  kind: 'halfPage'
-  direction: 'up' | 'down'
-  deltaPx: number
-}
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
-}
-
-function halfPageCommentJumpCount(deltaPx: number) {
-  const els = visibleCommentElements()
-  if (els.length === 0) return 1
-
-  const idx = clamp(currentCommentIndex(), 0, els.length - 1)
-  const raw = els[idx]?.offsetHeight
-  const px = typeof raw === 'number' && Number.isFinite(raw) && raw > 0 ? raw : 60
-  const rowPx = clamp(px, 24, 160)
-
-  return Math.max(1, Math.floor(Math.abs(deltaPx) / rowPx))
-}
-
-function onSelectionScroll(ev: Event) {
-  const e = ev as CustomEvent<SelectionScrollDetail>
-  if (e.detail?.kind !== 'halfPage') return
-
-  const els = visibleCommentElements()
-  if (els.length === 0) return
-
-  e.preventDefault()
-
-  const main = getMainScrollContainer()
-  main?.scrollBy({ top: e.detail.deltaPx, behavior: 'auto' })
-
-  void (async () => {
-    const direction = e.detail.direction === 'down' ? 1 : -1
-    const targetIndex = currentCommentIndex() + direction * halfPageCommentJumpCount(e.detail.deltaPx)
-    await selectCommentByIndex(targetIndex)
-  })()
-}
+useHalfPageSelectionScrollComments({
+  visibleCommentElements,
+  currentCommentIndex,
+  selectCommentByIndex: async (index) => {
+    await selectCommentByIndex(index)
+  },
+})
 
 async function ensureInitialCommentSelection() {
   if (!selectionActive.value) return
@@ -504,14 +509,15 @@ watch(isLoading, (l) => {
   setLoading(l)
 })
 
-watch([id, story, visibleTopIds], async () => {
+watch([id, story, visibleTopIds], () => {
   updateMenu()
-  await setupTopInfiniteScroll()
 })
 
 watch([selectedCommentId, selectionActive], () => {
   saveViewState()
 })
+
+useEventListener(window, 'keydown', onKeyDown)
 
 onMounted(async () => {
   const restored = restoreFromState()
@@ -519,16 +525,10 @@ onMounted(async () => {
   updateMenu()
   await applyRestoredScroll(restored)
   await ensureInitialCommentSelection()
-
-  window.addEventListener('keydown', onKeyDown)
-  window.addEventListener('ykhn:selection-scroll', onSelectionScroll)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
-  window.removeEventListener('ykhn:selection-scroll', onSelectionScroll)
   saveViewState()
-  teardownTopInfiniteScroll()
   setMenuActions([])
   setMenuTitle('')
 })
