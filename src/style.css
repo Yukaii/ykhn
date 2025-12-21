@@ -41,6 +41,7 @@
 
   html {
     font-size: var(--tui-font-size);
+    height: 100%;
   }
 
   body {
@@ -49,6 +50,8 @@
     image-rendering: pixelated;
     font-size: 1rem;
     line-height: 1.2;
+    height: 100%;
+    overflow: hidden;
   }
 
   .font-content {
@@ -84,7 +87,9 @@
   }
 
   #app {
-    @apply h-screen w-screen overflow-hidden bg-tui-bg;
+    @apply w-full overflow-hidden bg-tui-bg;
+    height: 100%;
+    min-height: 100svh;
   }
 }
 

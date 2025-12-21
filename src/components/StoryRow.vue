@@ -46,7 +46,7 @@ const host = computed(() => hostFromUrl(props.item.url))
         </RouterLink>
         <span
           v-if="host"
-          class="uppercase whitespace-nowrap"
+          class="uppercase break-all md:break-normal"
           :class="selected ? 'text-tui-bg' : 'text-tui-cyan group-hover:text-tui-bg'"
         >
           ({{ host }})
@@ -54,11 +54,11 @@ const host = computed(() => hostFromUrl(props.item.url))
       </div>
 
       <div
-        class="flex gap-3 opacity-70"
+        class="flex flex-wrap gap-x-3 gap-y-1 opacity-70 min-w-0"
         :class="selected ? 'opacity-100 text-tui-bg' : 'group-hover:opacity-100 group-hover:text-tui-bg'"
       >
-        <span>BY: {{ item.by?.toUpperCase() }}</span>
-        <span>{{ timeAgo(item.time).toUpperCase() }}</span>
+        <span class="break-all">BY: {{ item.by?.toUpperCase() }}</span>
+        <span class="whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
         <RouterLink
           :to="`/item/${item.id}`"
           class="text-tui-yellow font-bold underline"
