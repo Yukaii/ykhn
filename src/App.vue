@@ -13,7 +13,7 @@ useMainScrollRestoration()
 </script>
 
 <template>
-  <div class="flex flex-col bg-tui-bg overflow-hidden h-full min-h-[100svh] w-full pt-[calc(0.5rem+env(safe-area-inset-top))] pb-[calc(0.5rem+env(safe-area-inset-bottom))] pl-[calc(0.5rem+env(safe-area-inset-left))] pr-[calc(0.5rem+env(safe-area-inset-right))] md:pt-[calc(1rem+env(safe-area-inset-top))] md:pb-[calc(1rem+env(safe-area-inset-bottom))] md:pl-[calc(1rem+env(safe-area-inset-left))] md:pr-[calc(1rem+env(safe-area-inset-right))]">
+  <div class="app-container flex flex-col bg-tui-bg overflow-hidden">
     <!-- Main Window -->
     <div class="tui-window flex-1 flex flex-col overflow-hidden relative border-4">
       <AppHeader />
@@ -30,3 +30,22 @@ useMainScrollRestoration()
     <ToastBar />
   </div>
 </template>
+
+<style scoped>
+.app-container {
+  position: fixed;
+  top: calc(0.5rem + env(safe-area-inset-top));
+  bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  left: calc(0.5rem + env(safe-area-inset-left));
+  right: calc(0.5rem + env(safe-area-inset-right));
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    top: calc(1rem + env(safe-area-inset-top));
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    left: calc(1rem + env(safe-area-inset-left));
+    right: calc(1rem + env(safe-area-inset-right));
+  }
+}
+</style>
