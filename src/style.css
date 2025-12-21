@@ -15,6 +15,7 @@
 @layer base {
   :root {
     --tui-font-size: 16px;
+    --tui-content-font-scale: 0.94;
   }
 
   /* Themes (default is commander via @theme) */
@@ -50,6 +51,10 @@
     line-height: 1.2;
   }
 
+  .font-content {
+    font-size: calc(1em * var(--tui-content-font-scale));
+  }
+ 
   /* Norton Commander style scrollbar */
   ::-webkit-scrollbar {
     width: 12px;
