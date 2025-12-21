@@ -62,6 +62,8 @@ function close() {
           <div class="flex justify-between"><span>[count]G</span><span>Jump to comment</span></div>
           <div class="flex justify-between"><span>h</span><span>Jump to parent</span></div>
           <div class="flex justify-between"><span>l / L</span><span>Load sub entries (one/all)</span></div>
+          <div class="flex justify-between"><span>o</span><span>Open story link</span></div>
+          <div class="flex justify-between"><span>O</span><span>Open story link (new tab)</span></div>
           <div class="flex justify-between"><span>zt / zz / zb</span><span>Scroll active comment</span></div>
         </div>
 

@@ -437,6 +437,20 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'o' || e.key === 'O')) {
+    const url = story.value?.url ?? hnItemUrl(id.value)
+    saveViewState()
+
+    if (e.key === 'O') {
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } else {
+      window.location.assign(url)
+    }
+
+    e.preventDefault()
+    return
+  }
+
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
     selectionActive.value = false
     saveViewState()
