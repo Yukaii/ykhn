@@ -81,6 +81,20 @@ export function scrollElementIntoMain(el: HTMLElement, block: ScrollLogicalPosit
   container.scrollTop = clamp(targetTop, 0, maxTop)
 }
 
+export function focusWithoutScroll(el: HTMLElement | null) {
+  if (!el) return
+  try {
+    el.focus({ preventScroll: true })
+  } catch {
+    el.focus()
+  }
+}
+
+export function isMenuElement(el: Element | null) {
+  if (!el) return false
+  return !!el.closest('.tui-menu-container,[role="menu"],[role="menubar"]')
+}
+
 export function estimateRowScrollStepPx(container?: HTMLElement | null) {
   const el = container ?? getMainScrollContainer()
   if (!el) return 40

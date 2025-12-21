@@ -242,6 +242,7 @@ async function focusMenuEdge(menu: MenuName, edge: 'first' | 'last') {
 function onMenuKeydown(menu: MenuName, e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closeMenus()
+    mnemonicMode.value = false
     focusTrigger(menu)
     e.preventDefault()
     e.stopPropagation()
@@ -352,7 +353,25 @@ const onWindowClick = (e: MouseEvent) => {
   }
 }
 
-const onCloseMenus = () => closeMenus()
+const onCloseMenus = () => {
+  const currentMenu = getOpenMenu()
+  const active = document.activeElement
+
+  const menuEl = currentMenu ? getMenuEl(currentMenu) : null
+  const shouldRestoreFocus = !!(
+    currentMenu &&
+    active instanceof HTMLElement &&
+    menuEl instanceof HTMLElement &&
+    menuEl.contains(active)
+  )
+
+  closeMenus()
+  mnemonicMode.value = false
+
+  if (shouldRestoreFocus && currentMenu) {
+    focusTrigger(currentMenu)
+  }
+}
 
 const onWindowKeyDown = async (e: KeyboardEvent) => {
   if (uiState.shortcutsOpen) return

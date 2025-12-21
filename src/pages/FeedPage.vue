@@ -9,7 +9,13 @@ import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
 import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
-import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import {
+  focusWithoutScroll,
+  getMainScrollContainer,
+  isMenuElement,
+  scrollElementIntoMain,
+  shouldIgnoreKeyboardEvent,
+} from '../lib/keyboard'
 import { useHalfPageSelectionScrollList } from '../composables/useHalfPageSelectionScrollList'
 import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
 
@@ -185,6 +191,7 @@ async function scrollSelectedIntoView(block: ScrollLogicalPosition = 'nearest') 
   const el = rowEls.value[selectedIndex.value]
   if (!el) return
   scrollElementIntoMain(el, block)
+  focusWithoutScroll(el)
 }
 
 function setSelected(i: number, opts?: { scroll?: ScrollLogicalPosition }) {
@@ -277,6 +284,7 @@ function parseCount(defaultCount: number) {
 
 async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
+  if (e.target instanceof Element && isMenuElement(e.target)) return
   if (shouldIgnoreKeyboardEvent(e)) return
 
   // Count prefix: <num>j / <num>k / <num>G
@@ -486,6 +494,7 @@ onBeforeUnmount(() => {
           :key="item.id"
           :ref="(el: Element | ComponentPublicInstance | null) => (rowEls[idx] = el as HTMLElement | null)"
           role="option"
+          tabindex="-1"
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
