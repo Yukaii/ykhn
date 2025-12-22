@@ -6,6 +6,7 @@ import App from './App.vue'
 import { router } from './router'
 import { markNeedRefresh, markOfflineReady } from './pwa'
 import { initThemeFromStorage } from './store'
+import { initGA } from './lib/ga'
 
 const updateServiceWorker = registerSW({
   immediate: true,
@@ -18,5 +19,6 @@ const updateServiceWorker = registerSW({
 })
 
 initThemeFromStorage()
+initGA()
 
 createApp(App).use(router).mount('#app')

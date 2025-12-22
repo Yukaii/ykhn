@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 
+import { trackPageView } from '../lib/ga'
+
 import FeedPage from '../pages/FeedPage.vue'
 import SearchPage from '../pages/SearchPage.vue'
 import ItemPage from '../pages/ItemPage.vue'
@@ -38,4 +40,5 @@ export const router = createRouter({
 router.afterEach((to) => {
   const title = typeof to.meta.title === 'string' ? to.meta.title : 'YKHN'
   document.title = `${title} · YKHN`
+  trackPageView()
 })
