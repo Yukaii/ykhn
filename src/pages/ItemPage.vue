@@ -270,10 +270,90 @@ async function selectParent() {
   }
 }
 
-async function loadSubEntries(opts: { recursive: boolean }) {
-  if (!selectionActive.value || selectedCommentId.value == null) return
+function findThreadRootIndex(els: HTMLElement[], fromIndex: number) {
+  const start = Math.max(0, Math.min(els.length - 1, fromIndex))
 
-  const item = itemsById.get(selectedCommentId.value)
+  // If we're already on a top-level comment, that's the thread root.
+  if (elementDepth(els[start] as HTMLElement) === 0) return start
+
+  // Otherwise, walk up by scanning backward to the nearest depth==0.
+  for (let i = start; i >= 0; i--) {
+    const d = elementDepth(els[i] as HTMLElement)
+    if (d === 0) return i
+    // Depth < 0 means the story header card (not part of threads).
+    if (d < 0) break
+  }
+
+  return -1
+}
+
+async function selectPrevThread() {
+  if (!selectionActive.value) return
+  const els = visibleCommentElements()
+  if (els.length === 0) return
+
+  const idx = currentCommentIndex()
+  const rootIdx = findThreadRootIndex(els, idx)
+
+  for (let i = (rootIdx >= 0 ? rootIdx : idx) - 1; i >= 0; i--) {
+    if (elementDepth(els[i] as HTMLElement) === 0) {
+      await selectCommentByIndex(i, { scroll: 'nearest' })
+      return
+    }
+  }
+}
+
+async function selectNextThread() {
+  if (!selectionActive.value) return
+  const els = visibleCommentElements()
+  if (els.length === 0) return
+
+  const idx = currentCommentIndex()
+  const rootIdx = findThreadRootIndex(els, idx)
+
+  for (let i = (rootIdx >= 0 ? rootIdx : idx) + 1; i < els.length; i++) {
+    if (elementDepth(els[i] as HTMLElement) === 0) {
+      await selectCommentByIndex(i, { scroll: 'nearest' })
+      return
+    }
+  }
+}
+
+function setSelectedCommentExpanded(expanded: boolean) {
+  if (!selectionActive.value || selectedCommentId.value == null) return
+  window.dispatchEvent(new CustomEvent('ykhn:comment-set-expanded', { detail: { id: selectedCommentId.value, expanded } }))
+}
+
+async function selectFirstChildOfCurrent() {
+  if (!selectionActive.value || selectedCommentId.value == null) return false
+
+  const els = visibleCommentElements()
+  if (els.length === 0) return false
+
+  const idx = els.findIndex((el) => Number(el.dataset.ykhnCommentId) === selectedCommentId.value)
+  if (idx < 0) return false
+
+  const depth = elementDepth(els[idx] as HTMLElement)
+  if (depth < 0) return false
+
+  const childDepth = depth + 1
+
+  for (let i = idx + 1; i < els.length; i++) {
+    const d = elementDepth(els[i] as HTMLElement)
+    if (d === childDepth) {
+      await selectCommentByIndex(i, { scroll: 'nearest' })
+      return true
+    }
+    if (d <= depth) return false
+  }
+
+  return false
+}
+
+async function loadSubEntriesFor(targetId: number, opts: { recursive: boolean }) {
+  if (!selectionActive.value) return
+
+  const item = itemsById.get(targetId)
   const kidIds = item?.kids ?? []
   if (!kidIds.length) return
 
@@ -281,7 +361,6 @@ async function loadSubEntries(opts: { recursive: boolean }) {
     await ensureItems(kidIds.slice(0, 200))
     return
   }
-
 
   // Breadth-first load descendants with a hard cap.
   const cap = 800
@@ -472,14 +551,49 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'l') {
-    await loadSubEntries({ recursive: false })
+  // Thread navigation (top-level comments).
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === '{') {
+    await selectPrevThread()
     e.preventDefault()
     return
   }
 
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === '}') {
+    await selectNextThread()
+    e.preventDefault()
+    return
+  }
+
+  // Collapse selected comment.
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'H') {
+    setSelectedCommentExpanded(false)
+    e.preventDefault()
+    return
+  }
+
+  // Expand current comment, load sub-entries, then visit first child.
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'l') {
+    const targetId = selectedCommentId.value
+    if (typeof targetId === 'number') {
+      setSelectedCommentExpanded(true)
+      await loadSubEntriesFor(targetId, { recursive: false })
+      await nextTick()
+      await selectFirstChildOfCurrent()
+    }
+    e.preventDefault()
+    return
+  }
+
+  // Expand current comment, visit first child, and load descendants.
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'L') {
-    await loadSubEntries({ recursive: true })
+    const targetId = selectedCommentId.value
+    if (typeof targetId === 'number') {
+      setSelectedCommentExpanded(true)
+      await loadSubEntriesFor(targetId, { recursive: false })
+      await nextTick()
+      await selectFirstChildOfCurrent()
+      void loadSubEntriesFor(targetId, { recursive: true })
+    }
     e.preventDefault()
     return
   }

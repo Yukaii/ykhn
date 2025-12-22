@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useEventListener } from '@vueuse/core'
 import type { HnItem } from '../api/types'
 import { timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
@@ -43,6 +44,19 @@ async function ensureKids() {
   await props.loadKids(kids.value)
   loadedKids.value = true
 }
+
+useEventListener(window, 'ykhn:comment-toggle', (ev) => {
+  const e = ev as CustomEvent<{ id?: number }>
+  if (e.detail?.id !== props.id) return
+  void toggle()
+})
+
+useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
+  const e = ev as CustomEvent<{ id?: number; expanded?: boolean }>
+  if (e.detail?.id !== props.id) return
+  if (e.detail?.expanded === true) expanded.value = true
+  if (e.detail?.expanded === false) expanded.value = false
+})
 </script>
 
 <template>

@@ -69,7 +69,10 @@ Shortcuts are ignored while typing in inputs.
 - `gg` / `G` top/bottom comment
 - `[count]G` jump to comment
 - `h` jump to parent
-- `l` load one-level sub entries; `L` load recursively
+- `{` / `}` prev/next thread
+- `H` collapse comment
+- `l` expand + load one level + go to first child
+- `L` expand + load recursively + go to first child
 - `zt` / `zz` / `zb` scroll active comment to top/center/bottom
 
 ## Roadmap / future ideas
