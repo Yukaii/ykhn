@@ -190,10 +190,18 @@ export function useGlobalHotkeys() {
         return
       }
       if (e.key === 'f' && page) {
+        if (dispatchSelectionScroll({ kind: 'halfPage', direction: 'down', deltaPx: page })) {
+          e.preventDefault()
+          return
+        }
         if (scrollMainBy(page)) e.preventDefault()
         return
       }
       if (e.key === 'b' && page) {
+        if (dispatchSelectionScroll({ kind: 'halfPage', direction: 'up', deltaPx: -page })) {
+          e.preventDefault()
+          return
+        }
         if (scrollMainBy(-page)) e.preventDefault()
         return
       }
