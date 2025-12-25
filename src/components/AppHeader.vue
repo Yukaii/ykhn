@@ -4,7 +4,7 @@ import { computed, nextTick, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useOnline } from '../composables/useOnline'
 import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
-import { menuState, setTheme, uiState, type Theme } from '../store'
+import { menuState, setJoystickDock, setTheme, uiState, type JoystickDock, type Theme } from '../store'
 
 const { online } = useOnline()
 const router = useRouter()
@@ -151,6 +151,27 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
     ariaChecked: uiState.theme === 'commander',
     prefix: uiState.theme === 'commander' ? '● ' : '  ',
     onSelect: () => setThemeAndClose('commander'),
+  }),
+  makeSeparator('sep-joy'),
+  makeItem({
+    id: 'joystick-dock-right',
+    displayLabel: 'JOYSTICK_DOCK_RIGHT',
+    mnemonic: 'y',
+    shortcut: 'R',
+    role: 'menuitemradio',
+    ariaChecked: uiState.joystickDock === 'right',
+    prefix: uiState.joystickDock === 'right' ? '● ' : '  ',
+    onSelect: () => setJoystickDockAndClose('right'),
+  }),
+  makeItem({
+    id: 'joystick-dock-left',
+    displayLabel: 'JOYSTICK_DOCK_LEFT',
+    mnemonic: 'f',
+    shortcut: 'L',
+    role: 'menuitemradio',
+    ariaChecked: uiState.joystickDock === 'left',
+    prefix: uiState.joystickDock === 'left' ? '● ' : '  ',
+    onSelect: () => setJoystickDockAndClose('left'),
   }),
   makeSeparator('sep-2'),
   makeItem({
@@ -333,6 +354,11 @@ function reboot() {
 
 function setThemeAndClose(theme: Theme) {
   setTheme(theme)
+  closeMenus()
+}
+
+function setJoystickDockAndClose(dock: JoystickDock) {
+  setJoystickDock(dock)
   closeMenus()
 }
 

@@ -6,6 +6,7 @@ import { useAsyncState, useEventListener, useSessionStorage } from '@vueuse/core
 import { fetchItem } from '../api/hn'
 import type { HnItem } from '../api/types'
 import CommentNode from '../components/CommentNode.vue'
+import MobileThreadJoystick from '../components/MobileThreadJoystick.vue'
 import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
 import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
@@ -740,5 +741,7 @@ onBeforeUnmount(() => {
       <div>LOADING...</div>
       <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>
     </div>
+
+    <MobileThreadJoystick />
   </div>
 </template>
