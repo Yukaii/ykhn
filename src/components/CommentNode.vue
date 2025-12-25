@@ -18,6 +18,25 @@ const props = defineProps<{
 
 const depth = computed(() => props.depth ?? 0)
 
+const MAX_VISIBLE_DEPTH = 4
+
+const overflowDepth = computed(() => Math.max(0, depth.value - MAX_VISIBLE_DEPTH))
+
+const commentOffsetStyle = computed(() => {
+  if (depth.value <= 0) return {}
+
+  // Note: since CommentNode is rendered recursively, margin-left accumulates.
+  // Apply a fixed per-level indent up to MAX_VISIBLE_DEPTH, then stop.
+  if (depth.value > MAX_VISIBLE_DEPTH) return {}
+
+  return { marginLeft: 'var(--ykhn-comment-indent)' }
+})
+
+const branchStyle = computed(() => {
+  if (depth.value <= 0) return {}
+  return { left: 'calc(-1 * var(--ykhn-comment-branch-offset))' }
+})
+
 const expanded = ref(true)
 const loadedKids = ref(false)
 
@@ -65,17 +84,26 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
     class="relative mb-4"
     :data-ykhn-comment-id="String(id)"
     :data-ykhn-depth="String(depth)"
-    :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''"
+    :style="commentOffsetStyle"
   >
     <!-- Visual branch for threading -->
-    <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/50 font-mono leading-none">
-      {{ isLast ? '└─' : '├─' }}
+    <div
+      v-if="depth > 0"
+      class="absolute top-4 text-tui-active/50 font-mono leading-none"
+      :style="branchStyle"
+    >
+      <span>{{ isLast ? '└─' : '├─' }}</span>
+      <span v-if="overflowDepth" class="ml-1 text-tui-yellow/70">+{{ overflowDepth }}</span>
     </div>
-    <div v-if="depth > 0 && !isLast" class="absolute left-[-18px] top-8 bottom-[-16px] border-l border-tui-active/30"></div>
+    <div
+      v-if="depth > 0 && !isLast"
+      class="absolute top-8 bottom-[-16px] border-l border-tui-active/30"
+      :style="branchStyle"
+    ></div>
 
     <div class="tui-comment-card" :class="selectedId === id ? 'border-2 border-tui-yellow bg-tui-active/10' : ''">
-      <div class="flex items-center justify-between gap-2 bg-tui-active/40 px-2 py-1 mb-2 font-mono">
-        <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-tui-active/40 px-2 py-1 mb-2 font-mono">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
           <div class="flex items-center gap-1">
             <span class="text-tui-gray">USR:</span>
             <span class="text-tui-yellow font-bold">{{ item.by ?? 'GUEST' }}</span>
@@ -88,7 +116,7 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
         <button 
           v-if="kids.length" 
           @click="toggle" 
-          class="bg-tui-bg text-tui-border px-2 border border-tui-border/30 hover:bg-tui-border hover:text-tui-bg transition-none"
+          class="ml-auto shrink-0 bg-tui-bg text-tui-border px-2 border border-tui-border/30 hover:bg-tui-border hover:text-tui-bg transition-none"
         >
           {{ expanded ? '[-] COLLAPSE' : `[+] EXPAND ${kids.length}` }}
         </button>
@@ -125,10 +153,15 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
     </div>
   </div>
   
-  <div v-else class="relative mb-4" :class="depth > 0 ? (depth > 5 ? 'ml-2' : 'ml-6') : ''">
+  <div v-else class="relative mb-4" :style="commentOffsetStyle">
     <!-- Skeleton branch -->
-    <div v-if="depth > 0" class="absolute left-[-18px] top-4 text-tui-active/20 font-mono">
-      {{ isLast ? '└─' : '├─' }}
+    <div
+      v-if="depth > 0"
+      class="absolute top-4 text-tui-active/20 font-mono"
+      :style="branchStyle"
+    >
+      <span>{{ isLast ? '└─' : '├─' }}</span>
+      <span v-if="overflowDepth" class="ml-1 text-tui-yellow/40">+{{ overflowDepth }}</span>
     </div>
     
     <div class="tui-comment-card opacity-20 border-dashed">

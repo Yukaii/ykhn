@@ -16,6 +16,17 @@
   :root {
     --tui-font-size: 16px;
     --tui-content-font-scale: 0.94;
+
+    /* Comment threading layout */
+    --ykhn-comment-indent: 24px;
+    --ykhn-comment-branch-offset: 18px;
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --ykhn-comment-indent: 12px;
+      --ykhn-comment-branch-offset: 6px;
+    }
   }
 
   /* Themes (default is commander via @theme) */
