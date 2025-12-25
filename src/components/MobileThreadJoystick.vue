@@ -55,6 +55,15 @@ const dragPos = ref({ left: 0, top: 0 })
 const resolvedDock = computed<JoystickDock>(() => uiState.joystickPosition?.dock ?? uiState.joystickDock)
 const resolvedTop = computed(() => clampTop(uiState.joystickPosition?.top ?? defaultTop()))
 
+watch(
+  [resolvedDock, resolvedTop, winW, winH],
+  () => {
+    if (dragging.value) return
+    dragPos.value = { left: dockToLeft(resolvedDock.value), top: resolvedTop.value }
+  },
+  { immediate: true }
+)
+
 const dock = computed<JoystickDock>(() => {
   if (dragging.value) {
     const mid = dragPos.value.left + WRAP_W_PX / 2
