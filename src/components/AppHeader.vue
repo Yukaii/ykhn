@@ -466,14 +466,14 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
 <template>
   <div class="flex flex-col flex-none select-none">
     <!-- Title Bar -->
-    <div class="tui-title-bar">
-      <div class="flex items-center gap-2">
-        <RouterLink to="/" class="hover:bg-tui-bg hover:text-tui-cyan px-1 transition-none">
+    <div class="tui-title-bar gap-3">
+      <div class="flex items-center gap-2 min-w-0">
+        <RouterLink to="/" class="hover:bg-tui-bg hover:text-tui-cyan px-1 transition-none truncate">
           YKHN_OS V1.0
         </RouterLink>
       </div>
       
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3 md:gap-4 min-w-0">
         <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1'">
           {{ online ? '[ONLINE]' : '[OFFLINE]' }}
         </span>

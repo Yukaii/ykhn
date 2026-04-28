@@ -102,7 +102,7 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
     ></div>
 
     <div class="tui-comment-card" :class="selectedId === id ? 'border-2 border-tui-yellow bg-tui-active/10' : ''">
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-tui-active/40 px-2 py-1 mb-2 font-mono">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-tui-active/45 px-2 py-1.5 mb-3 font-mono border-b border-tui-border/20">
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
           <div class="flex items-center gap-1">
             <span class="text-tui-gray">USR:</span>
@@ -116,13 +116,13 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
         <button 
           v-if="kids.length" 
           @click="toggle" 
-          class="ml-auto shrink-0 bg-tui-bg text-tui-border px-2 border border-tui-border/30 hover:bg-tui-border hover:text-tui-bg transition-none"
+          class="ml-auto shrink-0 bg-tui-bg text-tui-border px-2 py-0.5 border border-tui-border/40 hover:bg-tui-border hover:text-tui-bg transition-none"
         >
           {{ expanded ? '[-] COLLAPSE' : `[+] EXPAND ${kids.length}` }}
         </button>
       </div>
 
-      <div v-if="expanded" class="px-1">
+      <div v-if="expanded" class="px-1 md:px-2">
         <div v-if="text" class="prose prose-invert max-w-none leading-relaxed mb-1 font-content break-words" v-html="text" />
         <div v-else class="opacity-30 mb-2 italic">-- NO_CONTENT --</div>
         

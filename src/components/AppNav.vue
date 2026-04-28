@@ -29,17 +29,22 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <nav class="bg-tui-active border-t-2 border-tui-border relative flex items-center h-10 overflow-hidden" aria-label="Feeds">
+  <nav class="bg-tui-active border-t-2 border-tui-border relative flex items-center h-11 overflow-hidden" aria-label="Feeds">
     <!-- Left Overflow Indicator -->
     <button 
       v-if="!arrivedState.left"
       @click="scroll('left')"
-      class="absolute left-0 top-0 bottom-0 flex items-center px-1 bg-tui-active text-tui-yellow font-bold z-10 hover:bg-tui-cyan hover:text-tui-bg transition-none border-r border-tui-border/30"
+      class="absolute left-0 top-0 bottom-0 flex items-center px-2 bg-tui-active text-tui-yellow font-bold z-10 hover:bg-tui-cyan hover:text-tui-bg transition-none border-r border-tui-border/30"
+      aria-label="Scroll feeds left"
     >
       &lt;
     </button>
 
-    <div ref="el" class="flex-1 flex overflow-x-auto no-scrollbar h-full">
+    <div
+      ref="el"
+      class="flex-1 flex overflow-x-auto no-scrollbar h-full"
+      :class="{ 'pl-7': !arrivedState.left, 'pr-7': !arrivedState.right }"
+    >
       <RouterLink
         v-for="(tab, index) in tabs"
         :key="tab.to"
@@ -55,7 +60,8 @@ function isActive(to: string) {
     <button 
       v-if="!arrivedState.right"
       @click="scroll('right')"
-      class="absolute right-0 top-0 bottom-0 flex items-center px-1 bg-tui-active text-tui-yellow font-bold z-10 hover:bg-tui-cyan hover:text-tui-bg transition-none border-l border-tui-border/30"
+      class="absolute right-0 top-0 bottom-0 flex items-center px-2 bg-tui-active text-tui-yellow font-bold z-10 hover:bg-tui-cyan hover:text-tui-bg transition-none border-l border-tui-border/30"
+      aria-label="Scroll feeds right"
     >
       &gt;
     </button>

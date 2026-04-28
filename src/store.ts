@@ -20,11 +20,15 @@ export function setLoading(loading: boolean) {
 }
 
 export type Theme = 'commander' | 'dark' | 'light'
+export type FontMode = 'readable' | 'balanced' | 'retro'
 export type JoystickDock = 'right' | 'left'
 export type JoystickPosition = { top: number; dock: JoystickDock }
 
 const themeStorageKey = 'ykhn-theme'
 const storedTheme = useLocalStorage<string>(themeStorageKey, 'commander')
+
+const fontModeStorageKey = 'ykhn-font-mode'
+const storedFontMode = useLocalStorage<string>(fontModeStorageKey, 'balanced')
 
 const joystickDockStorageKey = 'ykhn-joystick-dock'
 const storedJoystickDock = useLocalStorage<string>(joystickDockStorageKey, 'right')
@@ -38,6 +42,7 @@ const storedJoystickCollapsed = useLocalStorage<boolean>(joystickCollapsedStorag
 export const uiState = reactive({
   shortcutsOpen: false,
   theme: 'commander' as Theme,
+  fontMode: 'balanced' as FontMode,
   joystickDock: 'right' as JoystickDock,
   joystickPosition: null as JoystickPosition | null,
   joystickCollapsed: false,
@@ -46,6 +51,10 @@ export const uiState = reactive({
 
 function isTheme(value: unknown): value is Theme {
   return value === 'commander' || value === 'dark' || value === 'light'
+}
+
+function isFontMode(value: unknown): value is FontMode {
+  return value === 'readable' || value === 'balanced' || value === 'retro'
 }
 
 function isJoystickDock(value: unknown): value is JoystickDock {
@@ -65,6 +74,11 @@ function applyThemeToDom(theme: Theme) {
   document.documentElement.dataset.theme = theme
 }
 
+function applyFontModeToDom(mode: FontMode) {
+  if (typeof document === 'undefined') return
+  document.documentElement.dataset.font = mode
+}
+
 watch(
   storedTheme,
   (value) => {
@@ -76,6 +90,21 @@ watch(
 
     storedTheme.value = uiState.theme
     applyThemeToDom(uiState.theme)
+  },
+  { immediate: true }
+)
+
+watch(
+  storedFontMode,
+  (value) => {
+    if (isFontMode(value)) {
+      uiState.fontMode = value
+      applyFontModeToDom(value)
+      return
+    }
+
+    storedFontMode.value = uiState.fontMode
+    applyFontModeToDom(uiState.fontMode)
   },
   { immediate: true }
 )
@@ -140,12 +169,19 @@ watch(
 
 export function initThemeFromStorage() {
   applyThemeToDom(uiState.theme)
+  applyFontModeToDom(uiState.fontMode)
 }
 
 export function setTheme(theme: Theme) {
   uiState.theme = theme
   storedTheme.value = theme
   applyThemeToDom(theme)
+}
+
+export function setFontMode(mode: FontMode) {
+  uiState.fontMode = mode
+  storedFontMode.value = mode
+  applyFontModeToDom(mode)
 }
 
 export function setJoystickDock(dock: JoystickDock) {

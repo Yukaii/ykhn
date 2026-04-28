@@ -10,25 +10,31 @@ const props = defineProps<{
 }>()
 
 const host = computed(() => hostFromUrl(props.item.url))
+const rowVariant = computed(() => {
+  if (props.item.type === 'job') return 'JOB'
+  if (props.item.type === 'poll') return 'POLL'
+  if (!props.item.url) return 'TEXT'
+  return 'LINK'
+})
 </script>
 
 <template>
   <div
-    class="tui-list-item group border-b border-tui-active/30 last:border-b-0 py-2"
+    class="tui-list-item group border-b border-tui-active/30 last:border-b-0"
     :class="selected ? 'bg-tui-cyan text-tui-bg' : ''"
   >
     <div
-      class="flex-none w-10 text-right font-bold"
+      class="flex-none w-12 text-right font-bold tabular-nums pt-0.5"
       :class="selected ? 'text-tui-bg' : 'text-tui-text/60 group-hover:text-tui-bg'"
     >
       {{ item.score ?? 0 }}
     </div>
 
     <div class="flex-1 min-w-0">
-      <div class="flex flex-col md:flex-row md:items-baseline md:gap-2">
+      <div class="flex flex-col gap-1 md:flex-row md:items-baseline md:gap-2">
         <a
           v-if="item.url"
-          class="font-bold break-words"
+          class="font-bold break-words leading-snug"
           :class="selected ? 'underline' : 'group-hover:underline'"
           :href="item.url"
           target="_blank"
@@ -38,7 +44,7 @@ const host = computed(() => hostFromUrl(props.item.url))
         </a>
         <RouterLink
           v-else
-          class="font-bold break-words"
+          class="font-bold break-words leading-snug"
           :class="selected ? 'underline' : 'group-hover:underline'"
           :to="`/item/${item.id}`"
         >
@@ -54,15 +60,21 @@ const host = computed(() => hostFromUrl(props.item.url))
       </div>
 
       <div
-        class="flex flex-wrap gap-x-3 gap-y-1 opacity-70 min-w-0"
+        class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 min-w-0 text-[0.92em]"
         :class="selected ? 'opacity-100 text-tui-bg' : 'group-hover:opacity-100 group-hover:text-tui-bg'"
       >
-        <span class="break-all">BY: {{ item.by?.toUpperCase() }}</span>
+        <span
+          class="tui-chip"
+          :class="selected ? 'border-tui-bg text-tui-bg' : 'group-hover:border-tui-bg group-hover:text-tui-bg'"
+        >
+          {{ rowVariant }}
+        </span>
+        <span class="break-all tui-meta" :class="selected ? 'text-tui-bg' : 'group-hover:text-tui-bg'">BY: {{ item.by?.toUpperCase() ?? 'UNKNOWN' }}</span>
         <span class="whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
         <RouterLink
           :to="`/item/${item.id}`"
-          class="text-tui-yellow font-bold underline"
-          :class="selected ? 'text-tui-bg' : 'group-hover:text-tui-bg'"
+          class="font-bold underline"
+          :class="selected ? 'text-tui-bg' : 'text-tui-yellow group-hover:text-tui-bg'"
         >
           {{ item.descendants ?? 0 }} COMM
         </RouterLink>
@@ -70,7 +82,7 @@ const host = computed(() => hostFromUrl(props.item.url))
     </div>
 
     <RouterLink
-      class="flex-none px-2 bg-tui-active text-tui-text"
+      class="flex-none self-center px-2 py-1 bg-tui-active text-tui-text border border-tui-border/30"
       :class="selected ? 'bg-tui-bg text-tui-cyan' : 'group-hover:bg-tui-bg group-hover:text-tui-cyan'"
       :to="`/item/${item.id}`"
     >

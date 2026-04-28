@@ -675,7 +675,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000]">
+    <div v-if="error" class="tui-panel border-red-500">
       <div class="font-bold mb-2 uppercase">!! ACCESS DENIED !!</div>
       <div class="mb-4">{{ error }}</div>
       <button class="tui-btn" @click="() => loadStory()">RETRY</button>
@@ -683,19 +683,19 @@ onBeforeUnmount(() => {
 
     <template v-else-if="story">
       <div
-        class="p-4 border-2 border-tui-border bg-tui-bg shadow-[4px_4px_0px_rgba(0,0,0,0.5)]"
+        class="tui-panel"
         :data-ykhn-comment-id="String(story.id)"
         :data-ykhn-depth="'-1'"
         :class="selectionActive && selectedCommentId === story.id ? 'border-tui-yellow bg-tui-active/10' : ''"
       >
-        <h1 class="font-black mb-4 uppercase leading-tight text-tui-yellow">
+        <h1 class="font-black mb-4 uppercase leading-tight text-tui-yellow text-xl md:text-2xl">
           <a v-if="story.url" :href="story.url" target="_blank" rel="noreferrer" class="hover:underline">
             {{ story.title ?? 'UNTITLED' }}
           </a>
           <template v-else>{{ story.title ?? 'UNTITLED' }}</template>
         </h1>
 
-        <div class="flex flex-wrap gap-x-6 gap-y-2 mb-6 border-y border-tui-active/30 py-2 font-mono uppercase">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-2 mb-5 border-y border-tui-active/40 py-2 font-mono uppercase">
           <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-tui-text font-bold">{{ story.by }}</span></div>
           <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-tui-text font-bold">{{ story.score }}</span></div>
           <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-tui-text font-bold">{{ timeAgo(story.time) }}</span></div>
@@ -704,13 +704,13 @@ onBeforeUnmount(() => {
 
         <div
           v-if="storyText"
-          class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/5 break-words overflow-wrap-anywhere leading-relaxed prose prose-invert max-w-none"
+          class="font-content border-l-4 border-tui-active pl-4 py-2 mb-2 bg-tui-active/10 break-words leading-relaxed prose prose-invert max-w-none"
           v-html="storyText"
         />
       </div>
 
       <div class="mt-6">
-        <div class="bg-tui-active text-tui-text px-2 font-bold uppercase mb-4 border-b border-tui-border/30">
+        <div class="tui-section-heading mb-4">
           >> COMMENTS_THREAD ({{ topCommentIds.length }})
         </div>
 

@@ -17,7 +17,7 @@ async function onUpdate() {
 </script>
 
 <template>
-  <div v-if="show" class="fixed bottom-12 left-2 right-2 md:left-auto md:right-8 md:bottom-12 md:w-80 bg-tui-gray border-4 border-double border-tui-border p-4 z-50 shadow-[8px_8px_0px_rgba(0,0,0,0.5)] text-tui-text" role="status" aria-live="polite">
+  <div v-if="show" class="fixed bottom-14 left-2 right-2 md:left-auto md:right-8 md:bottom-16 md:w-80 tui-panel z-50 text-tui-text" role="status" aria-live="polite">
     <div class="mb-4">
       <div v-if="pwaState.needRefresh" class="font-black uppercase mb-1 underline">! SYSTEM ALERT !</div>
       <div v-else class="font-black uppercase mb-1 underline">! DISK READY !</div>

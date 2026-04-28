@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --font-mono: "VT323", "Courier New", Courier, monospace;
-  --font-content: "JetBrains Mono", monospace;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-content: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-retro: "VT323", "JetBrains Mono", monospace;
   --color-tui-bg: #0000aa;
   --color-tui-text: #ffffff;
   --color-tui-cyan: #55ffff;
@@ -15,7 +16,12 @@
 @layer base {
   :root {
     --tui-font-size: 16px;
-    --tui-content-font-scale: 0.94;
+    --tui-content-font-scale: 0.96;
+    --ykhn-ui-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-content-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-shadow-color: rgba(0, 0, 0, 0.55);
+    --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-active));
+    --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 72%, var(--color-tui-active));
 
     /* Comment threading layout */
     --ykhn-comment-indent: 24px;
@@ -30,40 +36,85 @@
   }
 
   /* Themes (default is commander via @theme) */
+  :root[data-theme='commander'] {
+    --color-tui-bg: #00008f;
+    --color-tui-text: #f5f7ff;
+    --color-tui-border: #f5f7ff;
+    --color-tui-gray: #b8bdc7;
+    --color-tui-active: #008b8b;
+    --color-tui-cyan: #66ffff;
+    --color-tui-yellow: #fff56b;
+    --ykhn-shadow-color: rgba(0, 0, 0, 0.62);
+  }
+
   :root[data-theme='dark'] {
-    --color-tui-bg: #000000;
-    --color-tui-text: #ffffff;
-    --color-tui-border: #ffffff;
-    --color-tui-gray: #444444;
-    --color-tui-active: #1f1f1f;
-    --color-tui-cyan: #ffffff;
-    --color-tui-yellow: #ffffff;
+    --color-tui-bg: #070707;
+    --color-tui-text: #f1f1ec;
+    --color-tui-border: #d8d8d0;
+    --color-tui-gray: #5f625f;
+    --color-tui-active: #242623;
+    --color-tui-cyan: #79d7d2;
+    --color-tui-yellow: #f2dc78;
+    --ykhn-shadow-color: rgba(0, 0, 0, 0.82);
   }
 
   :root[data-theme='light'] {
-    --color-tui-bg: #ffffff;
-    --color-tui-text: #000000;
-    --color-tui-border: #000000;
-    --color-tui-gray: #333333;
-    --color-tui-active: #dcdcdc;
-    --color-tui-cyan: #000000;
-    --color-tui-yellow: #000000;
+    --color-tui-bg: #fbfbf2;
+    --color-tui-text: #11130f;
+    --color-tui-border: #20241d;
+    --color-tui-gray: #71766c;
+    --color-tui-active: #d9ded1;
+    --color-tui-cyan: #005c60;
+    --color-tui-yellow: #806700;
+    --ykhn-shadow-color: rgba(32, 36, 29, 0.34);
   }
 
   html {
     font-size: var(--tui-font-size);
   }
 
+  :root[data-font='readable'] {
+    --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-content: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-ui-font: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-content-font: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --tui-content-font-scale: 0.96;
+  }
+
+  :root[data-font='balanced'] {
+    --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-content: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-ui-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-content-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --tui-content-font-scale: 0.96;
+  }
+
+  :root[data-font='retro'] {
+    --font-mono: "VT323", "JetBrains Mono", monospace;
+    --font-content: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-ui-font: "VT323", "JetBrains Mono", monospace;
+    --ykhn-content-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --tui-content-font-scale: 0.94;
+  }
+
   body {
     @apply bg-tui-bg text-tui-text font-mono;
-    -webkit-font-smoothing: none;
+    font-family: var(--ykhn-ui-font);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
     image-rendering: pixelated;
     font-size: 1rem;
-    line-height: 1.2;
+    line-height: 1.42;
   }
 
   .font-content {
+    font-family: var(--ykhn-content-font);
     font-size: calc(1em * var(--tui-content-font-scale));
+  }
+
+  .font-retro {
+    font-family: var(--font-retro);
+    letter-spacing: 0;
   }
  
   /* Norton Commander style scrollbar */
@@ -101,22 +152,51 @@
 
 @layer components {
   .tui-window {
-    @apply border-2 border-tui-border bg-tui-bg shadow-[6px_6px_0px_#000000];
+    @apply border-2 border-tui-border bg-tui-bg;
+    box-shadow: 6px 6px 0 var(--ykhn-shadow-color);
   }
 
   .tui-title-bar {
-    @apply bg-tui-cyan text-tui-bg px-2 font-bold flex justify-between items-center uppercase border-b-2 border-tui-border;
+    @apply bg-tui-cyan text-tui-bg px-2 py-1 font-bold flex justify-between items-center uppercase border-b-2 border-tui-border;
+    line-height: 1.2;
+  }
+
+  .tui-panel,
+  .retro-border {
+    @apply border-2 border-tui-border bg-tui-bg p-3 md:p-4;
+    background: var(--ykhn-panel-bg);
+    box-shadow: 4px 4px 0 var(--ykhn-shadow-color);
+  }
+
+  .tui-panel-muted {
+    @apply border border-tui-active/60 p-3 md:p-4;
+    background: var(--ykhn-muted-bg);
+  }
+
+  .tui-section-heading {
+    @apply bg-tui-active text-tui-text px-2 py-1 font-bold uppercase border-b border-tui-border/40;
+  }
+
+  .tui-field {
+    @apply bg-tui-bg border-2 border-tui-border px-2 py-1 font-mono outline-none text-tui-text;
+  }
+
+  .tui-field:focus {
+    @apply border-tui-cyan;
+    box-shadow: inset 0 0 0 1px var(--color-tui-cyan);
   }
 
   .tui-comment-card {
-    @apply border border-tui-active bg-tui-bg p-2 mb-2 relative overflow-hidden;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+    @apply border border-tui-active p-2 md:p-3 mb-2 relative overflow-hidden;
+    background: color-mix(in srgb, var(--color-tui-bg) 92%, var(--color-tui-active));
+    box-shadow: 2px 2px 0 var(--ykhn-shadow-color);
   }
 
   /* Handle long text/code in v-html */
   .prose {
     @apply break-words w-full max-w-full;
     overflow-wrap: anywhere;
+    line-height: 1.55;
   }
   
   .prose pre {
@@ -164,7 +244,12 @@
   }
 
   .tui-btn {
-    @apply px-3 py-1 bg-tui-gray text-tui-text hover:bg-tui-cyan border-2 border-tui-border shadow-[2px_2px_0px_#000000] active:shadow-none active:translate-x-[1px] active:translate-y-[1px] uppercase font-bold;
+    @apply px-3 py-1 bg-tui-gray text-tui-text hover:bg-tui-cyan hover:text-tui-bg border-2 border-tui-border active:translate-x-[1px] active:translate-y-[1px] uppercase font-bold disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow: 2px 2px 0 var(--ykhn-shadow-color);
+  }
+
+  .tui-btn:active {
+    box-shadow: none;
   }
 
   :root[data-theme='commander'] .tui-btn {
@@ -172,22 +257,32 @@
   }
 
   .tui-f-key {
-    @apply flex-1 text-center py-1 border-r border-tui-border last:border-r-0;
+    @apply flex-1 text-center py-1 border-r border-tui-border/60 last:border-r-0;
   }
   .tui-f-key span {
     @apply text-tui-yellow font-bold mr-1;
   }
 
   .tui-list-item {
-    @apply flex items-start gap-2 p-1 hover:bg-tui-cyan hover:text-tui-bg cursor-pointer;
+    @apply flex items-start gap-3 px-2 py-2 hover:bg-tui-cyan hover:text-tui-bg cursor-pointer;
   }
   
   .tui-list-item.active {
     @apply bg-tui-yellow text-tui-bg;
   }
 
+  .tui-meta {
+    @apply text-tui-text/70;
+  }
+
+  .tui-chip {
+    @apply inline-flex items-center border border-tui-active/70 px-1.5 leading-none uppercase text-tui-cyan;
+    min-height: 1.25rem;
+  }
+
   .tui-menu-bar {
     @apply bg-tui-gray text-tui-text flex font-mono border-b border-tui-bg sticky top-0 z-10;
+    line-height: 1.25;
   }
 
   :root[data-theme='light'] .tui-menu-bar,
@@ -205,7 +300,8 @@
   }
 
   .tui-menu-dropdown {
-    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 min-w-[160px] text-tui-text;
+    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border z-50 min-w-[180px] text-tui-text;
+    box-shadow: 4px 4px 0 var(--ykhn-shadow-color);
   }
 
   :root[data-theme='light'] .tui-menu-dropdown {
@@ -217,7 +313,7 @@
   }
 
   .tui-dropdown-item {
-    @apply px-4 py-1 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
+    @apply px-4 py-1.5 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
     @apply focus-visible:bg-tui-bg focus-visible:text-tui-cyan focus-visible:outline focus-visible:outline-1 focus-visible:outline-tui-yellow;
   }
 

@@ -471,7 +471,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col h-full" role="listbox" aria-label="Stories">
-    <div v-if="error" class="bg-red-600 p-4 border-2 border-white shadow-[8px_8px_0px_#000000] text-center">
+    <div v-if="error" class="tui-panel text-center border-red-500">
       <div class="font-bold mb-2 uppercase">!! DISK READ ERROR !!</div>
       <div class="mb-4">{{ error }}</div>
       <button class="tui-btn" @click="refresh">RETRY</button>
@@ -479,8 +479,8 @@ onBeforeUnmount(() => {
 
     <div v-else class="flex-1">
       <div v-if="loadingItems && items.length === 0" class="flex flex-col">
-        <div v-for="n in 15" :key="n" class="p-2 border-b border-tui-active/30 flex gap-4 opacity-20">
-          <div class="w-10 text-right">000</div>
+        <div v-for="n in 15" :key="n" class="p-2 border-b border-tui-active/30 flex gap-3 opacity-30">
+          <div class="w-12 text-right">000</div>
           <div class="flex-1">
             <div class="bg-tui-text/20 h-4 w-3/4 mb-2"></div>
             <div class="bg-tui-text/20 h-3 w-1/2"></div>
