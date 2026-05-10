@@ -190,6 +190,13 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
     disabled: !authState.token,
     onSelect: () => void logout(),
   }),
+  makeItem({
+    id: 'auth-terms',
+    displayLabel: 'AUTH_RISK_NOTICE',
+    mnemonic: 'w',
+    shortcut: 'AUTH',
+    onSelect: () => navigate('/auth-terms'),
+  }),
   makeSeparator('sep-auth'),
   makeItem({
     id: 'my-submissions',
