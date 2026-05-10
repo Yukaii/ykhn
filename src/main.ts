@@ -5,7 +5,7 @@ import './style.css'
 import App from './App.vue'
 import { router } from './router'
 import { markNeedRefresh, markOfflineReady } from './pwa'
-import { initThemeFromStorage } from './store'
+import { initAuthFromStorage, initThemeFromStorage } from './store'
 import { initGA } from './lib/ga'
 
 const updateServiceWorker = registerSW({
@@ -19,6 +19,7 @@ const updateServiceWorker = registerSW({
 })
 
 initThemeFromStorage()
+void initAuthFromStorage()
 initGA()
 
 createApp(App).use(router).mount('#app')

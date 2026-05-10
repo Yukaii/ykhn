@@ -2,9 +2,10 @@
 import { useEventListener } from '@vueuse/core'
 import { computed, nextTick, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { logoutAuthProxy } from '../api/auth'
 import { useOnline } from '../composables/useOnline'
 import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
-import { menuState, setJoystickDock, setTheme, uiState, type JoystickDock, type Theme } from '../store'
+import { authState, clearAuthSession, menuState, setJoystickDock, setLoading, setTheme, uiState, type JoystickDock, type Theme } from '../store'
 
 const { online } = useOnline()
 const router = useRouter()
@@ -174,6 +175,71 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
     onSelect: () => setJoystickDockAndClose('left'),
   }),
   makeSeparator('sep-2'),
+  makeItem({
+    id: 'login',
+    displayLabel: authState.userId ? `USER_${authState.userId}` : 'LOGIN',
+    mnemonic: 'g',
+    shortcut: 'AUTH',
+    onSelect: () => navigate(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
+  }),
+  makeItem({
+    id: 'logout',
+    displayLabel: 'LOGOUT',
+    mnemonic: 'o',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => void logout(),
+  }),
+  makeSeparator('sep-auth'),
+  makeItem({
+    id: 'my-submissions',
+    displayLabel: 'MY_SUBMISSIONS',
+    mnemonic: 'i',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => navigate('/me/submissions'),
+  }),
+  makeItem({
+    id: 'my-comments',
+    displayLabel: 'MY_COMMENTS',
+    mnemonic: 'y',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => navigate('/me/comments'),
+  }),
+  makeItem({
+    id: 'upvoted-stories',
+    displayLabel: 'UPVOTED_STORIES',
+    mnemonic: 'v',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => navigate('/me/upvoted/submissions'),
+  }),
+  makeItem({
+    id: 'upvoted-comments',
+    displayLabel: 'UPVOTED_COMMENTS',
+    mnemonic: 'p',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => navigate('/me/upvoted/comments'),
+  }),
+  makeItem({
+    id: 'favorite-stories',
+    displayLabel: 'FAVORITE_STORIES',
+    mnemonic: 'a',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => navigate('/me/favorites/submissions'),
+  }),
+  makeItem({
+    id: 'favorite-comments',
+    displayLabel: 'FAVORITE_COMMENTS',
+    mnemonic: 'c',
+    shortcut: 'AUTH',
+    disabled: !authState.token,
+    onSelect: () => navigate('/me/favorites/comments'),
+  }),
+  makeSeparator('sep-account-lists'),
   makeItem({
     id: 'system-setup',
     displayLabel: 'SYSTEM_SETUP',
@@ -367,6 +433,22 @@ function openExternal(url: string) {
   closeMenus()
 }
 
+async function logout() {
+  const token = authState.token
+  if (!token) return
+
+  setLoading(true)
+  try {
+    await logoutAuthProxy(token)
+  } catch {
+    // Local session cleanup still matters if the server-side session is already expired.
+  } finally {
+    clearAuthSession()
+    setLoading(false)
+    closeMenus()
+  }
+}
+
 function runAction(action: () => void, disabled?: boolean) {
   if (disabled) return
   action()
@@ -476,6 +558,9 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
       <div class="flex items-center gap-3 md:gap-4 min-w-0">
         <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1'">
           {{ online ? '[ONLINE]' : '[OFFLINE]' }}
+        </span>
+        <span class="hidden sm:inline" :class="authState.userId ? 'text-tui-bg' : 'opacity-70'">
+          {{ authState.userId ? `[USER:${authState.userId.toUpperCase()}]` : '[GUEST]' }}
         </span>
         <span class="hidden md:inline opacity-70">C:\HN\STORIES\</span>
       </div>

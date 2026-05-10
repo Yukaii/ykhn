@@ -7,6 +7,7 @@ import { hostFromUrl, timeAgo } from '../lib/format'
 const props = defineProps<{
   item: HnItem
   selected?: boolean
+  voted?: boolean
 }>()
 
 const host = computed(() => hostFromUrl(props.item.url))
@@ -68,6 +69,13 @@ const rowVariant = computed(() => {
           :class="selected ? 'border-tui-bg text-tui-bg' : 'group-hover:border-tui-bg group-hover:text-tui-bg'"
         >
           {{ rowVariant }}
+        </span>
+        <span
+          v-if="voted"
+          class="tui-chip font-bold"
+          :class="selected ? 'border-tui-bg text-tui-bg' : 'border-tui-yellow text-tui-yellow group-hover:border-tui-bg group-hover:text-tui-bg'"
+        >
+          VOTED
         </span>
         <span class="break-all tui-meta" :class="selected ? 'text-tui-bg' : 'group-hover:text-tui-bg'">BY: {{ item.by?.toUpperCase() ?? 'UNKNOWN' }}</span>
         <span class="whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
