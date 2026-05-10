@@ -1,5 +1,7 @@
 import { useLocalStorage } from '@vueuse/core'
 import { reactive, watch } from 'vue'
+import { fetchAuthList, fetchCurrentSession } from './api/auth'
+import type { AuthSession } from './api/auth'
 
 export const menuState = reactive({
   actions: [] as { label: string; action: () => void; shortcut?: string; disabled?: boolean }[],
@@ -47,6 +49,122 @@ export const uiState = reactive({
   joystickPosition: null as JoystickPosition | null,
   joystickCollapsed: false,
 })
+
+const authTokenStorageKey = 'ykhn-auth-token'
+const authUserStorageKey = 'ykhn-auth-user'
+const authExpiresStorageKey = 'ykhn-auth-expires-at'
+
+const storedAuthToken = useLocalStorage<string | null>(authTokenStorageKey, null)
+const storedAuthUser = useLocalStorage<string | null>(authUserStorageKey, null)
+const storedAuthExpiresAt = useLocalStorage<number | null>(authExpiresStorageKey, null)
+
+export const authState = reactive({
+  token: storedAuthToken.value,
+  userId: storedAuthUser.value,
+  expiresAt: storedAuthExpiresAt.value,
+  initialized: false,
+  checking: false,
+  loadingVotes: false,
+  upvotedSubmissionIds: new Set<number>(),
+  upvotedCommentIds: new Set<number>(),
+})
+
+export const isAuthenticated = () => !!authState.token && !!authState.userId && !isAuthExpired()
+
+function isAuthExpired() {
+  return typeof authState.expiresAt === 'number' && authState.expiresAt <= Math.floor(Date.now() / 1000)
+}
+
+export function setAuthSession(session: AuthSession) {
+  authState.token = session.token
+  authState.userId = session.user.id
+  authState.expiresAt = session.expiresAt
+
+  storedAuthToken.value = session.token
+  storedAuthUser.value = session.user.id
+  storedAuthExpiresAt.value = session.expiresAt
+
+  void refreshUpvotedSnapshot()
+}
+
+export function clearAuthSession() {
+  authState.token = null
+  authState.userId = null
+  authState.expiresAt = null
+  authState.upvotedSubmissionIds.clear()
+  authState.upvotedCommentIds.clear()
+
+  storedAuthToken.value = null
+  storedAuthUser.value = null
+  storedAuthExpiresAt.value = null
+}
+
+export function setUpvotedItem(id: number, type: 'story' | 'comment', voted: boolean) {
+  const set = type === 'comment' ? authState.upvotedCommentIds : authState.upvotedSubmissionIds
+  if (voted) set.add(id)
+  else set.delete(id)
+}
+
+export function isItemUpvoted(id: number, type: 'story' | 'comment' = 'story') {
+  return type === 'comment' ? authState.upvotedCommentIds.has(id) : authState.upvotedSubmissionIds.has(id)
+}
+
+export async function refreshUpvotedSnapshot(options?: { pages?: number }) {
+  const token = authState.token
+  if (!token || authState.loadingVotes) return
+
+  const pages = options?.pages ?? 3
+  authState.loadingVotes = true
+
+  try {
+    const submissionIds = new Set<number>()
+    const commentIds = new Set<number>()
+
+    for (let page = 1; page <= pages; page++) {
+      const [submissions, comments] = await Promise.all([
+        fetchAuthList('upvoted-submissions', token, page),
+        fetchAuthList('upvoted-comments', token, page),
+      ])
+
+      for (const item of submissions.items) submissionIds.add(item.id)
+      for (const item of comments.items) commentIds.add(item.id)
+
+      if (!submissions.nextPage && !comments.nextPage) break
+    }
+
+    authState.upvotedSubmissionIds = submissionIds
+    authState.upvotedCommentIds = commentIds
+  } catch {
+    // Keep any previously-known vote state; account pages expose exact errors.
+  } finally {
+    authState.loadingVotes = false
+  }
+}
+
+export async function initAuthFromStorage() {
+  if (authState.initialized || authState.checking) return
+
+  if (!authState.token || isAuthExpired()) {
+    clearAuthSession()
+    authState.initialized = true
+    return
+  }
+
+  authState.checking = true
+  try {
+    const me = await fetchCurrentSession(authState.token)
+    authState.userId = me.user.id
+    authState.expiresAt = me.session.expiresAt
+    storedAuthUser.value = me.user.id
+    storedAuthExpiresAt.value = me.session.expiresAt
+    void refreshUpvotedSnapshot()
+  } catch {
+    clearAuthSession()
+  } finally {
+    authState.checking = false
+    authState.initialized = true
+  }
+}
 
 
 function isTheme(value: unknown): value is Theme {

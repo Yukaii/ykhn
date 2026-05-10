@@ -8,7 +8,7 @@ import { fetchFeedIds, fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
-import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import { authState, isItemUpvoted, refreshUpvotedSnapshot, setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
 import {
   focusWithoutScroll,
   getMainScrollContainer,
@@ -18,12 +18,14 @@ import {
 } from '../lib/keyboard'
 import { useHalfPageSelectionScrollList } from '../composables/useHalfPageSelectionScrollList'
 import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
+import { useStoryVoteAction } from '../composables/useStoryVoteAction'
 
 const props = defineProps<{
   feed: FeedKind
 }>()
 
 const router = useRouter()
+const { toggleStoryVote, voteLabel, votingStoryId } = useStoryVoteAction()
 
 const pageSize = 30
 
@@ -376,6 +378,12 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'v') {
+    await toggleStoryVote(selectedItem())
+    e.preventDefault()
+    return
+  }
+
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
     selectionActive.value = false
     e.preventDefault()
@@ -388,6 +396,17 @@ function updateMenu() {
   setMenuActions([
     { label: 'Refresh', action: refresh, shortcut: 'r' },
     { label: 'Load More', action: loadMore, shortcut: 'PgDn', disabled: !hasMore.value },
+    {
+      label: voteLabel(selectedItem()),
+      action: () => void toggleStoryVote(selectedItem()),
+      shortcut: 'v',
+      disabled: !!votingStoryId.value,
+    },
+    {
+      label: authState.token ? 'Refresh Voted Marks' : 'Login for Voted Marks',
+      action: () => authState.token ? void refreshUpvotedSnapshot() : router.push(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
+      disabled: !!authState.token && authState.loadingVotes,
+    },
   ])
 }
 
@@ -438,7 +457,7 @@ watch([loadingIds, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
 })
 
-watch([() => props.feed, hasMore, title], () => {
+watch([() => props.feed, hasMore, title, selectedIndex, () => authState.token, () => authState.upvotedSubmissionIds, votingStoryId], () => {
   updateMenu()
 })
 
@@ -498,7 +517,7 @@ onBeforeUnmount(() => {
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
-          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" />
+          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" :voted="isItemUpvoted(item.id)" />
         </div>
 
         <div v-if="hasMore" class="mt-2">

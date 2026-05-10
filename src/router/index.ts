@@ -6,6 +6,9 @@ import FeedPage from '../pages/FeedPage.vue'
 import SearchPage from '../pages/SearchPage.vue'
 import ItemPage from '../pages/ItemPage.vue'
 import AboutPage from '../pages/AboutPage.vue'
+import LoginPage from '../pages/LoginPage.vue'
+import AuthListPage from '../pages/AuthListPage.vue'
+import AuthTermsPage from '../pages/AuthTermsPage.vue'
 import NotFoundPage from '../pages/NotFoundPage.vue'
 
 export type FeedKind = 'top' | 'new' | 'best' | 'ask' | 'show' | 'jobs'
@@ -23,6 +26,14 @@ const routes: RouteRecordRaw[] = [
   ...feedRoutes,
   { path: '/search', name: 'search', component: SearchPage, meta: { title: 'Search' } },
   { path: '/item/:id(\\d+)', name: 'item', component: ItemPage, meta: { title: 'Item' } },
+  { path: '/login', name: 'login', component: LoginPage, meta: { title: 'Login' } },
+  { path: '/auth-terms', name: 'auth-terms', component: AuthTermsPage, meta: { title: 'Auth terms' } },
+  { path: '/me/submissions', name: 'me-submissions', component: AuthListPage, props: { kind: 'submissions' }, meta: { title: 'My submissions' } },
+  { path: '/me/comments', name: 'me-comments', component: AuthListPage, props: { kind: 'comments' }, meta: { title: 'My comments' } },
+  { path: '/me/upvoted/submissions', name: 'me-upvoted-submissions', component: AuthListPage, props: { kind: 'upvoted-submissions' }, meta: { title: 'Upvoted stories' } },
+  { path: '/me/upvoted/comments', name: 'me-upvoted-comments', component: AuthListPage, props: { kind: 'upvoted-comments' }, meta: { title: 'Upvoted comments' } },
+  { path: '/me/favorites/submissions', name: 'me-favorites-submissions', component: AuthListPage, props: { kind: 'favorites-submissions' }, meta: { title: 'Favorite stories' } },
+  { path: '/me/favorites/comments', name: 'me-favorites-comments', component: AuthListPage, props: { kind: 'favorites-comments' }, meta: { title: 'Favorite comments' } },
   { path: '/about', name: 'about', component: AboutPage, meta: { title: 'About' } },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundPage, meta: { title: 'Not found' } },
 ]

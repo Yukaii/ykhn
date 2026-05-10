@@ -58,6 +58,7 @@ function close() {
           <div class="flex justify-between"><span>D</span><span>Open comments (new tab)</span></div>
           <div class="flex justify-between"><span>o</span><span>Open link</span></div>
           <div class="flex justify-between"><span>O</span><span>Open link (new tab)</span></div>
+          <div class="flex justify-between"><span>v</span><span>Vote selected story</span></div>
           <div class="flex justify-between"><span>zt / zz / zb</span><span>Scroll active row</span></div>
 
           <div class="font-bold uppercase text-tui-cyan mt-4 mb-2">Item Page</div>
@@ -71,6 +72,7 @@ function close() {
           <div class="flex justify-between"><span>L</span><span>Expand + load recursively + go to first child</span></div>
           <div class="flex justify-between"><span>o</span><span>Open story link</span></div>
           <div class="flex justify-between"><span>O</span><span>Open story link (new tab)</span></div>
+          <div class="flex justify-between"><span>v</span><span>Vote selected item</span></div>
           <div class="flex justify-between"><span>zt / zz / zb</span><span>Scroll active comment</span></div>
         </div>
 

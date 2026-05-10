@@ -8,6 +8,7 @@ Retro terminal Hacker News client.
 - **Fast navigation**: keyboard-first UI with vim-style movement, count prefixes, and a `?` help overlay.
 - **Story list**: select rows, open comments or the external link (same tab or new tab).
 - **Item view**: story metadata + sanitized HTML, threaded comments with expand/collapse.
+- **Login actions**: JWT-backed HN login via `hn-api.yukai.dev`, with item-page vote/unvote actions and account lists.
 - **Progressive loading**: load more stories / comments; optional recursive comment prefetch.
 - **State restore**: remembers scroll + selection per feed/item (session-based).
 - **Themes & UI**: Commander/Dark/Light themes + adjustable font size.
@@ -25,6 +26,13 @@ Retro terminal Hacker News client.
 
 - `bun install`
 - `bun run dev` (Vite @ `http://localhost:5173`)
+
+Local development proxies auth requests through Vite at `/auth-proxy`, avoiding browser CORS issues. The default proxy target is `https://hn-api.yukai.dev`.
+
+Auth configuration:
+
+- `HN_AUTH_PROXY_TARGET`: dev-server proxy target for `/auth-proxy`.
+- `VITE_HN_AUTH_PROXY_URL`: browser-facing auth API base URL. Leave unset locally to use `/auth-proxy`; set it when you need the client to call a specific origin directly.
 
 ## Icons
 
@@ -62,6 +70,7 @@ Shortcuts are ignored while typing in inputs.
 - `zt` / `zz` / `zb` scroll active row to top/center/bottom
 - `Enter` / `d` open comments; `D` opens in new tab
 - `o` open link; `O` opens in new tab
+- `v` vote/unvote the selected story when logged in
 
 **Item page (comments)**
 
@@ -73,6 +82,7 @@ Shortcuts are ignored while typing in inputs.
 - `H` collapse comment
 - `l` expand + load one level + go to first child
 - `L` expand + load recursively + go to first child
+- `v` vote/unvote the selected story or comment when logged in
 - `zt` / `zz` / `zb` scroll active comment to top/center/bottom
 
 ## Roadmap / future ideas
@@ -84,8 +94,8 @@ Shortcuts are ignored while typing in inputs.
 - **Performance**: list virtualization for very long feeds; smarter comment prefetch caps.
 - **Accessibility**: more ARIA coverage, focus management, and high-contrast theme tuning.
 - **Sharing**: share target (receive shared URLs) and richer share metadata.
+- **More HN actions**: favorite/unfavorite, reply form integration, and hide/unhide once those actions are promoted from raw `/hn/*` proxy links.
 
 ## License
 
 MIT
-

@@ -1,14 +1,27 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    tailwindcss(),
-    VitePWA({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const authProxyTarget = env.HN_AUTH_PROXY_TARGET || env.VITE_HN_AUTH_PROXY_TARGET || 'https://hn-api.yukai.dev'
+
+  return {
+    server: {
+      proxy: {
+        '/auth-proxy': {
+          target: authProxyTarget,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/auth-proxy/, ''),
+        },
+      },
+    },
+    plugins: [
+      vue(),
+      tailwindcss(),
+      VitePWA({
       injectRegister: false,
       registerType: 'autoUpdate',
       includeAssets: [
@@ -72,6 +85,7 @@ export default defineConfig({
         enabled: true,
         type: 'module',
       },
-    }),
-  ],
+      }),
+    ],
+  }
 })

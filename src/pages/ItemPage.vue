@@ -3,13 +3,14 @@ import { computed, nextTick, onBeforeUnmount, reactive, ref, watch, onMounted } 
 import { useRoute, useRouter } from 'vue-router'
 import { useAsyncState, useEventListener, useSessionStorage } from '@vueuse/core'
 
+import { fetchVoteActionsForItemPage, runHnProxyAction, type HnVoteAction } from '../api/auth'
 import { fetchItem } from '../api/hn'
 import type { HnItem } from '../api/types'
 import CommentNode from '../components/CommentNode.vue'
 import MobileThreadJoystick from '../components/MobileThreadJoystick.vue'
 import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
-import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import { authState, setMenuActions, setMenuTitle, setLoading, setUpvotedItem, uiState } from '../store'
 import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
 import { useHalfPageSelectionScrollComments } from '../composables/useHalfPageSelectionScrollComments'
 import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
@@ -23,6 +24,10 @@ const topLimit = ref(40)
 
 const loadMoreSentinel = ref<HTMLElement | null>(null)
 const loadingMoreTop = ref(false)
+const loadingVoteActions = ref(false)
+const voting = ref(false)
+const voteActions = ref<HnVoteAction[]>([])
+const voteActionsError = ref('')
 
 type ItemViewState = {
   selectedCommentId: number | null
@@ -176,6 +181,90 @@ function appItemUrl() {
   return new URL(href, window.location.origin).toString()
 }
 
+const voteActionById = computed(() => {
+  const map = new Map<number, HnVoteAction>()
+  for (const action of voteActions.value) {
+    map.set(action.id, action)
+  }
+  return map
+})
+
+const selectedVoteTargetId = computed(() => selectedCommentId.value ?? story.value?.id ?? null)
+const storyVoteLabel = computed(() => voteActionLabel(story.value?.id ?? null, 'Story'))
+const selectedVoteLabel = computed(() => voteActionLabel(selectedVoteTargetId.value, 'Selected'))
+
+function voteActionLabel(targetId: number | null, fallback: string) {
+  if (targetId == null) return `Upvote ${fallback}`
+  const action = voteActionById.value.get(targetId)
+  const verb = action?.how === 'un' ? 'Unvote' : 'Upvote'
+  return `${verb} ${fallback}`
+}
+
+function loginNextUrl() {
+  return `/login?next=${encodeURIComponent(route.fullPath)}`
+}
+
+async function refreshVoteActions() {
+  const token = authState.token
+  if (!token || !story.value) {
+    voteActions.value = []
+    voteActionsError.value = ''
+    return
+  }
+
+  loadingVoteActions.value = true
+  voteActionsError.value = ''
+
+  try {
+    voteActions.value = await fetchVoteActionsForItemPage(id.value, token)
+  } catch (e) {
+    voteActions.value = []
+    voteActionsError.value = e instanceof Error ? e.message : 'Unable to load login actions'
+  } finally {
+    loadingVoteActions.value = false
+  }
+}
+
+async function toggleVote(targetId: number | null) {
+  const token = authState.token
+  if (!token) {
+    router.push(loginNextUrl())
+    return
+  }
+
+  if (targetId == null) return
+
+  let action = voteActionById.value.get(targetId)
+  if (!action && !loadingVoteActions.value) {
+    await refreshVoteActions()
+    action = voteActionById.value.get(targetId)
+  }
+
+  if (!action) {
+    window.alert(voteActionsError.value || 'No vote action is available for this item.')
+    return
+  }
+
+  voting.value = true
+  setLoading(true)
+  try {
+    const nextVoted = action.how === 'up'
+    await runHnProxyAction(action.href, token)
+    setUpvotedItem(targetId, targetId === story.value?.id ? 'story' : 'comment', nextVoted)
+    voteActions.value = voteActions.value.map((candidate) =>
+      candidate.id === targetId
+        ? { ...candidate, how: nextVoted ? 'un' : 'up' }
+        : candidate
+    )
+    await refreshVoteActions()
+  } catch (e) {
+    window.alert(e instanceof Error ? e.message : 'Vote action failed')
+  } finally {
+    voting.value = false
+    setLoading(false)
+  }
+}
+
 async function shareOrCopy(url: string, opts?: { title?: string }) {
   const title = opts?.title
 
@@ -214,6 +303,27 @@ function updateMenu() {
 
   const actions = [
     { label: 'Refresh', action: () => loadStory({ keepTopLimit: true }), shortcut: 'r' },
+    {
+      label: authState.token ? storyVoteLabel.value : 'Login to Vote',
+      action: () => authState.token ? void toggleVote(story.value?.id ?? null) : router.push(loginNextUrl()),
+      shortcut: 'v',
+      disabled: !!authState.token && (loadingVoteActions.value || voting.value || !voteActionById.value.has(id.value)),
+    },
+    {
+      label: authState.token ? selectedVoteLabel.value : 'Login for Actions',
+      action: () => authState.token ? void toggleVote(selectedVoteTargetId.value) : router.push(loginNextUrl()),
+      disabled: !!authState.token && (
+        selectedVoteTargetId.value == null ||
+        loadingVoteActions.value ||
+        voting.value ||
+        !voteActionById.value.has(selectedVoteTargetId.value)
+      ),
+    },
+    {
+      label: 'Refresh Login Actions',
+      action: () => authState.token ? void refreshVoteActions() : router.push(loginNextUrl()),
+      disabled: !!authState.token && loadingVoteActions.value,
+    },
     { label: 'Share (YKHN)', action: () => void shareOrCopy(appItemUrl(), { title: shareTitle }) },
     { label: 'Share (HN)', action: () => void shareOrCopy(hnUrl, { title: shareTitle }) },
     {
@@ -636,6 +746,12 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'v') {
+    await toggleVote(selectedVoteTargetId.value)
+    e.preventDefault()
+    return
+  }
+
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
     selectionActive.value = false
     saveViewState()
@@ -649,6 +765,14 @@ watch(isLoading, (l) => {
 })
 
 watch([id, story, visibleTopIds], () => {
+  updateMenu()
+})
+
+watch([() => authState.token, id, story], () => {
+  void refreshVoteActions()
+})
+
+watch([voteActions, loadingVoteActions, voting, selectedVoteTargetId], () => {
   updateMenu()
 })
 
@@ -700,6 +824,19 @@ onBeforeUnmount(() => {
           <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-tui-text font-bold">{{ story.score }}</span></div>
           <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-tui-text font-bold">{{ timeAgo(story.time) }}</span></div>
           <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-tui-text font-bold truncate">{{ storyHost }}</span></div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 mb-4 font-mono uppercase">
+          <button
+            class="tui-btn"
+            type="button"
+            :disabled="!!authState.token && (loadingVoteActions || voting || !voteActionById.has(story.id))"
+            @click="authState.token ? toggleVote(story.id) : router.push(loginNextUrl())"
+          >
+            {{ authState.token ? storyVoteLabel : 'LOGIN_TO_VOTE' }}
+          </button>
+          <span v-if="loadingVoteActions" class="text-tui-cyan">SYNCING_ACTIONS...</span>
+          <span v-else-if="voteActionsError" class="text-red-300">{{ voteActionsError }}</span>
         </div>
 
         <div

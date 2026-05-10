@@ -17,10 +17,12 @@ import {
 } from '../lib/keyboard'
 import { useHalfPageSelectionScrollList } from '../composables/useHalfPageSelectionScrollList'
 import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
-import { setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import { useStoryVoteAction } from '../composables/useStoryVoteAction'
+import { authState, isItemUpvoted, refreshUpvotedSnapshot, setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
 
 const router = useRouter()
 const route = useRoute()
+const { toggleStoryVote, voteLabel, votingStoryId } = useStoryVoteAction()
 
 const pageSize = 30
 
@@ -404,6 +406,12 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'v') {
+    await toggleStoryVote(selectedItem())
+    e.preventDefault()
+    return
+  }
+
   if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'Escape') {
     selectionActive.value = false
     e.preventDefault()
@@ -418,6 +426,17 @@ function updateMenu() {
     { label: 'Focus Search', action: focusSearch, shortcut: 'PgUp' },
     { label: 'Refresh', action: refresh, shortcut: 'r' },
     { label: 'Load More', action: loadMore, shortcut: 'PgDn', disabled: !canLoadMore.value },
+    {
+      label: voteLabel(selectedItem()),
+      action: () => void toggleStoryVote(selectedItem()),
+      shortcut: 'v',
+      disabled: !!votingStoryId.value,
+    },
+    {
+      label: authState.token ? 'Refresh Voted Marks' : 'Login for Voted Marks',
+      action: () => authState.token ? void refreshUpvotedSnapshot() : router.push(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
+      disabled: !!authState.token && authState.loadingVotes,
+    },
   ])
 }
 
@@ -451,7 +470,7 @@ watch([loadingInit, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
 })
 
-watch([submittedQuery, canLoadMore], () => {
+watch([submittedQuery, canLoadMore, selectedIndex, () => authState.token, () => authState.upvotedSubmissionIds, votingStoryId], () => {
   updateMenu()
 })
 
@@ -540,7 +559,7 @@ onBeforeUnmount(() => {
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
-          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" />
+          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" :voted="isItemUpvoted(item.id)" />
         </div>
 
         <div v-if="canLoadMore" class="mt-2">
