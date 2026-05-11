@@ -8,7 +8,7 @@ Retro terminal Hacker News client.
 - **Fast navigation**: keyboard-first UI with vim-style movement, count prefixes, and a `?` help overlay.
 - **Story list**: select rows, open comments or the external link (same tab or new tab).
 - **Item view**: story metadata + sanitized HTML, threaded comments with expand/collapse.
-- **Login actions**: JWT-backed HN login via `hn-api.yukai.dev`, with item-page vote/unvote actions and account lists.
+- **Login actions**: JWT-backed HN login via [`hn-api.yukai.dev`](https://hn-api.yukai.dev), powered by [`hn-auth-proxy`](https://github.com/Yukaii/hn-auth-proxy), with item-page vote/unvote actions and account lists.
 - **Progressive loading**: load more stories / comments; optional recursive comment prefetch.
 - **State restore**: remembers scroll + selection per feed/item (session-based).
 - **Themes & UI**: Commander/Dark/Light themes + adjustable font size.

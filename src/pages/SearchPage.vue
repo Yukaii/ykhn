@@ -273,6 +273,11 @@ async function submitSearch(nextQuery?: string) {
   if (q) setSelected(0, { scroll: 'start' })
 }
 
+function clearSearch() {
+  query.value = ''
+  void submitSearch('')
+}
+
 function openComments(it: HnItem, newTab: boolean) {
   // Snapshot current list state so Back restores selection+scroll.
   saveViewState(submittedQuery.value)
@@ -555,10 +560,7 @@ onBeforeUnmount(() => {
         <button
           class="tui-btn"
           type="button"
-          @click="
-            query = ''
-            submitSearch('')
-          "
+          @click="clearSearch"
         >
           CLEAR
         </button>
