@@ -10,8 +10,19 @@ import CommentNode from '../components/CommentNode.vue'
 import MobileThreadJoystick from '../components/MobileThreadJoystick.vue'
 import { hostFromUrl, timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
-import { authState, setMenuActions, setMenuTitle, setLoading, setUpvotedItem, uiState } from '../store'
-import { getMainScrollContainer, scrollElementIntoMain, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import {
+  authState,
+  setMenuActions,
+  setMenuTitle,
+  setLoading,
+  setUpvotedItem,
+  uiState,
+} from '../store'
+import {
+  getMainScrollContainer,
+  scrollElementIntoMain,
+  shouldIgnoreKeyboardEvent,
+} from '../lib/keyboard'
 import { useHalfPageSelectionScrollComments } from '../composables/useHalfPageSelectionScrollComments'
 import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
 
@@ -51,9 +62,10 @@ function normalizeItemViewState(raw: unknown): ItemViewState {
   const st = typeof raw === 'object' && raw ? (raw as Record<string, unknown>) : {}
 
   const selectedCommentIdRaw = st.selectedCommentId
-  const selectedCommentId = typeof selectedCommentIdRaw === 'number' && Number.isFinite(selectedCommentIdRaw)
-    ? selectedCommentIdRaw
-    : null
+  const selectedCommentId =
+    typeof selectedCommentIdRaw === 'number' && Number.isFinite(selectedCommentIdRaw)
+      ? selectedCommentIdRaw
+      : null
 
   const selectionActive = typeof st.selectionActive === 'boolean' ? st.selectionActive : true
 
@@ -104,7 +116,12 @@ function readViewState(itemId: number) {
   return itemViewStateRef(itemId).value
 }
 
-const { state: story, isLoading, error, execute: executeFetchStory } = useAsyncState(
+const {
+  state: story,
+  isLoading,
+  error,
+  execute: executeFetchStory,
+} = useAsyncState(
   async () => {
     const item = await fetchItem(id.value)
     if (!item) throw new Error('Not found')
@@ -118,7 +135,7 @@ const { state: story, isLoading, error, execute: executeFetchStory } = useAsyncS
     return item
   },
   null,
-  { immediate: false, shallow: true }
+  { immediate: false, shallow: true },
 )
 
 const topCommentIds = computed(() => story.value?.kids ?? [])
@@ -252,9 +269,7 @@ async function toggleVote(targetId: number | null) {
     await runHnProxyAction(action.href, token)
     setUpvotedItem(targetId, targetId === story.value?.id ? 'story' : 'comment', nextVoted)
     voteActions.value = voteActions.value.map((candidate) =>
-      candidate.id === targetId
-        ? { ...candidate, how: nextVoted ? 'un' : 'up' }
-        : candidate
+      candidate.id === targetId ? { ...candidate, how: nextVoted ? 'un' : 'up' } : candidate,
     )
     await refreshVoteActions()
   } catch (e) {
@@ -305,23 +320,27 @@ function updateMenu() {
     { label: 'Refresh', action: () => loadStory({ keepTopLimit: true }), shortcut: 'r' },
     {
       label: authState.token ? storyVoteLabel.value : 'Login to Vote',
-      action: () => authState.token ? void toggleVote(story.value?.id ?? null) : router.push(loginNextUrl()),
+      action: () =>
+        authState.token ? void toggleVote(story.value?.id ?? null) : router.push(loginNextUrl()),
       shortcut: 'v',
-      disabled: !!authState.token && (loadingVoteActions.value || voting.value || !voteActionById.value.has(id.value)),
+      disabled:
+        !!authState.token &&
+        (loadingVoteActions.value || voting.value || !voteActionById.value.has(id.value)),
     },
     {
       label: authState.token ? selectedVoteLabel.value : 'Login for Actions',
-      action: () => authState.token ? void toggleVote(selectedVoteTargetId.value) : router.push(loginNextUrl()),
-      disabled: !!authState.token && (
-        selectedVoteTargetId.value == null ||
-        loadingVoteActions.value ||
-        voting.value ||
-        !voteActionById.value.has(selectedVoteTargetId.value)
-      ),
+      action: () =>
+        authState.token ? void toggleVote(selectedVoteTargetId.value) : router.push(loginNextUrl()),
+      disabled:
+        !!authState.token &&
+        (selectedVoteTargetId.value == null ||
+          loadingVoteActions.value ||
+          voting.value ||
+          !voteActionById.value.has(selectedVoteTargetId.value)),
     },
     {
       label: 'Refresh Login Actions',
-      action: () => authState.token ? void refreshVoteActions() : router.push(loginNextUrl()),
+      action: () => (authState.token ? void refreshVoteActions() : router.push(loginNextUrl())),
       disabled: !!authState.token && loadingVoteActions.value,
     },
     { label: 'Share (YKHN)', action: () => void shareOrCopy(appItemUrl(), { title: shareTitle }) },
@@ -331,7 +350,11 @@ function updateMenu() {
       action: () => story.value?.url && void shareOrCopy(story.value.url, { title: shareTitle }),
       disabled: !story.value?.url,
     },
-    { label: 'Open URL', action: () => story.value?.url && window.open(story.value.url, '_blank'), disabled: !story.value?.url },
+    {
+      label: 'Open URL',
+      action: () => story.value?.url && window.open(story.value.url, '_blank'),
+      disabled: !story.value?.url,
+    },
     { label: 'View Source', action: () => window.open(hnUrl, '_blank') },
   ]
 
@@ -432,7 +455,11 @@ async function selectNextThread() {
 
 function setSelectedCommentExpanded(expanded: boolean) {
   if (!selectionActive.value || selectedCommentId.value == null) return
-  window.dispatchEvent(new CustomEvent('ykhn:comment-set-expanded', { detail: { id: selectedCommentId.value, expanded } }))
+  window.dispatchEvent(
+    new CustomEvent('ykhn:comment-set-expanded', {
+      detail: { id: selectedCommentId.value, expanded },
+    }),
+  )
 }
 
 async function selectFirstChildOfCurrent() {
@@ -531,7 +558,8 @@ async function selectCommentByIndex(idx: number, opts?: { scroll?: ScrollLogical
   const root = getMainScrollContainer() ?? document
   const selector = `[data-ykhn-comment-id="${String(nextId)}"]`
 
-  const resolvedInitial = root.querySelector<HTMLElement>(selector) ?? (initialEl.isConnected ? initialEl : null)
+  const resolvedInitial =
+    root.querySelector<HTMLElement>(selector) ?? (initialEl.isConnected ? initialEl : null)
   if (resolvedInitial) {
     scrollElementIntoMain(resolvedInitial, opts?.scroll ?? 'nearest')
 
@@ -539,7 +567,9 @@ async function selectCommentByIndex(idx: number, opts?: { scroll?: ScrollLogical
     await nextFrame()
     if (seq !== selectionScrollSeq) return
 
-    const resolvedAfter = root.querySelector<HTMLElement>(selector) ?? (resolvedInitial.isConnected ? resolvedInitial : null)
+    const resolvedAfter =
+      root.querySelector<HTMLElement>(selector) ??
+      (resolvedInitial.isConnected ? resolvedInitial : null)
     if (resolvedAfter) scrollElementIntoMain(resolvedAfter, opts?.scroll ?? 'nearest')
   }
 
@@ -810,27 +840,53 @@ onBeforeUnmount(() => {
         class="tui-panel"
         :data-ykhn-comment-id="String(story.id)"
         :data-ykhn-depth="'-1'"
-        :class="selectionActive && selectedCommentId === story.id ? 'border-tui-yellow bg-tui-active/10' : ''"
+        :class="
+          selectionActive && selectedCommentId === story.id
+            ? 'border-tui-yellow bg-tui-active/10'
+            : ''
+        "
       >
         <h1 class="font-black mb-4 uppercase leading-tight text-tui-yellow text-xl md:text-2xl">
-          <a v-if="story.url" :href="story.url" target="_blank" rel="noreferrer" class="hover:underline">
+          <a
+            v-if="story.url"
+            :href="story.url"
+            target="_blank"
+            rel="noreferrer"
+            class="hover:underline"
+          >
             {{ story.title ?? 'UNTITLED' }}
           </a>
           <template v-else>{{ story.title ?? 'UNTITLED' }}</template>
         </h1>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-2 mb-5 border-y border-tui-active/40 py-2 font-mono uppercase">
-          <div class="flex gap-1"><span class="text-tui-cyan">AUTHOR:</span><span class="text-tui-text font-bold">{{ story.by }}</span></div>
-          <div class="flex gap-1"><span class="text-tui-cyan">SCORE:</span><span class="text-tui-text font-bold">{{ story.score }}</span></div>
-          <div class="flex gap-1"><span class="text-tui-cyan">TIME:</span><span class="text-tui-text font-bold">{{ timeAgo(story.time) }}</span></div>
-          <div v-if="storyHost" class="flex gap-1 truncate"><span class="text-tui-cyan">HOST:</span><span class="text-tui-text font-bold truncate">{{ storyHost }}</span></div>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-6 gap-y-2 mb-5 border-y border-tui-active/40 py-2 font-mono uppercase"
+        >
+          <div class="flex gap-1">
+            <span class="text-tui-cyan">AUTHOR:</span
+            ><span class="text-tui-text font-bold">{{ story.by }}</span>
+          </div>
+          <div class="flex gap-1">
+            <span class="text-tui-cyan">SCORE:</span
+            ><span class="text-tui-text font-bold">{{ story.score }}</span>
+          </div>
+          <div class="flex gap-1">
+            <span class="text-tui-cyan">TIME:</span
+            ><span class="text-tui-text font-bold">{{ timeAgo(story.time) }}</span>
+          </div>
+          <div v-if="storyHost" class="flex gap-1 truncate">
+            <span class="text-tui-cyan">HOST:</span
+            ><span class="text-tui-text font-bold truncate">{{ storyHost }}</span>
+          </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 mb-4 font-mono uppercase">
           <button
             class="tui-btn"
             type="button"
-            :disabled="!!authState.token && (loadingVoteActions || voting || !voteActionById.has(story.id))"
+            :disabled="
+              !!authState.token && (loadingVoteActions || voting || !voteActionById.has(story.id))
+            "
             @click="authState.token ? toggleVote(story.id) : router.push(loginNextUrl())"
           >
             {{ authState.token ? storyVoteLabel : 'LOGIN_TO_VOTE' }}
@@ -847,9 +903,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="mt-6">
-        <div class="tui-section-heading mb-4">
-          >> COMMENTS_THREAD ({{ topCommentIds.length }})
-        </div>
+        <div class="tui-section-heading mb-4">>> COMMENTS_THREAD ({{ topCommentIds.length }})</div>
 
         <div v-if="topCommentIds.length === 0" class="text-center py-8 opacity-50 italic">
           -- EMPTY DIRECTORY --
@@ -865,7 +919,11 @@ onBeforeUnmount(() => {
             :selected-id="selectionActive ? selectedCommentId : null"
           />
 
-          <button v-if="visibleTopIds.length < topCommentIds.length" class="tui-btn w-full" @click="loadMoreTop">
+          <button
+            v-if="visibleTopIds.length < topCommentIds.length"
+            class="tui-btn w-full"
+            @click="loadMoreTop"
+          >
             LOAD_MORE_RECORDS
           </button>
 
@@ -876,7 +934,7 @@ onBeforeUnmount(() => {
 
     <div v-else-if="isLoading" class="text-center py-20">
       <div>LOADING...</div>
-      <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>
+      <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉ ]</div>
     </div>
 
     <MobileThreadJoystick />

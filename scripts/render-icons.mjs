@@ -20,7 +20,11 @@ function parseArgs(argv) {
     const arg = argv[i]
     if (arg === '--in') args.inFile = argv[++i]
     else if (arg === '--out-dir') args.outDir = argv[++i]
-    else if (arg === '--sizes') args.sizes = argv[++i].split(',').map((s) => Number(s.trim())).filter(Boolean)
+    else if (arg === '--sizes')
+      args.sizes = argv[++i]
+        .split(',')
+        .map((s) => Number(s.trim()))
+        .filter(Boolean)
     else if (arg === '--rounded') args.rounded = true
     else if (arg === '--rounded-radius') args.roundedRadius = Number(argv[++i])
     else if (arg === '--inset') args.inset = Number(argv[++i])
@@ -57,10 +61,7 @@ function getDefaultChromeExecutablePath() {
       return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
     }
     case 'win32': {
-      return (
-        process.env.CHROME_PATH ||
-        'C:/Program Files/Google/Chrome/Application/chrome.exe'
-      )
+      return process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     }
     default: {
       return 'google-chrome'
@@ -73,8 +74,7 @@ async function ensureDir(dirPath) {
 }
 
 function toHtml(svgSource, size, { rounded, radiusPx, insetPx, background }) {
-  const svgEscaped = svgSource
-    .replaceAll('</script', '<\\/script')
+  const svgEscaped = svgSource.replaceAll('</script', '<\\/script')
 
   return `<!doctype html>
 <html>
@@ -117,7 +117,10 @@ function toHtml(svgSource, size, { rounded, radiusPx, insetPx, background }) {
 </html>`
 }
 
-async function renderOne(page, { svgSource, size, outPath, rounded, roundedRadius, inset, background }) {
+async function renderOne(
+  page,
+  { svgSource, size, outPath, rounded, roundedRadius, inset, background },
+) {
   await page.setViewport({
     width: size,
     height: size,
@@ -133,7 +136,9 @@ async function renderOne(page, { svgSource, size, outPath, rounded, roundedRadiu
   const clampedInsetRatio = Math.max(0, Math.min(0.3, Number.isFinite(insetRatio) ? insetRatio : 0))
   const insetPx = Math.round(size * clampedInsetRatio)
 
-  await page.setContent(toHtml(svgSource, size, { rounded, radiusPx, insetPx, background }), { waitUntil: 'load' })
+  await page.setContent(toHtml(svgSource, size, { rounded, radiusPx, insetPx, background }), {
+    waitUntil: 'load',
+  })
 
   const svgEl = await page.$('svg')
   if (!svgEl) throw new Error('Could not find <svg> element on the page')

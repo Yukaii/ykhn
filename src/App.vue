@@ -25,7 +25,7 @@ useMainScrollRestoration()
       <!-- TUI Status/Nav Bar (Locked at bottom of window) -->
       <AppNav class="flex-none z-20" />
     </div>
-    
+
     <KeyboardHelp />
     <ToastBar />
   </div>

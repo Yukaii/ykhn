@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "vue"],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["dist/**", "dev-dist/**", "node_modules/**"],
+  "rules": {
+    "eslint/no-unused-vars": "error"
+  }
+}

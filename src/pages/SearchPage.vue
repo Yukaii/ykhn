@@ -18,7 +18,15 @@ import {
 import { useHalfPageSelectionScrollList } from '../composables/useHalfPageSelectionScrollList'
 import { useInfiniteScrollSentinel } from '../composables/useInfiniteScrollSentinel'
 import { useStoryVoteAction } from '../composables/useStoryVoteAction'
-import { authState, isItemUpvoted, refreshUpvotedSnapshot, setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import {
+  authState,
+  isItemUpvoted,
+  refreshUpvotedSnapshot,
+  setMenuActions,
+  setMenuTitle,
+  setLoading,
+  uiState,
+} from '../store'
 
 const router = useRouter()
 const route = useRoute()
@@ -305,7 +313,6 @@ function parseCount(defaultCount: number) {
   return n
 }
 
-
 async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
   if (e.target instanceof Element && isMenuElement(e.target)) return
@@ -392,7 +399,12 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'Enter' || e.key === 'd' || e.key === 'D')) {
+  if (
+    !e.ctrlKey &&
+    !e.metaKey &&
+    !e.altKey &&
+    (e.key === 'Enter' || e.key === 'd' || e.key === 'D')
+  ) {
     const it = selectedItem()
     if (it) openComments(it, e.key === 'D')
     e.preventDefault()
@@ -434,7 +446,10 @@ function updateMenu() {
     },
     {
       label: authState.token ? 'Refresh Voted Marks' : 'Login for Voted Marks',
-      action: () => authState.token ? void refreshUpvotedSnapshot() : router.push(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
+      action: () =>
+        authState.token
+          ? void refreshUpvotedSnapshot()
+          : router.push(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
       disabled: !!authState.token && authState.loadingVotes,
     },
   ])
@@ -463,16 +478,26 @@ const { isLoading: loadingInit, execute: executeInit } = useAsyncState(
     await loadWithOptionalRestore(q.trim())
   },
   undefined,
-  { immediate: false }
+  { immediate: false },
 )
 
 watch([loadingInit, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
 })
 
-watch([submittedQuery, canLoadMore, selectedIndex, () => authState.token, () => authState.upvotedSubmissionIds, votingStoryId], () => {
-  updateMenu()
-})
+watch(
+  [
+    submittedQuery,
+    canLoadMore,
+    selectedIndex,
+    () => authState.token,
+    () => authState.upvotedSubmissionIds,
+    votingStoryId,
+  ],
+  () => {
+    updateMenu()
+  },
+)
 
 watch([selectedIndex, selectionActive], () => {
   saveViewState(submittedQuery.value)
@@ -486,7 +511,7 @@ watch(
     query.value = next
     submittedQuery.value = next
     await loadWithOptionalRestore(next.trim())
-  }
+  },
 )
 
 useEventListener(window, 'keydown', onKeyDown)
@@ -506,7 +531,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col h-full" role="listbox" aria-label="Search results">
-    <form class="tui-panel-muted mb-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center" @submit.prevent="submitSearch()">
+    <form
+      class="tui-panel-muted mb-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center"
+      @submit.prevent="submitSearch()"
+    >
       <div class="flex-1 flex items-center gap-2">
         <label class="font-mono font-bold whitespace-nowrap" for="ykhn-search">SEARCH:</label>
         <input
@@ -524,7 +552,16 @@ onBeforeUnmount(() => {
 
       <div class="flex gap-2">
         <button class="tui-btn" type="submit" :disabled="!query.trim()">SEARCH</button>
-        <button class="tui-btn" type="button" @click="query = ''; submitSearch('')">CLEAR</button>
+        <button
+          class="tui-btn"
+          type="button"
+          @click="
+            query = ''
+            submitSearch('')
+          "
+        >
+          CLEAR
+        </button>
       </div>
     </form>
 
@@ -536,7 +573,11 @@ onBeforeUnmount(() => {
 
     <div v-else class="flex-1">
       <div v-if="submittedQuery && items.length === 0 && loadingItems" class="flex flex-col">
-        <div v-for="n in 12" :key="n" class="p-2 border-b border-tui-active/30 flex gap-3 opacity-30">
+        <div
+          v-for="n in 12"
+          :key="n"
+          class="p-2 border-b border-tui-active/30 flex gap-3 opacity-30"
+        >
           <div class="w-12 text-right">000</div>
           <div class="flex-1">
             <div class="bg-tui-text/20 h-4 w-3/4 mb-2"></div>
@@ -546,20 +587,28 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-else-if="!submittedQuery" class="tui-panel-muted font-mono opacity-80">
-        Type a query and press <span class="font-bold">Enter</span>. Press <span class="font-bold">/</span> to focus the search box.
+        Type a query and press <span class="font-bold">Enter</span>. Press
+        <span class="font-bold">/</span> to focus the search box.
       </div>
 
       <div v-else class="flex flex-col">
         <div
           v-for="(item, idx) in items"
           :key="item.id"
-          :ref="(el: Element | ComponentPublicInstance | null) => (rowEls[idx] = el as HTMLElement | null)"
+          :ref="
+            (el: Element | ComponentPublicInstance | null) =>
+              (rowEls[idx] = el as HTMLElement | null)
+          "
           role="option"
           tabindex="-1"
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
-          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" :voted="isItemUpvoted(item.id)" />
+          <StoryRow
+            :item="item"
+            :selected="selectionActive && idx === selectedIndex"
+            :voted="isItemUpvoted(item.id)"
+          />
         </div>
 
         <div v-if="canLoadMore" class="mt-2">

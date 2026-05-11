@@ -3,7 +3,12 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
-import { fetchAuthList, type AuthCommentItem, type AuthListKind, type AuthSubmissionItem } from '../api/auth'
+import {
+  fetchAuthList,
+  type AuthCommentItem,
+  type AuthListKind,
+  type AuthSubmissionItem,
+} from '../api/auth'
 import StoryRow from '../components/StoryRow.vue'
 import { timeAgo } from '../lib/format'
 import { sanitizeHtml } from '../lib/sanitize'
@@ -26,9 +31,16 @@ const nextPage = ref<number | null>(null)
 const submissionItems = ref<AuthSubmissionItem[]>([])
 const commentItems = ref<AuthCommentItem[]>([])
 
-const isComments = computed(() => props.kind === 'comments' || props.kind === 'upvoted-comments' || props.kind === 'favorites-comments')
+const isComments = computed(
+  () =>
+    props.kind === 'comments' ||
+    props.kind === 'upvoted-comments' ||
+    props.kind === 'favorites-comments',
+)
 const hasMore = computed(() => nextPage.value !== null)
-const itemsLength = computed(() => isComments.value ? commentItems.value.length : submissionItems.value.length)
+const itemsLength = computed(() =>
+  isComments.value ? commentItems.value.length : submissionItems.value.length,
+)
 
 const titleByKind: Record<AuthListKind, string> = {
   submissions: 'My Submissions',
@@ -166,9 +178,24 @@ function updateMenu() {
   setMenuTitle(`DIR: AUTH\\${title.value.toUpperCase().replace(/ /g, '_')}`)
   setMenuActions([
     { label: 'Refresh', action: refresh, shortcut: 'r', disabled: loading.value },
-    { label: 'Load More', action: loadMore, shortcut: 'PgDn', disabled: !hasMore.value || loading.value },
-    { label: 'Open', action: () => openSelected(false), shortcut: 'Enter', disabled: itemsLength.value === 0 },
-    { label: 'Open New Tab', action: () => openSelected(true), shortcut: 'D', disabled: itemsLength.value === 0 },
+    {
+      label: 'Load More',
+      action: loadMore,
+      shortcut: 'PgDn',
+      disabled: !hasMore.value || loading.value,
+    },
+    {
+      label: 'Open',
+      action: () => openSelected(false),
+      shortcut: 'Enter',
+      disabled: itemsLength.value === 0,
+    },
+    {
+      label: 'Open New Tab',
+      action: () => openSelected(true),
+      shortcut: 'D',
+      disabled: itemsLength.value === 0,
+    },
     {
       label: isComments.value ? 'Vote Story' : voteLabel(selectedStoryItem()),
       action: () => !isComments.value && void toggleStoryVote(selectedStoryItem()),
@@ -179,29 +206,36 @@ function updateMenu() {
   ])
 }
 
-const {
-  selectedIndex,
-  selectionActive,
-  rowEls,
-  resetSelection,
-  setSelected,
-} = useListKeyboardNavigation({
-  itemsLength,
-  canLoadMore: hasMore,
-  loadMore,
-  onOpen: openSelected,
-  onOpenLink: openSelectedLink,
-  onVote: () => toggleStoryVote(selectedStoryItem()),
-  canVote: computed(() => !isComments.value),
-})
+const { selectedIndex, selectionActive, rowEls, resetSelection, setSelected } =
+  useListKeyboardNavigation({
+    itemsLength,
+    canLoadMore: hasMore,
+    loadMore,
+    onOpen: openSelected,
+    onOpenLink: openSelectedLink,
+    onVote: () => toggleStoryVote(selectedStoryItem()),
+    canVote: computed(() => !isComments.value),
+  })
 
-watch([title, hasMore, loading, selectedIndex, itemsLength, () => authState.token, () => authState.upvotedSubmissionIds, votingStoryId], updateMenu)
+watch(
+  [
+    title,
+    hasMore,
+    loading,
+    selectedIndex,
+    itemsLength,
+    () => authState.token,
+    () => authState.upvotedSubmissionIds,
+    votingStoryId,
+  ],
+  updateMenu,
+)
 
 watch(
   () => props.kind,
   () => {
     void refresh()
-  }
+  },
 )
 
 onMounted(() => {
@@ -235,20 +269,35 @@ onBeforeUnmount(() => {
         <div
           v-for="(item, idx) in commentItems"
           :key="item.id"
-          :ref="(el: Element | ComponentPublicInstance | null) => (rowEls[idx] = el as HTMLElement | null)"
+          :ref="
+            (el: Element | ComponentPublicInstance | null) =>
+              (rowEls[idx] = el as HTMLElement | null)
+          "
           class="tui-comment-card"
-          :class="selectionActive && idx === selectedIndex ? 'border-2 border-tui-yellow bg-tui-active/10' : ''"
+          :class="
+            selectionActive && idx === selectedIndex
+              ? 'border-2 border-tui-yellow bg-tui-active/10'
+              : ''
+          "
           role="option"
           tabindex="-1"
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 bg-tui-active/45 px-2 py-1.5 mb-3 font-mono border-b border-tui-border/20 uppercase">
+          <div
+            class="flex flex-wrap items-center gap-x-3 gap-y-1 bg-tui-active/45 px-2 py-1.5 mb-3 font-mono border-b border-tui-border/20 uppercase"
+          >
             <span class="text-tui-gray">USR:</span>
             <span class="text-tui-yellow font-bold">{{ item.by ?? authState.userId }}</span>
             <span class="text-tui-gray">DATE:</span>
-            <span class="text-tui-cyan">{{ item.time ? timeAgo(item.time).toUpperCase() : item.age }}</span>
-            <span v-if="isItemUpvoted(item.id, 'comment')" class="tui-chip border-tui-yellow text-tui-yellow font-bold">VOTED</span>
+            <span class="text-tui-cyan">{{
+              item.time ? timeAgo(item.time).toUpperCase() : item.age
+            }}</span>
+            <span
+              v-if="isItemUpvoted(item.id, 'comment')"
+              class="tui-chip border-tui-yellow text-tui-yellow font-bold"
+              >VOTED</span
+            >
           </div>
 
           <RouterLink
@@ -259,11 +308,24 @@ onBeforeUnmount(() => {
             {{ item.story.title ?? `ITEM_${item.story.id}` }}
           </RouterLink>
 
-          <div class="prose prose-invert max-w-none font-content mb-3" v-html="sanitizeHtml(item.textHtml)" />
+          <div
+            class="prose prose-invert max-w-none font-content mb-3"
+            v-html="sanitizeHtml(item.textHtml)"
+          />
 
           <div class="flex flex-wrap gap-2">
-            <RouterLink v-if="itemRouteFromUrl(item.contextUrl)" class="tui-btn" :to="itemRouteFromUrl(item.contextUrl)!">CONTEXT</RouterLink>
-            <RouterLink v-if="itemRouteFromUrl(item.parentUrl)" class="tui-btn" :to="itemRouteFromUrl(item.parentUrl)!">PARENT</RouterLink>
+            <RouterLink
+              v-if="itemRouteFromUrl(item.contextUrl)"
+              class="tui-btn"
+              :to="itemRouteFromUrl(item.contextUrl)!"
+              >CONTEXT</RouterLink
+            >
+            <RouterLink
+              v-if="itemRouteFromUrl(item.parentUrl)"
+              class="tui-btn"
+              :to="itemRouteFromUrl(item.parentUrl)!"
+              >PARENT</RouterLink
+            >
           </div>
         </div>
       </div>
@@ -272,26 +334,45 @@ onBeforeUnmount(() => {
         <div
           v-for="(item, idx) in submissionItems"
           :key="item.id"
-          :ref="(el: Element | ComponentPublicInstance | null) => (rowEls[idx] = el as HTMLElement | null)"
+          :ref="
+            (el: Element | ComponentPublicInstance | null) =>
+              (rowEls[idx] = el as HTMLElement | null)
+          "
           role="option"
           tabindex="-1"
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
-          <StoryRow :item="submissionToHnItem(item)" :selected="selectionActive && idx === selectedIndex" :voted="isItemUpvoted(item.id)" />
+          <StoryRow
+            :item="submissionToHnItem(item)"
+            :selected="selectionActive && idx === selectedIndex"
+            :voted="isItemUpvoted(item.id)"
+          />
         </div>
       </div>
 
-      <div v-if="loading && submissionItems.length === 0 && commentItems.length === 0" class="text-center py-12">
+      <div
+        v-if="loading && submissionItems.length === 0 && commentItems.length === 0"
+        class="text-center py-12"
+      >
         <div>LOADING...</div>
-        <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉      ]</div>
+        <div class="mt-2 text-tui-cyan">[▉▉▉▉▉▉▉▉▉▉ ]</div>
       </div>
 
-      <button v-if="hasMore" class="tui-btn w-full" type="button" :disabled="loading" @click="loadMore">
+      <button
+        v-if="hasMore"
+        class="tui-btn w-full"
+        type="button"
+        :disabled="loading"
+        @click="loadMore"
+      >
         {{ loading ? 'LOADING...' : 'LOAD_MORE_RECORDS' }}
       </button>
 
-      <div v-if="!loading && !submissionItems.length && !commentItems.length" class="tui-panel-muted text-center opacity-80">
+      <div
+        v-if="!loading && !submissionItems.length && !commentItems.length"
+        class="tui-panel-muted text-center opacity-80"
+      >
         -- EMPTY DIRECTORY --
       </div>
     </template>

@@ -24,6 +24,6 @@ export function useInfiniteScrollSentinel(opts: UseInfiniteScrollSentinelOptions
     {
       root: (opts.root ? opts.root() : getMainScrollContainer()) ?? undefined,
       rootMargin: opts.rootMargin ?? '400px',
-    }
+    },
   )
 }

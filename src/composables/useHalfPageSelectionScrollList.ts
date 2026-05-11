@@ -40,7 +40,8 @@ export function useHalfPageSelectionScrollList(opts: UseHalfPageSelectionScrollL
 
     void (async () => {
       const direction = e.detail.direction === 'down' ? 1 : -1
-      const targetIndex = opts.selectedIndex.value + direction * halfPageRowJumpCount(e.detail.deltaPx)
+      const targetIndex =
+        opts.selectedIndex.value + direction * halfPageRowJumpCount(e.detail.deltaPx)
 
       if (direction > 0) {
         while (targetIndex >= opts.itemsLength.value && opts.canLoadMore.value) {

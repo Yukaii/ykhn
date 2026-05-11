@@ -14,7 +14,13 @@ const consent = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-const canSubmit = computed(() => username.value.trim().length > 0 && password.value.length > 0 && consent.value && !loading.value)
+const canSubmit = computed(
+  () =>
+    username.value.trim().length > 0 &&
+    password.value.length > 0 &&
+    consent.value &&
+    !loading.value,
+)
 
 function nextPath() {
   const next = route.query.next
@@ -46,7 +52,8 @@ async function submit() {
       <div>
         <div class="tui-section-heading mb-3">AUTH_LOGIN</div>
         <div v-if="authState.userId" class="tui-panel-muted">
-          CURRENT_USER: <span class="font-bold text-tui-yellow">{{ authState.userId.toUpperCase() }}</span>
+          CURRENT_USER:
+          <span class="font-bold text-tui-yellow">{{ authState.userId.toUpperCase() }}</span>
         </div>
         <div class="tui-panel-muted mt-3 text-sm leading-relaxed">
           Login is handled by
@@ -56,10 +63,9 @@ async function submit() {
             target="_blank"
             rel="noreferrer"
           >
-            hn-auth-proxy
-          </a>.
-          The backend submits your HN credentials to Hacker News, stores the HN session cookie server-side, and returns a JWT to this app.
-          Read the
+            hn-auth-proxy </a
+          >. The backend submits your HN credentials to Hacker News, stores the HN session cookie
+          server-side, and returns a JWT to this app. Read the
           <RouterLink class="font-bold text-tui-yellow underline" to="/auth-terms">
             auth risk notice
           </RouterLink>
@@ -92,7 +98,11 @@ async function submit() {
         />
       </label>
 
-      <div v-if="error" class="border border-red-500 bg-red-950/60 px-3 py-2 font-bold" role="alert">
+      <div
+        v-if="error"
+        class="border border-red-500 bg-red-950/60 px-3 py-2 font-bold"
+        role="alert"
+      >
         {{ error }}
       </div>
 
@@ -104,12 +114,17 @@ async function submit() {
           :disabled="loading"
         />
         <span class="font-mono text-sm leading-relaxed">
-          I have read the auth risk notice and understand this is an unofficial service mainly built for the maintainer's personal use. I accept that my HN credentials pass through this project's backend and that published source code does not guarantee the deployed server behavior.
+          I have read the auth risk notice and understand this is an unofficial service mainly built
+          for the maintainer's personal use. I accept that my HN credentials pass through this
+          project's backend and that published source code does not guarantee the deployed server
+          behavior.
         </span>
       </label>
 
       <div class="flex justify-end gap-2">
-        <button class="tui-btn" type="button" :disabled="loading" @click="router.back()">CANCEL</button>
+        <button class="tui-btn" type="button" :disabled="loading" @click="router.back()">
+          CANCEL
+        </button>
         <button class="tui-btn" type="submit" :disabled="!canSubmit">
           {{ loading ? 'VERIFYING...' : 'LOGIN' }}
         </button>

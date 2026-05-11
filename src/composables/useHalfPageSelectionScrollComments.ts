@@ -13,7 +13,11 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
 }
 
-function halfPageCommentJumpCount(deltaPx: number, getEls: () => HTMLElement[], getCurrentIndex: () => number) {
+function halfPageCommentJumpCount(
+  deltaPx: number,
+  getEls: () => HTMLElement[],
+  getCurrentIndex: () => number,
+) {
   const els = getEls()
   if (els.length === 0) return 1
 
@@ -25,7 +29,9 @@ function halfPageCommentJumpCount(deltaPx: number, getEls: () => HTMLElement[], 
   return Math.max(1, Math.floor(Math.abs(deltaPx) / rowPx))
 }
 
-export function useHalfPageSelectionScrollComments(opts: UseHalfPageSelectionScrollCommentsOptions) {
+export function useHalfPageSelectionScrollComments(
+  opts: UseHalfPageSelectionScrollCommentsOptions,
+) {
   useEventListener(window, 'ykhn:selection-scroll', (ev) => {
     const e = ev as CustomEvent<SelectionScrollDetail>
     if (e.detail?.kind !== 'halfPage') return
@@ -41,7 +47,13 @@ export function useHalfPageSelectionScrollComments(opts: UseHalfPageSelectionScr
     void (async () => {
       const direction = e.detail.direction === 'down' ? 1 : -1
       const targetIndex =
-        opts.currentCommentIndex() + direction * halfPageCommentJumpCount(e.detail.deltaPx, opts.visibleCommentElements, opts.currentCommentIndex)
+        opts.currentCommentIndex() +
+        direction *
+          halfPageCommentJumpCount(
+            e.detail.deltaPx,
+            opts.visibleCommentElements,
+            opts.currentCommentIndex,
+          )
 
       await opts.selectCommentByIndex(targetIndex)
     })()

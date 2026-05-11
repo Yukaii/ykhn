@@ -29,9 +29,12 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <nav class="bg-tui-active border-t-2 border-tui-border relative flex items-center h-11 overflow-hidden" aria-label="Feeds">
+  <nav
+    class="bg-tui-active border-t-2 border-tui-border relative flex items-center h-11 overflow-hidden"
+    aria-label="Feeds"
+  >
     <!-- Left Overflow Indicator -->
-    <button 
+    <button
       v-if="!arrivedState.left"
       @click="scroll('left')"
       class="absolute left-0 top-0 bottom-0 flex items-center px-2 bg-tui-active text-tui-yellow font-bold z-10 hover:bg-tui-cyan hover:text-tui-bg transition-none border-r border-tui-border/30"
@@ -52,12 +55,13 @@ function isActive(to: string) {
         :class="isActive(tab.to) ? 'bg-tui-yellow text-tui-bg' : ''"
         :to="tab.to"
       >
-        <span>F{{ index + 1 }}</span>{{ tab.label }}
+        <span>F{{ index + 1 }}</span
+        >{{ tab.label }}
       </RouterLink>
     </div>
 
     <!-- Right Overflow Indicator -->
-    <button 
+    <button
       v-if="!arrivedState.right"
       @click="scroll('right')"
       class="absolute right-0 top-0 bottom-0 flex items-center px-2 bg-tui-active text-tui-yellow font-bold z-10 hover:bg-tui-cyan hover:text-tui-bg transition-none border-l border-tui-border/30"

@@ -8,7 +8,15 @@ import { fetchFeedIds, fetchItems } from '../api/hn'
 import type { HnItem } from '../api/types'
 import type { FeedKind } from '../router'
 import StoryRow from '../components/StoryRow.vue'
-import { authState, isItemUpvoted, refreshUpvotedSnapshot, setMenuActions, setMenuTitle, setLoading, uiState } from '../store'
+import {
+  authState,
+  isItemUpvoted,
+  refreshUpvotedSnapshot,
+  setMenuActions,
+  setMenuTitle,
+  setLoading,
+  uiState,
+} from '../store'
 import {
   focusWithoutScroll,
   getMainScrollContainer,
@@ -166,12 +174,17 @@ let pendingZAt = 0
 
 const loadMoreSentinel = ref<HTMLElement | null>(null)
 
-const { state: ids, isLoading: loadingIds, error: idsError, execute: executeLoadIds } = useAsyncState(
+const {
+  state: ids,
+  isLoading: loadingIds,
+  error: idsError,
+  execute: executeLoadIds,
+} = useAsyncState(
   async () => {
     return await fetchFeedIds(props.feed)
   },
   [],
-  { immediate: false, shallow: true }
+  { immediate: false, shallow: true },
 )
 
 const items = ref<HnItem[]>([])
@@ -283,7 +296,6 @@ function parseCount(defaultCount: number) {
   return n
 }
 
-
 async function onKeyDown(e: KeyboardEvent) {
   if (uiState.shortcutsOpen) return
   if (e.target instanceof Element && isMenuElement(e.target)) return
@@ -364,7 +376,12 @@ async function onKeyDown(e: KeyboardEvent) {
     return
   }
 
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'Enter' || e.key === 'd' || e.key === 'D')) {
+  if (
+    !e.ctrlKey &&
+    !e.metaKey &&
+    !e.altKey &&
+    (e.key === 'Enter' || e.key === 'd' || e.key === 'D')
+  ) {
     const it = selectedItem()
     if (it) openComments(it, e.key === 'D')
     e.preventDefault()
@@ -404,7 +421,10 @@ function updateMenu() {
     },
     {
       label: authState.token ? 'Refresh Voted Marks' : 'Login for Voted Marks',
-      action: () => authState.token ? void refreshUpvotedSnapshot() : router.push(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
+      action: () =>
+        authState.token
+          ? void refreshUpvotedSnapshot()
+          : router.push(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
       disabled: !!authState.token && authState.loadingVotes,
     },
   ])
@@ -457,9 +477,20 @@ watch([loadingIds, loadingItems], ([l1, l2]) => {
   setLoading(l1 || l2)
 })
 
-watch([() => props.feed, hasMore, title, selectedIndex, () => authState.token, () => authState.upvotedSubmissionIds, votingStoryId], () => {
-  updateMenu()
-})
+watch(
+  [
+    () => props.feed,
+    hasMore,
+    title,
+    selectedIndex,
+    () => authState.token,
+    () => authState.upvotedSubmissionIds,
+    votingStoryId,
+  ],
+  () => {
+    updateMenu()
+  },
+)
 
 watch([selectedIndex, selectionActive], () => {
   saveViewState(props.feed)
@@ -471,9 +502,8 @@ watch(
     if (prevFeed) saveViewState(prevFeed)
     await loadWithOptionalRestore(nextFeed)
   },
-  { immediate: true }
+  { immediate: true },
 )
-
 
 useEventListener(window, 'keydown', onKeyDown)
 
@@ -498,7 +528,11 @@ onBeforeUnmount(() => {
 
     <div v-else class="flex-1">
       <div v-if="loadingItems && items.length === 0" class="flex flex-col">
-        <div v-for="n in 15" :key="n" class="p-2 border-b border-tui-active/30 flex gap-3 opacity-30">
+        <div
+          v-for="n in 15"
+          :key="n"
+          class="p-2 border-b border-tui-active/30 flex gap-3 opacity-30"
+        >
           <div class="w-12 text-right">000</div>
           <div class="flex-1">
             <div class="bg-tui-text/20 h-4 w-3/4 mb-2"></div>
@@ -511,13 +545,20 @@ onBeforeUnmount(() => {
         <div
           v-for="(item, idx) in items"
           :key="item.id"
-          :ref="(el: Element | ComponentPublicInstance | null) => (rowEls[idx] = el as HTMLElement | null)"
+          :ref="
+            (el: Element | ComponentPublicInstance | null) =>
+              (rowEls[idx] = el as HTMLElement | null)
+          "
           role="option"
           tabindex="-1"
           :aria-selected="selectionActive && idx === selectedIndex"
           @click="setSelected(idx, { scroll: 'nearest' })"
         >
-          <StoryRow :item="item" :selected="selectionActive && idx === selectedIndex" :voted="isItemUpvoted(item.id)" />
+          <StoryRow
+            :item="item"
+            :selected="selectionActive && idx === selectedIndex"
+            :voted="isItemUpvoted(item.id)"
+          />
         </div>
 
         <div v-if="hasMore" class="mt-2">

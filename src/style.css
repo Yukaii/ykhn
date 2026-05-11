@@ -1,9 +1,13 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  --font-content: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  --font-retro: "VT323", "JetBrains Mono", monospace;
+  --font-mono:
+    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', monospace;
+  --font-content:
+    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', monospace;
+  --font-retro: 'VT323', 'JetBrains Mono', monospace;
   --color-tui-bg: #0000aa;
   --color-tui-text: #ffffff;
   --color-tui-cyan: #55ffff;
@@ -17,8 +21,12 @@
   :root {
     --tui-font-size: 16px;
     --tui-content-font-scale: 0.96;
-    --ykhn-ui-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --ykhn-content-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --ykhn-ui-font:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --ykhn-content-font:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
     --ykhn-shadow-color: rgba(0, 0, 0, 0.55);
     --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-active));
     --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 72%, var(--color-tui-active));
@@ -74,26 +82,46 @@
   }
 
   :root[data-font='readable'] {
-    --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --font-content: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --ykhn-ui-font: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --ykhn-content-font: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-mono:
+      'IBM Plex Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --font-content:
+      'IBM Plex Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --ykhn-ui-font:
+      'IBM Plex Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --ykhn-content-font:
+      'IBM Plex Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
     --tui-content-font-scale: 0.96;
   }
 
   :root[data-font='balanced'] {
-    --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --font-content: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --ykhn-ui-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --ykhn-content-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-mono:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --font-content:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --ykhn-ui-font:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --ykhn-content-font:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
     --tui-content-font-scale: 0.96;
   }
 
   :root[data-font='retro'] {
-    --font-mono: "VT323", "JetBrains Mono", monospace;
-    --font-content: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --ykhn-ui-font: "VT323", "JetBrains Mono", monospace;
-    --ykhn-content-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-mono: 'VT323', 'JetBrains Mono', monospace;
+    --font-content:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
+    --ykhn-ui-font: 'VT323', 'JetBrains Mono', monospace;
+    --ykhn-content-font:
+      'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', monospace;
     --tui-content-font-scale: 0.94;
   }
 
@@ -116,7 +144,7 @@
     font-family: var(--font-retro);
     letter-spacing: 0;
   }
- 
+
   /* Norton Commander style scrollbar */
   ::-webkit-scrollbar {
     width: 12px;
@@ -134,11 +162,11 @@
   }
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-tui-active/50;
-    box-shadow: inset 2px 2px 0px rgba(0,0,0,0.5);
+    box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.5);
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-tui-gray border-2 border-tui-bg;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
   }
 
   a {
@@ -198,7 +226,7 @@
     overflow-wrap: anywhere;
     line-height: 1.55;
   }
-  
+
   .prose pre {
     @apply p-2 bg-black/30 border border-tui-active/30 my-2 font-mono w-full max-w-full;
     white-space: pre-wrap !important;
@@ -214,7 +242,8 @@
   }
 
   /* Quoted text in HN often uses <i> or simple indentation */
-  .prose i, .prose em {
+  .prose i,
+  .prose em {
     @apply border-l-2 border-tui-active/50 pl-2 not-italic text-tui-gray block my-2;
   }
 
@@ -225,18 +254,18 @@
   .tui-comment-branch {
     @apply absolute left-[-14px] md:left-[-20px] top-0 bottom-0 w-[2px] bg-tui-active/30;
   }
-  
+
   .tui-comment-node {
     @apply relative ml-4 md:ml-6 mb-2;
   }
 
   .tui-comment-node::before {
-    content: "├─";
+    content: '├─';
     @apply absolute left-[-16px] md:left-[-20px] top-4 text-tui-active/50 font-mono;
   }
 
   .tui-comment-node:last-child::before {
-    content: "└─";
+    content: '└─';
   }
 
   .tui-comment-node:last-child > .tui-comment-branch {
@@ -266,7 +295,7 @@
   .tui-list-item {
     @apply flex items-start gap-3 px-2 py-2 hover:bg-tui-cyan hover:text-tui-bg cursor-pointer;
   }
-  
+
   .tui-list-item.active {
     @apply bg-tui-yellow text-tui-bg;
   }

@@ -50,10 +50,7 @@ function getDefaultChromeExecutablePath() {
     }
     case 'win32': {
       // Try the most common install locations.
-      return (
-        process.env.CHROME_PATH ||
-        'C:/Program Files/Google/Chrome/Application/chrome.exe'
-      )
+      return process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     }
     default: {
       // linux
@@ -64,44 +61,6 @@ function getDefaultChromeExecutablePath() {
 
 async function ensureDir(dirPath) {
   await fs.mkdir(dirPath, { recursive: true })
-}
-
-async function clickFirstByText(page, needle) {
-  const clicked = await page.evaluate((text) => {
-    const isVisible = (el) => {
-      const rect = el.getBoundingClientRect()
-      return rect.width > 0 && rect.height > 0
-    }
-
-    const selectors = [
-      'button',
-      '[role="button"]',
-      '[role="menuitem"]',
-      '[role="option"]',
-      'a',
-      'li',
-      'div',
-      'span',
-    ]
-
-    const elements = selectors.flatMap((sel) => Array.from(document.querySelectorAll(sel)))
-
-    const match = elements.find((el) => {
-      if (!isVisible(el)) return false
-      const t = (el.textContent || '').trim()
-      return t === text || t.includes(text)
-    })
-
-    if (!match) return false
-
-    match.scrollIntoView({ block: 'center' })
-    match.click()
-    return true
-  }, needle)
-
-  if (!clicked) {
-    throw new Error(`Could not find element containing text: ${needle}`)
-  }
 }
 
 function sleep(ms) {
@@ -197,10 +156,9 @@ async function dismissOverlays(page, { timeoutMs = 8000 } = {}) {
 async function gotoApp(page, url) {
   await page.goto(url, { waitUntil: 'networkidle2' })
   // Wait for something stable on the page.
-  await page.waitForFunction(
-    () => document.body?.innerText.includes('YKHN_OS'),
-    { timeout: 30_000 },
-  )
+  await page.waitForFunction(() => document.body?.innerText.includes('YKHN_OS'), {
+    timeout: 30_000,
+  })
 }
 
 async function captureTheme(page, { url, outDir, viewport, theme }) {
@@ -217,10 +175,7 @@ async function captureTheme(page, { url, outDir, viewport, theme }) {
   await sleep(600)
   await dismissOverlays(page)
 
-  const outPath = path.join(
-    outDir,
-    `${theme.fileBase}${viewport.isMobile ? '-mobile' : ''}.png`,
-  )
+  const outPath = path.join(outDir, `${theme.fileBase}${viewport.isMobile ? '-mobile' : ''}.png`)
 
   await page.screenshot({ path: outPath, fullPage: true })
 }

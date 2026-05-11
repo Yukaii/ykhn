@@ -62,22 +62,36 @@ const rowVariant = computed(() => {
 
       <div
         class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 min-w-0 text-[0.92em]"
-        :class="selected ? 'opacity-100 text-tui-bg' : 'group-hover:opacity-100 group-hover:text-tui-bg'"
+        :class="
+          selected ? 'opacity-100 text-tui-bg' : 'group-hover:opacity-100 group-hover:text-tui-bg'
+        "
       >
         <span
           class="tui-chip"
-          :class="selected ? 'border-tui-bg text-tui-bg' : 'group-hover:border-tui-bg group-hover:text-tui-bg'"
+          :class="
+            selected
+              ? 'border-tui-bg text-tui-bg'
+              : 'group-hover:border-tui-bg group-hover:text-tui-bg'
+          "
         >
           {{ rowVariant }}
         </span>
         <span
           v-if="voted"
           class="tui-chip font-bold"
-          :class="selected ? 'border-tui-bg text-tui-bg' : 'border-tui-yellow text-tui-yellow group-hover:border-tui-bg group-hover:text-tui-bg'"
+          :class="
+            selected
+              ? 'border-tui-bg text-tui-bg'
+              : 'border-tui-yellow text-tui-yellow group-hover:border-tui-bg group-hover:text-tui-bg'
+          "
         >
           VOTED
         </span>
-        <span class="break-all tui-meta" :class="selected ? 'text-tui-bg' : 'group-hover:text-tui-bg'">BY: {{ item.by?.toUpperCase() ?? 'UNKNOWN' }}</span>
+        <span
+          class="break-all tui-meta"
+          :class="selected ? 'text-tui-bg' : 'group-hover:text-tui-bg'"
+          >BY: {{ item.by?.toUpperCase() ?? 'UNKNOWN' }}</span
+        >
         <span class="whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
         <RouterLink
           :to="`/item/${item.id}`"
@@ -91,7 +105,9 @@ const rowVariant = computed(() => {
 
     <RouterLink
       class="flex-none self-center px-2 py-1 bg-tui-active text-tui-text border border-tui-border/30"
-      :class="selected ? 'bg-tui-bg text-tui-cyan' : 'group-hover:bg-tui-bg group-hover:text-tui-cyan'"
+      :class="
+        selected ? 'bg-tui-bg text-tui-cyan' : 'group-hover:bg-tui-bg group-hover:text-tui-cyan'
+      "
       :to="`/item/${item.id}`"
     >
       VIEW

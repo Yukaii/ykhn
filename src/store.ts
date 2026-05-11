@@ -36,7 +36,10 @@ const joystickDockStorageKey = 'ykhn-joystick-dock'
 const storedJoystickDock = useLocalStorage<string>(joystickDockStorageKey, 'right')
 
 const joystickPositionStorageKey = 'ykhn-joystick-position'
-const storedJoystickPosition = useLocalStorage<JoystickPosition | null>(joystickPositionStorageKey, null)
+const storedJoystickPosition = useLocalStorage<JoystickPosition | null>(
+  joystickPositionStorageKey,
+  null,
+)
 
 const joystickCollapsedStorageKey = 'ykhn-joystick-collapsed'
 const storedJoystickCollapsed = useLocalStorage<boolean>(joystickCollapsedStorageKey, false)
@@ -72,7 +75,9 @@ export const authState = reactive({
 export const isAuthenticated = () => !!authState.token && !!authState.userId && !isAuthExpired()
 
 function isAuthExpired() {
-  return typeof authState.expiresAt === 'number' && authState.expiresAt <= Math.floor(Date.now() / 1000)
+  return (
+    typeof authState.expiresAt === 'number' && authState.expiresAt <= Math.floor(Date.now() / 1000)
+  )
 }
 
 export function setAuthSession(session: AuthSession) {
@@ -106,7 +111,9 @@ export function setUpvotedItem(id: number, type: 'story' | 'comment', voted: boo
 }
 
 export function isItemUpvoted(id: number, type: 'story' | 'comment' = 'story') {
-  return type === 'comment' ? authState.upvotedCommentIds.has(id) : authState.upvotedSubmissionIds.has(id)
+  return type === 'comment'
+    ? authState.upvotedCommentIds.has(id)
+    : authState.upvotedSubmissionIds.has(id)
 }
 
 export async function refreshUpvotedSnapshot(options?: { pages?: number }) {
@@ -166,7 +173,6 @@ export async function initAuthFromStorage() {
   }
 }
 
-
 function isTheme(value: unknown): value is Theme {
   return value === 'commander' || value === 'dark' || value === 'light'
 }
@@ -209,7 +215,7 @@ watch(
     storedTheme.value = uiState.theme
     applyThemeToDom(uiState.theme)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -224,7 +230,7 @@ watch(
     storedFontMode.value = uiState.fontMode
     applyFontModeToDom(uiState.fontMode)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -237,7 +243,7 @@ watch(
 
     storedJoystickDock.value = uiState.joystickDock
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -260,7 +266,12 @@ watch(
       const v = raw as Record<string, unknown>
       const top = v.top
       const left = v.left
-      if (typeof top === 'number' && Number.isFinite(top) && typeof left === 'number' && Number.isFinite(left)) {
+      if (
+        typeof top === 'number' &&
+        Number.isFinite(top) &&
+        typeof left === 'number' &&
+        Number.isFinite(left)
+      ) {
         uiState.joystickPosition = { top, dock: uiState.joystickDock }
         storedJoystickPosition.value = uiState.joystickPosition
         return
@@ -269,7 +280,7 @@ watch(
 
     storedJoystickPosition.value = uiState.joystickPosition
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -282,7 +293,7 @@ watch(
 
     storedJoystickCollapsed.value = uiState.joystickCollapsed
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 export function initThemeFromStorage() {
@@ -341,7 +352,7 @@ watch(
     if (!Number.isFinite(px) || px <= 0) return
     applyFontSizeToDom(px)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 export function setFontSizePx(px: number) {

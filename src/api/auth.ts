@@ -1,4 +1,6 @@
-const AUTH_API_BASE = import.meta.env.VITE_HN_AUTH_PROXY_URL ?? (import.meta.env.DEV ? '/auth-proxy' : 'https://hn-api.yukai.dev')
+const AUTH_API_BASE =
+  import.meta.env.VITE_HN_AUTH_PROXY_URL ??
+  (import.meta.env.DEV ? '/auth-proxy' : 'https://hn-api.yukai.dev')
 
 export type AuthUser = {
   id: string
@@ -25,7 +27,13 @@ export type HnVoteAction = {
   href: string
 }
 
-export type AuthListKind = 'submissions' | 'comments' | 'upvoted-submissions' | 'upvoted-comments' | 'favorites-submissions' | 'favorites-comments'
+export type AuthListKind =
+  | 'submissions'
+  | 'comments'
+  | 'upvoted-submissions'
+  | 'upvoted-comments'
+  | 'favorites-submissions'
+  | 'favorites-comments'
 
 export type AuthSubmissionItem = {
   id: number

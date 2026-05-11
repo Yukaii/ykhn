@@ -5,7 +5,17 @@ import { RouterLink, useRouter } from 'vue-router'
 import { logoutAuthProxy } from '../api/auth'
 import { useOnline } from '../composables/useOnline'
 import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
-import { authState, clearAuthSession, menuState, setJoystickDock, setLoading, setTheme, uiState, type JoystickDock, type Theme } from '../store'
+import {
+  authState,
+  clearAuthSession,
+  menuState,
+  setJoystickDock,
+  setLoading,
+  setTheme,
+  uiState,
+  type JoystickDock,
+  type Theme,
+} from '../store'
 
 const { online } = useOnline()
 const router = useRouter()
@@ -83,7 +93,9 @@ function makeSeparator(id: string): MenuSeparatorEntry {
   return { kind: 'separator', id }
 }
 
-function makeItem(entry: Omit<MenuItemEntry, 'kind' | 'parts' | 'role'> & { role?: MenuItemEntry['role'] }): MenuItemEntry {
+function makeItem(
+  entry: Omit<MenuItemEntry, 'kind' | 'parts' | 'role'> & { role?: MenuItemEntry['role'] },
+): MenuItemEntry {
   const role = entry.role ?? 'menuitem'
   return {
     kind: 'item',
@@ -180,7 +192,8 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
     displayLabel: authState.userId ? `USER_${authState.userId}` : 'LOGIN',
     mnemonic: 'g',
     shortcut: 'AUTH',
-    onSelect: () => navigate(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
+    onSelect: () =>
+      navigate(`/login?next=${encodeURIComponent(router.currentRoute.value.fullPath)}`),
   }),
   makeItem({
     id: 'logout',
@@ -322,7 +335,9 @@ function focusTrigger(menu: MenuName) {
 function getFocusableMenuItems(menuEl: HTMLElement | null) {
   if (!menuEl) return []
   return Array.from(
-    menuEl.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"]):not([disabled])')
+    menuEl.querySelectorAll<HTMLElement>(
+      '[role^="menuitem"]:not([aria-disabled="true"]):not([disabled])',
+    ),
   )
 }
 
@@ -343,7 +358,8 @@ function onMenuKeydown(menu: MenuName, e: KeyboardEvent) {
     return
   }
 
-  const shouldHandle = e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End'
+  const shouldHandle =
+    e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End'
   if (!shouldHandle) return
 
   const items = getFocusableMenuItems(getMenuEl(menu))
@@ -355,8 +371,11 @@ function onMenuKeydown(menu: MenuName, e: KeyboardEvent) {
   let nextIndex = 0
   if (e.key === 'Home') nextIndex = 0
   else if (e.key === 'End') nextIndex = items.length - 1
-  else if (e.key === 'ArrowDown') nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length
-  else if (e.key === 'ArrowUp') nextIndex = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length
+  else if (e.key === 'ArrowDown')
+    nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length
+  else if (e.key === 'ArrowUp')
+    nextIndex =
+      currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length
 
   items[nextIndex]?.focus()
   e.preventDefault()
@@ -463,7 +482,10 @@ function runAction(action: () => void, disabled?: boolean) {
 }
 
 const onWindowClick = (e: MouseEvent) => {
-  if ((sysMenuOpen.value || actionsMenuOpen.value || helpMenuOpen.value) && !(e.target as HTMLElement).closest('.tui-menu-container')) {
+  if (
+    (sysMenuOpen.value || actionsMenuOpen.value || helpMenuOpen.value) &&
+    !(e.target as HTMLElement).closest('.tui-menu-container')
+  ) {
     closeMenus()
   }
 }
@@ -507,7 +529,7 @@ const onWindowKeyDown = async (e: KeyboardEvent) => {
   if (currentMenu) {
     const menuEl = getMenuEl(currentMenu)
     const match = menuEl?.querySelector<HTMLElement>(
-      `[data-mnemonic="${key}"]:not([aria-disabled="true"]):not([disabled])`
+      `[data-mnemonic="${key}"]:not([aria-disabled="true"]):not([disabled])`,
     )
 
     if (match) {
@@ -557,11 +579,14 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
     <!-- Title Bar -->
     <div class="tui-title-bar gap-3">
       <div class="flex items-center gap-2 min-w-0">
-        <RouterLink to="/" class="hover:bg-tui-bg hover:text-tui-cyan px-1 transition-none truncate">
+        <RouterLink
+          to="/"
+          class="hover:bg-tui-bg hover:text-tui-cyan px-1 transition-none truncate"
+        >
           YKHN_OS V1.0
         </RouterLink>
       </div>
-      
+
       <div class="flex items-center gap-3 md:gap-4 min-w-0">
         <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1'">
           {{ online ? '[ONLINE]' : '[OFFLINE]' }}
@@ -626,7 +651,10 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
             >
               <span>
                 <span v-if="entry.prefix" class="whitespace-pre">{{ entry.prefix }}</span>
-                <template v-if="mnemonicMode && entry.parts.key">{{ entry.parts.before }}<u>{{ entry.parts.key }}</u>{{ entry.parts.after }}</template>
+                <template v-if="mnemonicMode && entry.parts.key"
+                  >{{ entry.parts.before }}<u>{{ entry.parts.key }}</u
+                  >{{ entry.parts.after }}</template
+                >
                 <template v-else>{{ entry.displayLabel }}</template>
               </span>
               <span v-if="entry.shortcut" class="tui-shortcut">{{ entry.shortcut }}</span>
@@ -675,7 +703,10 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
               @click="runAction(item.action, item.disabled)"
             >
               <span class="font-bold">
-                <template v-if="mnemonicMode && item.parts.key">{{ item.parts.before }}<u>{{ item.parts.key }}</u>{{ item.parts.after }}</template>
+                <template v-if="mnemonicMode && item.parts.key"
+                  >{{ item.parts.before }}<u>{{ item.parts.key }}</u
+                  >{{ item.parts.after }}</template
+                >
                 <template v-else>{{ item.displayLabel }}</template>
               </span>
               <span v-if="item.shortcut" class="tui-shortcut">{{ item.shortcut }}</span>
@@ -723,7 +754,10 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
               @click="entry.onSelect && entry.onSelect()"
             >
               <span class="font-bold">
-                <template v-if="mnemonicMode && entry.parts.key">{{ entry.parts.before }}<u>{{ entry.parts.key }}</u>{{ entry.parts.after }}</template>
+                <template v-if="mnemonicMode && entry.parts.key"
+                  >{{ entry.parts.before }}<u>{{ entry.parts.key }}</u
+                  >{{ entry.parts.after }}</template
+                >
                 <template v-else>{{ entry.displayLabel }}</template>
               </span>
               <span v-if="entry.shortcut" class="tui-shortcut">{{ entry.shortcut }}</span>
@@ -731,8 +765,10 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
           </template>
         </div>
       </div>
-      
-      <div class="ml-auto px-4 py-0.5 opacity-100 font-mono flex items-center gap-2 whitespace-nowrap min-w-0">
+
+      <div
+        class="ml-auto px-4 py-0.5 opacity-100 font-mono flex items-center gap-2 whitespace-nowrap min-w-0"
+      >
         <div v-if="menuState.loading" class="text-tui-bg flex items-center gap-1 mr-1 shrink-0">
           <span class="hidden md:inline font-bold">WORKING...</span>
           <span class="md:hidden font-bold">BUSY</span>

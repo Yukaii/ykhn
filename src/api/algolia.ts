@@ -23,7 +23,7 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 
 export async function searchStoryIds(
   query: string,
-  options?: { page?: number; hitsPerPage?: number; signal?: AbortSignal }
+  options?: { page?: number; hitsPerPage?: number; signal?: AbortSignal },
 ): Promise<{ ids: number[]; page: number; nbPages: number }> {
   const q = query.trim()
   if (!q) return { ids: [], page: 0, nbPages: 0 }

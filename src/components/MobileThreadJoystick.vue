@@ -17,7 +17,9 @@ const isCoarsePointer = useMediaQuery('(pointer: coarse)')
 const isNarrow = useMediaQuery('(max-width: 767px)')
 const isDev = import.meta.env.DEV
 
-const visible = computed(() => !uiState.shortcutsOpen && (isDev || isCoarsePointer.value || isNarrow.value))
+const visible = computed(
+  () => !uiState.shortcutsOpen && (isDev || isCoarsePointer.value || isNarrow.value),
+)
 
 const { width: winW, height: winH } = useWindowSize()
 
@@ -52,7 +54,9 @@ function dockToLeft(dock: JoystickDock) {
 const dragging = ref(false)
 const dragPos = ref({ left: 0, top: 0 })
 
-const resolvedDock = computed<JoystickDock>(() => uiState.joystickPosition?.dock ?? uiState.joystickDock)
+const resolvedDock = computed<JoystickDock>(
+  () => uiState.joystickPosition?.dock ?? uiState.joystickDock,
+)
 const resolvedTop = computed(() => clampTop(uiState.joystickPosition?.top ?? defaultTop()))
 
 watch(
@@ -61,7 +65,7 @@ watch(
     if (dragging.value) return
     dragPos.value = { left: dockToLeft(resolvedDock.value), top: resolvedTop.value }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const dock = computed<JoystickDock>(() => {
@@ -95,7 +99,7 @@ watch(
       if (next.top !== uiState.joystickPosition.top) setJoystickPosition(next)
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const containerStyle = computed(() => ({
@@ -245,7 +249,6 @@ function dispatchFromSwipeVector(dx: number, dy: number) {
   dispatchKey(dy > 0 ? 'j' : 'k')
 }
 
-
 onMounted(() => {
   if (!tabEl.value || !gripEl.value || !padEl.value) return
 
@@ -265,7 +268,7 @@ onMounted(() => {
       preventDefault: true,
       eventOptions: { passive: false, capture: true },
       pointer: { keys: false },
-    }
+    },
   )
 
   gripGesture = new DragGesture(
@@ -274,7 +277,10 @@ onMounted(() => {
       if (uiState.joystickCollapsed) setJoystickCollapsed(false)
 
       type Memo = { startLeft: number; startTop: number }
-      const resolvedMemo = (memo as Memo | undefined) ?? { startLeft: left.value, startTop: top.value }
+      const resolvedMemo = (memo as Memo | undefined) ?? {
+        startLeft: left.value,
+        startTop: top.value,
+      }
 
       if (first) {
         dragging.value = true
@@ -284,7 +290,11 @@ onMounted(() => {
       }
 
       if (active) {
-        dragPos.value.left = clamp(resolvedMemo.startLeft + mx, MARGIN_X, Math.max(MARGIN_X, winW.value - MARGIN_X - WRAP_W_PX))
+        dragPos.value.left = clamp(
+          resolvedMemo.startLeft + mx,
+          MARGIN_X,
+          Math.max(MARGIN_X, winW.value - MARGIN_X - WRAP_W_PX),
+        )
         dragPos.value.top = clampTop(resolvedMemo.startTop + my)
       }
 
@@ -302,7 +312,7 @@ onMounted(() => {
       preventDefault: true,
       eventOptions: { passive: false, capture: true },
       pointer: { keys: false },
-    }
+    },
   )
 
   padGesture = new DragGesture(
@@ -369,7 +379,7 @@ onMounted(() => {
       swipe: { distance: 18, velocity: 0.2, duration: 350 },
       eventOptions: { passive: false, capture: true },
       pointer: { keys: false },
-    }
+    },
   )
 })
 
@@ -438,7 +448,9 @@ onBeforeUnmount(() => {
   border: 2px solid var(--tui-border);
   background: var(--tui-active);
   color: var(--tui-text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-weight: 900;
   line-height: 1;
   padding: 0;
@@ -468,7 +480,9 @@ onBeforeUnmount(() => {
   border: 2px solid var(--tui-border);
   background: var(--tui-bg);
   color: var(--tui-text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-weight: 900;
   font-size: 12px;
   line-height: 1;
@@ -497,7 +511,9 @@ onBeforeUnmount(() => {
 
 .ykhn-label {
   position: absolute;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-weight: 800;
   font-size: 11px;
   text-transform: none;

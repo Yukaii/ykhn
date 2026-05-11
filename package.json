@@ -1,12 +1,16 @@
 {
   "name": "ykhn",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
+    "lint": "oxlint . --deny-warnings",
+    "lint:fix": "oxlint . --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "screenshots": "node scripts/update-screenshots.mjs",
     "icons": "node scripts/render-icons.mjs"
   },
@@ -24,6 +28,8 @@
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
     "autoprefixer": "^10.4.23",
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
     "postcss": "^8.5.6",
     "puppeteer-core": "^24.24.0",
     "tailwindcss": "^4.1.18",

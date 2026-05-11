@@ -119,7 +119,8 @@ export function useListKeyboardNavigation(options: UseListKeyboardNavigationOpti
 
     if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'j') {
       const nextIndex = selectedIndex.value + parseCount(1)
-      if (nextIndex >= options.itemsLength.value && options.canLoadMore?.value) await options.loadMore?.()
+      if (nextIndex >= options.itemsLength.value && options.canLoadMore?.value)
+        await options.loadMore?.()
       setSelected(nextIndex)
       e.preventDefault()
       return
@@ -139,7 +140,12 @@ export function useListKeyboardNavigation(options: UseListKeyboardNavigationOpti
       return
     }
 
-    if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'Enter' || e.key === 'd' || e.key === 'D')) {
+    if (
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      (e.key === 'Enter' || e.key === 'd' || e.key === 'D')
+    ) {
       await options.onOpen?.(e.key === 'D')
       e.preventDefault()
       return
@@ -151,7 +157,13 @@ export function useListKeyboardNavigation(options: UseListKeyboardNavigationOpti
       return
     }
 
-    if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key === 'v' && (options.canVote?.value ?? true)) {
+    if (
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      e.key === 'v' &&
+      (options.canVote?.value ?? true)
+    ) {
       await options.onVote?.()
       e.preventDefault()
       return

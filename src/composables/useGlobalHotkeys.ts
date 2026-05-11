@@ -2,7 +2,12 @@ import { useEventListener } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 
 import { menuState, setShortcutsOpen, toggleShortcuts, uiState } from '../store'
-import { estimateRowScrollStepPx, getMainScrollContainer, menuShortcutFromEvent, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import {
+  estimateRowScrollStepPx,
+  getMainScrollContainer,
+  menuShortcutFromEvent,
+  shouldIgnoreKeyboardEvent,
+} from '../lib/keyboard'
 import type { SelectionScrollDetail } from './useHalfPageSelectionScrollList'
 
 function runMenuActionByShortcut(shortcut: string) {
@@ -13,7 +18,9 @@ function runMenuActionByShortcut(shortcut: string) {
 }
 
 function runMenuActionByLabel(label: string) {
-  const action = menuState.actions.find((a) => a.label.toLowerCase() === label.toLowerCase() && !a.disabled)
+  const action = menuState.actions.find(
+    (a) => a.label.toLowerCase() === label.toLowerCase() && !a.disabled,
+  )
   if (!action) return false
   action.action()
   return true
@@ -27,7 +34,10 @@ function scrollMainBy(deltaPx: number) {
 }
 
 function dispatchSelectionScroll(detail: SelectionScrollDetail) {
-  const ev = new CustomEvent<SelectionScrollDetail>('ykhn:selection-scroll', { detail, cancelable: true })
+  const ev = new CustomEvent<SelectionScrollDetail>('ykhn:selection-scroll', {
+    detail,
+    cancelable: true,
+  })
   const notCanceled = window.dispatchEvent(ev)
   return !notCanceled
 }
@@ -104,16 +114,16 @@ export function useGlobalHotkeys() {
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const now = Date.now()
 
-       if (pendingGotoAt && now - pendingGotoAt < 650 && /^[1-7]$/.test(e.key)) {
-         const map: Record<string, string> = {
-           '1': '/',
-           '2': '/new',
-           '3': '/best',
-           '4': '/ask',
-           '5': '/show',
-           '6': '/jobs',
-           '7': '/search',
-         }
+      if (pendingGotoAt && now - pendingGotoAt < 650 && /^[1-7]$/.test(e.key)) {
+        const map: Record<string, string> = {
+          '1': '/',
+          '2': '/new',
+          '3': '/best',
+          '4': '/ask',
+          '5': '/show',
+          '6': '/jobs',
+          '7': '/search',
+        }
 
         router.push(map[e.key] as string)
         pendingGotoAt = 0
