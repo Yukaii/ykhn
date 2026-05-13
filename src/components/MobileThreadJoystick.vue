@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { DragGesture } from '@use-gesture/vanilla'
 import { useEventListener, useMediaQuery, useWindowSize } from '@vueuse/core'
 
-import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { getMainScrollContainer, shouldIgnoreKeyboardEvent } from '../lib/keyboard'
 import {
   setJoystickCollapsed,
   setJoystickDock,
@@ -172,11 +172,11 @@ function clearRepeat() {
   }
 }
 
-function startRepeat(key: string) {
-  dispatchKey(key)
+function startPagerRepeat(direction: 'up' | 'down') {
+  pagerAction(direction)
   clearRepeat()
   repeatTimeout = window.setTimeout(() => {
-    repeatInterval = window.setInterval(() => dispatchKey(key), 110)
+    repeatInterval = window.setInterval(() => pagerAction(direction), 110)
   }, 350)
 }
 
@@ -198,14 +198,14 @@ type PadZone = 'up' | 'down' | 'left' | 'right' | 'L' | 'center'
 const padStartZone = ref<PadZone>('center')
 const padMoved = ref(false)
 let longPressTimer: number | null = null
-let longPressKey: 'j' | 'k' | null = null
+let longPressDirection: 'up' | 'down' | null = null
 
 function clearLongPress() {
   if (longPressTimer != null) {
     window.clearTimeout(longPressTimer)
     longPressTimer = null
   }
-  longPressKey = null
+  longPressDirection = null
 }
 
 function zoneFromPoint(el: HTMLElement, x: number, y: number): PadZone {
@@ -223,9 +223,48 @@ function zoneFromPoint(el: HTMLElement, x: number, y: number): PadZone {
   return 'center'
 }
 
+function getSelectedComment(): HTMLElement | null {
+  const main = getMainScrollContainer()
+  const sel =
+    main?.querySelector<HTMLElement>('[data-ykhn-comment-id][aria-selected="true"]') ??
+    document.querySelector<HTMLElement>('[data-ykhn-comment-id][aria-selected="true"]')
+  return sel
+}
+
+function scrollCommentInView(direction: 'up' | 'down'): boolean {
+  const main = getMainScrollContainer()
+  if (!main) return false
+
+  const selected = getSelectedComment()
+  if (!selected) return false
+
+  const mainRect = main.getBoundingClientRect()
+  const commentRect = selected.getBoundingClientRect()
+  const STEP = mainRect.height * 0.6
+
+  if (direction === 'down') {
+    if (commentRect.bottom > mainRect.bottom + 1) {
+      main.scrollBy({ top: STEP, behavior: 'auto' })
+      return true
+    }
+  } else {
+    if (commentRect.top < mainRect.top - 1) {
+      main.scrollBy({ top: -STEP, behavior: 'auto' })
+      return true
+    }
+  }
+
+  return false
+}
+
+function pagerAction(direction: 'up' | 'down') {
+  if (scrollCommentInView(direction)) return
+  dispatchKey(direction === 'down' ? 'j' : 'k')
+}
+
 function dispatchFromZone(zone: PadZone) {
-  if (zone === 'up') dispatchKey('k')
-  if (zone === 'down') dispatchKey('j')
+  if (zone === 'up') pagerAction('up')
+  if (zone === 'down') pagerAction('down')
   if (zone === 'left') dispatchKey('h')
   if (zone === 'right') dispatchKey('l')
   if (zone === 'L') dispatchKey('L')
@@ -246,7 +285,7 @@ function dispatchFromSwipeVector(dx: number, dy: number) {
     return
   }
 
-  dispatchKey(dy > 0 ? 'j' : 'k')
+  pagerAction(dy > 0 ? 'down' : 'up')
 }
 
 onMounted(() => {
@@ -329,9 +368,9 @@ onMounted(() => {
         padStartZone.value = zoneFromPoint(padEl.value, x, y)
 
         if (padStartZone.value === 'up' || padStartZone.value === 'down') {
-          longPressKey = padStartZone.value === 'up' ? 'k' : 'j'
+          longPressDirection = padStartZone.value === 'up' ? 'up' : 'down'
           longPressTimer = window.setTimeout(() => {
-            if (!padMoved.value && longPressKey) startRepeat(longPressKey)
+            if (!padMoved.value && longPressDirection) startPagerRepeat(longPressDirection)
           }, 320)
         }
       }
@@ -355,7 +394,7 @@ onMounted(() => {
       // Use @use-gesture swipe detection if available.
       if (sx || sy) {
         if (sx) dispatchKey(sx > 0 ? 'l' : 'h')
-        else dispatchKey(sy > 0 ? 'j' : 'k')
+        else pagerAction(sy > 0 ? 'down' : 'up')
         return
       }
 
