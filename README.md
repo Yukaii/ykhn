@@ -1,6 +1,7 @@
 # YKHN
 
-Retro terminal Hacker News client.
+Retro terminal Hacker News client. Successor to
+[`vimify-hackernews`](https://github.com/Yukaii/vimify-hackernews), a retake on the same topic.
 
 ## Features
 

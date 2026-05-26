@@ -40,6 +40,16 @@ function updateFontSize(delta: number) {
       <h2 class="font-bold mb-4 uppercase">>> PROJECT_OVERVIEW</h2>
       <p class="mb-3 leading-relaxed">
         YKHN IS A HIGH-PERFORMANCE, OFFLINE-ENABLED INTERFACE FOR THE HACKER_NEWS MAINFRAME.
+        IT IS THE SUCCESSOR TO
+        <a
+          class="text-tui-cyan underline hover:bg-tui-cyan hover:text-tui-bg px-1"
+          href="https://github.com/Yukaii/vimify-hackernews"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GITHUB.COM/YUKAII/VIMIFY-HACKERNEWS
+        </a>
+        AND A RETAKE ON THE SAME TOPIC.
       </p>
       <p class="mb-3 leading-relaxed">
         BUILT USING MODERN PROTOCOLS: BUN, VITE, VUE, AND TAILWIND_CSS.
