@@ -64,6 +64,10 @@ export default defineConfig(({ mode }) => {
         workbox: {
           navigateFallback: '/index.html',
           cleanupOutdatedCaches: true,
+          // Registration is handled through virtual:pwa-register, so the plugin
+          // does not add these automatically even with registerType: 'autoUpdate'.
+          skipWaiting: true,
+          clientsClaim: true,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/hacker-news\.firebaseio\.com\/v0\/.*\.json$/,
