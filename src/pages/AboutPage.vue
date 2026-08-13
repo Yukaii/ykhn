@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import ThemeBrowser from '../components/ThemeBrowser.vue'
 import {
   fontSizePx,
   setFontMode,
@@ -39,8 +40,8 @@ function updateFontSize(delta: number) {
     <div class="tui-panel">
       <h2 class="font-bold mb-4 uppercase">>> PROJECT_OVERVIEW</h2>
       <p class="mb-3 leading-relaxed">
-        YKHN IS A HIGH-PERFORMANCE, OFFLINE-ENABLED INTERFACE FOR THE HACKER_NEWS MAINFRAME.
-        IT IS THE SUCCESSOR TO
+        YKHN IS A HIGH-PERFORMANCE, OFFLINE-ENABLED INTERFACE FOR THE HACKER_NEWS MAINFRAME. IT IS
+        THE SUCCESSOR TO
         <a
           class="text-tui-cyan underline hover:bg-tui-cyan hover:text-tui-bg px-1"
           href="https://github.com/Yukaii/vimify-hackernews"
@@ -66,6 +67,8 @@ function updateFontSize(delta: number) {
         </a>
       </p>
     </div>
+
+    <ThemeBrowser />
 
     <div class="tui-panel-muted">
       <h2 class="font-bold mb-4 uppercase">>> SYS_CONFIGURATION</h2>
