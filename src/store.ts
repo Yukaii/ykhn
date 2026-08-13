@@ -1,7 +1,13 @@
 import { useLocalStorage } from '@vueuse/core'
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { fetchAuthList, fetchCurrentSession } from './api/auth'
 import type { AuthSession } from './api/auth'
+import {
+  isBuiltInTheme,
+  isInstalledTheme,
+  type BuiltInTheme,
+  type InstalledTheme,
+} from './lib/themes'
 
 export const menuState = reactive({
   actions: [] as { label: string; action: () => void; shortcut?: string; disabled?: boolean }[],
@@ -21,13 +27,21 @@ export function setLoading(loading: boolean) {
   menuState.loading = loading
 }
 
-export type Theme = 'commander' | 'dark' | 'light'
+export type Theme = BuiltInTheme | `open-vsx:${string}`
 export type FontMode = 'readable' | 'balanced' | 'retro'
 export type JoystickDock = 'right' | 'left'
 export type JoystickPosition = { top: number; dock: JoystickDock }
 
 const themeStorageKey = 'ykhn-theme'
 const storedTheme = useLocalStorage<string>(themeStorageKey, 'commander')
+
+const installedThemesStorageKey = 'ykhn-installed-themes'
+const storedInstalledThemes = useLocalStorage<InstalledTheme[]>(installedThemesStorageKey, [])
+
+export const installedThemes = computed<InstalledTheme[]>(() => {
+  const value: unknown = storedInstalledThemes.value
+  return Array.isArray(value) ? value.filter(isInstalledTheme) : []
+})
 
 const fontModeStorageKey = 'ykhn-font-mode'
 const storedFontMode = useLocalStorage<string>(fontModeStorageKey, 'balanced')
@@ -174,7 +188,10 @@ export async function initAuthFromStorage() {
 }
 
 function isTheme(value: unknown): value is Theme {
-  return value === 'commander' || value === 'dark' || value === 'light'
+  return (
+    isBuiltInTheme(value) ||
+    (typeof value === 'string' && installedThemes.value.some((theme) => theme.id === value))
+  )
 }
 
 function isFontMode(value: unknown): value is FontMode {
@@ -195,7 +212,35 @@ function isJoystickPosition(value: unknown): value is JoystickPosition {
 
 function applyThemeToDom(theme: Theme) {
   if (typeof document === 'undefined') return
-  document.documentElement.dataset.theme = theme
+  const root = document.documentElement
+  const customProperties = [
+    '--color-tui-bg',
+    '--color-tui-text',
+    '--color-tui-border',
+    '--color-tui-gray',
+    '--color-tui-active',
+    '--color-tui-cyan',
+    '--color-tui-yellow',
+  ]
+  for (const property of customProperties) root.style.removeProperty(property)
+
+  if (isBuiltInTheme(theme)) {
+    root.dataset.theme = theme
+    root.dataset.themeAppearance = theme === 'light' ? 'light' : 'dark'
+    return
+  }
+
+  const installed = installedThemes.value.find((candidate) => candidate.id === theme)
+  if (!installed) return
+  root.dataset.theme = 'custom'
+  root.dataset.themeAppearance = installed.appearance
+  root.style.setProperty('--color-tui-bg', installed.colors.background)
+  root.style.setProperty('--color-tui-text', installed.colors.text)
+  root.style.setProperty('--color-tui-border', installed.colors.border)
+  root.style.setProperty('--color-tui-gray', installed.colors.gray)
+  root.style.setProperty('--color-tui-active', installed.colors.active)
+  root.style.setProperty('--color-tui-cyan', installed.colors.cyan)
+  root.style.setProperty('--color-tui-yellow', installed.colors.yellow)
 }
 
 function applyFontModeToDom(mode: FontMode) {
@@ -231,6 +276,18 @@ watch(
     applyFontModeToDom(uiState.fontMode)
   },
   { immediate: true },
+)
+
+watch(
+  installedThemes,
+  () => {
+    if (!isTheme(uiState.theme)) {
+      setTheme('commander')
+      return
+    }
+    applyThemeToDom(uiState.theme)
+  },
+  { deep: true },
 )
 
 watch(
@@ -302,9 +359,39 @@ export function initThemeFromStorage() {
 }
 
 export function setTheme(theme: Theme) {
+  if (!isTheme(theme)) return
   uiState.theme = theme
   storedTheme.value = theme
   applyThemeToDom(theme)
+}
+
+export function replaceInstalledThemeCollection(themes: ReadonlyArray<InstalledTheme>) {
+  if (themes.length === 0 || themes.some((theme) => !isInstalledTheme(theme))) {
+    throw new Error('The imported theme collection is invalid.')
+  }
+  const id = themes[0]!.collection.id
+  if (themes.some((theme) => theme.collection.id !== id)) {
+    throw new Error('The imported themes do not belong to one collection.')
+  }
+
+  const next = [...installedThemes.value.filter((theme) => theme.collection.id !== id), ...themes]
+  if (new Set(next.map((theme) => theme.id)).size !== next.length) {
+    throw new Error('An imported theme conflicts with an installed theme.')
+  }
+  storedInstalledThemes.value = next
+}
+
+export function removeInstalledThemeCollection(collectionId: string) {
+  const removedIds = new Set<string>(
+    installedThemes.value
+      .filter((theme) => theme.collection.id === collectionId)
+      .map((theme) => theme.id),
+  )
+  if (removedIds.size === 0) return
+  storedInstalledThemes.value = installedThemes.value.filter(
+    (theme) => theme.collection.id !== collectionId,
+  )
+  if (removedIds.has(uiState.theme)) setTheme('commander')
 }
 
 export function setFontMode(mode: FontMode) {
