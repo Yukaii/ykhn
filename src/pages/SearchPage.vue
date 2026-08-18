@@ -462,17 +462,12 @@ function updateMenu() {
 
 const loadMoreSentinel = ref<HTMLElement | null>(null)
 
-onMounted(() => {
-  void (async () => {
-    await nextTick()
-    useInfiniteScrollSentinel({
-      target: loadMoreSentinel,
-      canLoadMore,
-      isLoading: loadingMore,
-      onLoadMore: loadMore,
-      rootMargin: '400px',
-    })
-  })()
+useInfiniteScrollSentinel({
+  target: loadMoreSentinel,
+  canLoadMore,
+  isLoading: loadingMore,
+  onLoadMore: loadMore,
+  rootMargin: '400px',
 })
 
 const { isLoading: loadingInit, execute: executeInit } = useAsyncState(
