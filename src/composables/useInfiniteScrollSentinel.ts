@@ -22,7 +22,9 @@ export function useInfiniteScrollSentinel(opts: UseInfiniteScrollSentinelOptions
       void opts.onLoadMore()
     },
     {
-      root: (opts.root ? opts.root() : getMainScrollContainer()) ?? undefined,
+      // Resolve the scroll container when VueUse starts observing (after the
+      // template ref is mounted), rather than while setup is still rendering.
+      root: () => opts.root?.() ?? getMainScrollContainer(),
       rootMargin: opts.rootMargin ?? '400px',
     },
   )

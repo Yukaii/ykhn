@@ -175,17 +175,12 @@ async function loadMoreTop() {
 const canLoadMoreTop = computed(() => visibleTopIds.value.length < topCommentIds.value.length)
 const isLoadingTop = computed(() => isLoading.value || loadingMoreTop.value)
 
-onMounted(() => {
-  void (async () => {
-    await nextTick()
-    useInfiniteScrollSentinel({
-      target: loadMoreSentinel,
-      canLoadMore: canLoadMoreTop,
-      isLoading: isLoadingTop,
-      onLoadMore: loadMoreTop,
-      rootMargin: '400px',
-    })
-  })()
+useInfiniteScrollSentinel({
+  target: loadMoreSentinel,
+  canLoadMore: canLoadMoreTop,
+  isLoading: isLoadingTop,
+  onLoadMore: loadMoreTop,
+  rootMargin: '400px',
 })
 
 function hnItemUrl(itemId: number) {

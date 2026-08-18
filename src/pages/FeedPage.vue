@@ -430,17 +430,12 @@ function updateMenu() {
   ])
 }
 
-onMounted(() => {
-  void (async () => {
-    await nextTick()
-    useInfiniteScrollSentinel({
-      target: loadMoreSentinel,
-      canLoadMore: hasMore,
-      isLoading: loadingMore,
-      onLoadMore: loadMore,
-      rootMargin: '400px',
-    })
-  })()
+useInfiniteScrollSentinel({
+  target: loadMoreSentinel,
+  canLoadMore: hasMore,
+  isLoading: loadingMore,
+  onLoadMore: loadMore,
+  rootMargin: '400px',
 })
 
 async function loadWithOptionalRestore(feed: FeedKind) {
