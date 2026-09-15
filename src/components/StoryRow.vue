@@ -21,7 +21,7 @@ const rowVariant = computed(() => {
 
 <template>
   <div
-    class="tui-list-item group border-b border-tui-active/30 last:border-b-0"
+    class="tui-list-item group"
     :class="selected ? 'active' : ''"
   >
     <div

@@ -66,6 +66,7 @@
     --ykhn-item-hover-text: var(--color-tui-bg);
     --ykhn-item-active-bg: var(--color-tui-yellow);
     --ykhn-item-active-text: var(--color-tui-bg);
+    --ykhn-list-gap: 0.25rem;
     --ykhn-nav-bg: var(--color-tui-active);
     --ykhn-field-bg: var(--color-tui-bg);
     --ykhn-scrollbar-track: var(--color-tui-active);
@@ -333,8 +334,8 @@
     --ykhn-btn-text: var(--color-tui-text);
     --ykhn-btn-hover-bg: color-mix(in srgb, var(--color-tui-gray) 65%, var(--color-tui-bg));
     --ykhn-btn-hover-text: var(--color-tui-text);
-    --ykhn-item-hover-bg: #000080;
-    --ykhn-item-hover-text: #ffffff;
+    --ykhn-item-hover-bg: color-mix(in srgb, #1084d0 22%, transparent);
+    --ykhn-item-hover-text: var(--color-tui-text);
     --ykhn-item-active-bg: #000080;
     --ykhn-item-active-text: #ffffff;
     --ykhn-nav-bg: color-mix(in srgb, var(--color-tui-gray) 50%, var(--color-tui-bg));
@@ -748,6 +749,11 @@
     color: inherit;
   }
 
+  .tui-list {
+    @apply flex flex-col;
+    gap: var(--ykhn-list-gap, 0.25rem);
+  }
+
   .tui-list-item {
     @apply flex items-start gap-3 px-2 py-2 cursor-pointer;
     border-radius: var(--ykhn-radius-sm);
@@ -756,7 +762,7 @@
       color 100ms ease;
   }
 
-  .tui-list-item:hover {
+  .tui-list-item:hover:not(.active) {
     background: var(--ykhn-item-hover-bg);
     color: var(--ykhn-item-hover-text);
   }
