@@ -176,6 +176,20 @@
   #app {
     @apply w-full h-full overflow-hidden bg-tui-bg;
   }
+
+  /* Keep keyboard-navigated rows clear of the container edges.
+     Covers native scrollIntoView fallback; the JS scroller in
+     lib/keyboard.ts applies the same spacing manually. */
+  [data-ykhn-main] {
+    scroll-padding-top: 16px;
+    scroll-padding-bottom: 16px;
+  }
+
+  [data-ykhn-main] [role='option'],
+  [data-ykhn-main] [data-ykhn-comment-id] {
+    scroll-margin-top: 8px;
+    scroll-margin-bottom: 8px;
+  }
 }
 
 @layer components {
