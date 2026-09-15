@@ -44,6 +44,20 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
 }
 
+const SCROLL_INTO_VIEW_SPACING_PX = 8
+
+function getScrollEdgeOffset(container: HTMLElement, side: 'top' | 'bottom') {
+  try {
+    const computed = getComputedStyle(container)
+    const raw = side === 'top' ? computed.paddingTop : computed.paddingBottom
+    const padding = Number.parseFloat(raw)
+    const resolved = Number.isFinite(padding) ? padding : 0
+    return resolved + SCROLL_INTO_VIEW_SPACING_PX
+  } catch {
+    return SCROLL_INTO_VIEW_SPACING_PX
+  }
+}
+
 export function scrollElementIntoMain(el: HTMLElement, block: ScrollLogicalPosition = 'nearest') {
   const container = getMainScrollContainer()
   if (!container) {
@@ -64,15 +78,17 @@ export function scrollElementIntoMain(el: HTMLElement, block: ScrollLogicalPosit
   let resolvedBlock: ScrollLogicalPosition = block
 
   if (resolvedBlock === 'nearest') {
-    if (elRect.top < containerRect.top) resolvedBlock = 'start'
-    else if (elRect.bottom > containerRect.bottom) resolvedBlock = 'end'
+    const topOffset = getScrollEdgeOffset(container, 'top')
+    const bottomOffset = getScrollEdgeOffset(container, 'bottom')
+    if (elRect.top < containerRect.top + topOffset) resolvedBlock = 'start'
+    else if (elRect.bottom > containerRect.bottom - bottomOffset) resolvedBlock = 'end'
     else return
   }
 
   if (resolvedBlock === 'start') {
-    targetTop = elTop
+    targetTop = elTop - getScrollEdgeOffset(container, 'top')
   } else if (resolvedBlock === 'end') {
-    targetTop = elBottom - container.clientHeight
+    targetTop = elBottom - container.clientHeight + getScrollEdgeOffset(container, 'bottom')
   } else if (resolvedBlock === 'center') {
     targetTop = elTop - (container.clientHeight / 2 - elRect.height / 2)
   }
