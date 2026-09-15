@@ -15,6 +15,44 @@
       rel="stylesheet"
     />
     <title>YKHN - RETRO TERMINAL</title>
+    <script>
+      // Apply persisted theme/style/font before first paint to avoid a flash.
+      ;(function () {
+        try {
+          var root = document.documentElement
+          var theme = localStorage.getItem('ykhn-theme')
+          if (
+            theme === 'commander' ||
+            theme === 'dark' ||
+            theme === 'light' ||
+            theme === 'hackernews'
+          ) {
+            root.dataset.theme = theme
+            root.dataset.themeAppearance =
+              theme === 'light' || theme === 'hackernews' ? 'light' : 'dark'
+          }
+          var style = localStorage.getItem('ykhn-style')
+          if (
+            style === 'classic' ||
+            style === 'modern' ||
+            style === 'retro' ||
+            style === 'office' ||
+            style === 'y2k' ||
+            style === 'og'
+          ) {
+            root.dataset.style = style
+          }
+          var font = localStorage.getItem('ykhn-font-mode')
+          if (font === 'readable' || font === 'balanced' || font === 'retro') {
+            root.dataset.font = font
+          }
+          var size = Number.parseFloat(localStorage.getItem('ykhn-font-size'))
+          if (size > 0) root.style.setProperty('--tui-font-size', size + 'px')
+        } catch (error) {
+          /* storage unavailable */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

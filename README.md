@@ -12,7 +12,8 @@ Retro terminal Hacker News client. Successor to
 - **Login actions**: JWT-backed HN login via [`hn-api.yukai.dev`](https://hn-api.yukai.dev), powered by [`hn-auth-proxy`](https://github.com/Yukaii/hn-auth-proxy), with item-page vote/unvote actions and account lists.
 - **Progressive loading**: load more stories / comments; optional recursive comment prefetch.
 - **State restore**: remembers scroll + selection per feed/item (session-based).
-- **Themes & UI**: Commander/Dark/Light themes, installable Open VSX community themes, and
+- **Themes & UI**: Commander/Dark/Light color schemes, installable Open VSX community themes, and
+  independent look-and-feel styles (Terminal, Modern, Retro, Office, Y2K) plus reading font and
   adjustable font size.
 - **Offline-friendly PWA**: installable, runtime-caches HN API responses, and automatically activates new versions.
 

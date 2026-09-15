@@ -19,11 +19,8 @@ function close() {
     aria-label="Keyboard shortcuts"
     @click="close"
   >
-    <div
-      class="w-full max-w-2xl max-h-[calc(100dvh-2rem)] bg-tui-bg border-4 border-double border-tui-border shadow-[8px_8px_0px_rgba(0,0,0,0.7)] flex flex-col overflow-hidden"
-      @click.stop
-    >
-      <div class="bg-tui-active text-tui-text px-3 py-2 font-black uppercase flex items-center">
+    <div class="tui-modal w-full max-w-2xl max-h-[calc(100dvh-2rem)]" @click.stop>
+      <div class="tui-title-bar px-3 py-2 font-black flex items-center">
         <span class="flex-1">KEYBOARD_SHORTCUTS</span>
         <button class="tui-btn" type="button" @click="close">[ESC]</button>
       </div>
@@ -76,7 +73,9 @@ function close() {
             <div class="flex justify-between"><span>gg / G</span><span>Top / Bottom</span></div>
             <div class="flex justify-between"><span>[count]G</span><span>Jump to row</span></div>
             <div class="flex justify-between"><span>Enter / d</span><span>Open comments</span></div>
-            <div class="flex justify-between"><span>D</span><span>Open comments (new tab)</span></div>
+            <div class="flex justify-between">
+              <span>D</span><span>Open comments (new tab)</span>
+            </div>
             <div class="flex justify-between"><span>o</span><span>Open link</span></div>
             <div class="flex justify-between"><span>O</span><span>Open link (new tab)</span></div>
             <div class="flex justify-between"><span>v</span><span>Vote selected story</span></div>
@@ -91,7 +90,9 @@ function close() {
             <div class="flex justify-between">
               <span>gg / G</span><span>Top / Bottom comment</span>
             </div>
-            <div class="flex justify-between"><span>[count]G</span><span>Jump to comment</span></div>
+            <div class="flex justify-between">
+              <span>[count]G</span><span>Jump to comment</span>
+            </div>
             <div class="flex justify-between"><span>h</span><span>Jump to parent</span></div>
             <div class="flex justify-between"><span>{ / }</span><span>Prev/Next thread</span></div>
             <div class="flex justify-between"><span>H</span><span>Collapse comment</span></div>

@@ -15,10 +15,13 @@ useMainScrollRestoration()
 <template>
   <div class="app-container flex flex-col bg-tui-bg overflow-hidden">
     <!-- Main Window -->
-    <div class="tui-window flex-1 flex flex-col overflow-hidden relative border-4">
+    <div class="tui-window flex-1 flex flex-col overflow-hidden relative">
       <AppHeader />
 
-      <main data-ykhn-main class="flex-1 overflow-y-auto p-2 md:p-4 custom-scrollbar bg-tui-bg">
+      <main
+        data-ykhn-main
+        class="flex-1 overflow-y-auto p-2 md:p-4 custom-scrollbar bg-transparent"
+      >
         <RouterView />
       </main>
 
@@ -40,12 +43,12 @@ useMainScrollRestoration()
   right: calc(0.5rem + env(safe-area-inset-right));
 }
 
-@media (min-width: 768px) {
+@media (max-width: 640px) {
   .app-container {
-    top: calc(1rem + env(safe-area-inset-top));
-    bottom: calc(1rem + env(safe-area-inset-bottom));
-    left: calc(1rem + env(safe-area-inset-left));
-    right: calc(1rem + env(safe-area-inset-right));
+    top: env(safe-area-inset-top);
+    bottom: env(safe-area-inset-bottom);
+    left: env(safe-area-inset-left);
+    right: env(safe-area-inset-right);
   }
 }
 </style>

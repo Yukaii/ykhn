@@ -22,11 +22,11 @@ const rowVariant = computed(() => {
 <template>
   <div
     class="tui-list-item group border-b border-tui-active/30 last:border-b-0"
-    :class="selected ? 'bg-tui-cyan text-tui-bg' : ''"
+    :class="selected ? 'active' : ''"
   >
     <div
       class="flex-none w-12 text-right font-bold tabular-nums pt-0.5"
-      :class="selected ? 'text-tui-bg' : 'text-tui-text/60 group-hover:text-tui-bg'"
+      :class="selected ? 'text-current' : 'text-tui-text/60 group-hover:text-current'"
     >
       {{ item.score ?? 0 }}
     </div>
@@ -54,7 +54,7 @@ const rowVariant = computed(() => {
         <span
           v-if="host"
           class="uppercase break-all md:break-normal"
-          :class="selected ? 'text-tui-bg' : 'text-tui-cyan group-hover:text-tui-bg'"
+          :class="selected ? 'text-current opacity-80' : 'text-tui-cyan group-hover:text-current'"
         >
           ({{ host }})
         </span>
@@ -63,15 +63,15 @@ const rowVariant = computed(() => {
       <div
         class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 min-w-0 text-[0.92em]"
         :class="
-          selected ? 'opacity-100 text-tui-bg' : 'group-hover:opacity-100 group-hover:text-tui-bg'
+          selected ? 'opacity-100 text-current' : 'group-hover:opacity-100 group-hover:text-current'
         "
       >
         <span
           class="tui-chip"
           :class="
             selected
-              ? 'border-tui-bg text-tui-bg'
-              : 'group-hover:border-tui-bg group-hover:text-tui-bg'
+              ? 'border-current text-current'
+              : 'group-hover:border-current group-hover:text-current'
           "
         >
           {{ rowVariant }}
@@ -81,35 +81,30 @@ const rowVariant = computed(() => {
           class="tui-chip font-bold"
           :class="
             selected
-              ? 'border-tui-bg text-tui-bg'
-              : 'border-tui-yellow text-tui-yellow group-hover:border-tui-bg group-hover:text-tui-bg'
+              ? 'border-current text-current'
+              : 'border-tui-yellow text-tui-yellow group-hover:border-current group-hover:text-current'
           "
         >
           VOTED
         </span>
         <span
           class="break-all tui-meta"
-          :class="selected ? 'text-tui-bg' : 'group-hover:text-tui-bg'"
-          >BY: {{ item.by?.toUpperCase() ?? 'UNKNOWN' }}</span
+          :class="selected ? 'text-current' : 'group-hover:text-current'"
         >
+          BY: {{ item.by?.toUpperCase() ?? 'UNKNOWN' }}
+        </span>
         <span class="whitespace-nowrap">{{ timeAgo(item.time).toUpperCase() }}</span>
         <RouterLink
           :to="`/item/${item.id}`"
           class="font-bold underline"
-          :class="selected ? 'text-tui-bg' : 'text-tui-yellow group-hover:text-tui-bg'"
+          :class="selected ? 'text-current' : 'text-tui-yellow group-hover:text-current'"
         >
           {{ item.descendants ?? 0 }} COMM
         </RouterLink>
       </div>
     </div>
 
-    <RouterLink
-      class="flex-none self-center px-2 py-1 bg-tui-active text-tui-text border border-tui-border/30"
-      :class="
-        selected ? 'bg-tui-bg text-tui-cyan' : 'group-hover:bg-tui-bg group-hover:text-tui-cyan'
-      "
-      :to="`/item/${item.id}`"
-    >
+    <RouterLink class="tui-btn flex-none self-center text-xs py-0.5 px-2" :to="`/item/${item.id}`">
       VIEW
     </RouterLink>
   </div>

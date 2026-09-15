@@ -31,6 +31,48 @@
     --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-active));
     --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 72%, var(--color-tui-active));
 
+    /* Look & feel tokens (classic terminal defaults). Styles override these
+       below so shape, borders, shadows and fonts change independently of the
+       color scheme. */
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 2px;
+    --ykhn-border-style: solid;
+    --ykhn-border-color: var(--color-tui-border);
+    --ykhn-window-border-w: 4px;
+    --ykhn-window-border-style: solid;
+    --ykhn-modal-border-w: 4px;
+    --ykhn-modal-border-style: double;
+    --ykhn-field-border-style: solid;
+    --ykhn-shadow-lg: 6px 6px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow: 4px 4px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow-sm: 2px 2px 0 var(--ykhn-shadow-color);
+    --ykhn-inset-shadow: none;
+    --ykhn-window-bg: var(--color-tui-bg);
+    --ykhn-window-overlay: none;
+    --ykhn-overlay-blend: normal;
+    --ykhn-title-bg: var(--color-tui-cyan);
+    --ykhn-title-text: var(--color-tui-bg);
+    --ykhn-title-text-shadow: none;
+    --ykhn-menu-bg: var(--color-tui-gray);
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-menu-active-bg: var(--color-tui-bg);
+    --ykhn-menu-active-text: var(--color-tui-cyan);
+    --ykhn-btn-bg: var(--color-tui-gray);
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-btn-hover-bg: var(--color-tui-cyan);
+    --ykhn-btn-hover-text: var(--color-tui-bg);
+    --ykhn-item-hover-bg: var(--color-tui-cyan);
+    --ykhn-item-hover-text: var(--color-tui-bg);
+    --ykhn-item-active-bg: var(--color-tui-yellow);
+    --ykhn-item-active-text: var(--color-tui-bg);
+    --ykhn-nav-bg: var(--color-tui-active);
+    --ykhn-field-bg: var(--color-tui-bg);
+    --ykhn-scrollbar-track: var(--color-tui-active);
+    --ykhn-scrollbar-thumb: var(--color-tui-gray);
+    --ykhn-letter-spacing: 0em;
+    --ykhn-caps-transform: uppercase;
+
     /* Comment threading layout */
     --ykhn-comment-indent: 24px;
     --ykhn-comment-branch-offset: 18px;
@@ -53,6 +95,14 @@
     --color-tui-cyan: #66ffff;
     --color-tui-yellow: #fff56b;
     --ykhn-shadow-color: rgba(0, 0, 0, 0.62);
+    --ykhn-menu-text: #000000;
+    --ykhn-btn-text: #000000;
+    --ykhn-item-hover-bg: #66ffff;
+    --ykhn-item-hover-text: #00008f;
+    --ykhn-item-active-bg: #fff56b;
+    --ykhn-item-active-text: #00008f;
+    --ykhn-menu-active-bg: #00008f;
+    --ykhn-menu-active-text: #66ffff;
   }
 
   :root[data-theme='dark'] {
@@ -64,6 +114,43 @@
     --color-tui-cyan: #79d7d2;
     --color-tui-yellow: #f2dc78;
     --ykhn-shadow-color: rgba(0, 0, 0, 0.82);
+    --ykhn-menu-bg: #222522;
+    --ykhn-menu-text: #f1f1ec;
+    --ykhn-btn-bg: #2d302d;
+    --ykhn-btn-text: #f1f1ec;
+    --ykhn-item-hover-bg: #79d7d2;
+    --ykhn-item-hover-text: #070707;
+    --ykhn-item-active-bg: #f2dc78;
+    --ykhn-item-active-text: #070707;
+    --ykhn-menu-active-bg: #070707;
+    --ykhn-menu-active-text: #79d7d2;
+    --ykhn-nav-bg: #161816;
+  }
+
+  :root[data-theme='hackernews'] {
+    --color-tui-bg: #f6f6ef;
+    --color-tui-text: #222222;
+    --color-tui-border: #d8d8d0;
+    --color-tui-gray: #828282;
+    --color-tui-active: #e7e7df;
+    --color-tui-cyan: #ff6600;
+    --color-tui-yellow: #ff6600;
+    --ykhn-shadow-color: rgba(0, 0, 0, 0.12);
+    --ykhn-title-bg: #ff6600;
+    --ykhn-title-text: #222222;
+    --ykhn-menu-bg: #ff6600;
+    --ykhn-menu-text: #222222;
+    --ykhn-menu-active-bg: #e65c00;
+    --ykhn-menu-active-text: #ffffff;
+    --ykhn-btn-bg: #ffffff;
+    --ykhn-btn-text: #222222;
+    --ykhn-btn-hover-bg: #ff6600;
+    --ykhn-btn-hover-text: #ffffff;
+    --ykhn-item-hover-bg: rgba(255, 102, 0, 0.08);
+    --ykhn-item-hover-text: #000000;
+    --ykhn-item-active-bg: rgba(255, 102, 0, 0.18);
+    --ykhn-item-active-text: #000000;
+    --ykhn-nav-bg: #f6f6ef;
   }
 
   :root[data-theme='light'] {
@@ -75,6 +162,21 @@
     --color-tui-cyan: #005c60;
     --color-tui-yellow: #806700;
     --ykhn-shadow-color: rgba(32, 36, 29, 0.34);
+    --ykhn-title-bg: #005c60;
+    --ykhn-title-text: #fbfbf2;
+    --ykhn-menu-bg: #e2e7dc;
+    --ykhn-menu-text: #11130f;
+    --ykhn-menu-active-bg: #005c60;
+    --ykhn-menu-active-text: #fbfbf2;
+    --ykhn-btn-bg: #e2e7dc;
+    --ykhn-btn-text: #11130f;
+    --ykhn-btn-hover-bg: #005c60;
+    --ykhn-btn-hover-text: #fbfbf2;
+    --ykhn-item-hover-bg: #005c60;
+    --ykhn-item-hover-text: #fbfbf2;
+    --ykhn-item-active-bg: #806700;
+    --ykhn-item-active-text: #fbfbf2;
+    --ykhn-nav-bg: #d9ded1;
   }
 
   html {
@@ -125,6 +227,252 @@
     --tui-content-font-scale: 0.94;
   }
 
+  /* ===================================================================
+     Look & feel styles. These come after the font modes so a style owns
+     the UI/chrome typeface; the reading font still drives comment prose.
+     =================================================================== */
+  :root[data-style='classic'] {
+    /* Terminal is the default token set. */
+  }
+
+  :root[data-style='modern'] {
+    --ykhn-ui-font:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', ui-sans-serif, system-ui,
+      sans-serif;
+    --ykhn-radius: 12px;
+    --ykhn-radius-sm: 8px;
+    --ykhn-border-w: 1px;
+    --ykhn-window-border-w: 1px;
+    --ykhn-modal-border-w: 1px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-border) 24%, var(--color-tui-bg));
+    --ykhn-shadow-color: color-mix(in srgb, #000000 55%, transparent);
+    --ykhn-shadow-lg:
+      0 20px 40px -15px var(--ykhn-shadow-color),
+      0 0 0 1px color-mix(in srgb, var(--color-tui-border) 18%, transparent);
+    --ykhn-shadow:
+      0 10px 24px -12px var(--ykhn-shadow-color), 0 1px 3px -1px var(--ykhn-shadow-color);
+    --ykhn-shadow-sm: 0 2px 6px -2px var(--ykhn-shadow-color);
+    --ykhn-inset-shadow: inset 0 1px 2px var(--ykhn-shadow-color);
+    --ykhn-window-bg: color-mix(in srgb, var(--color-tui-bg) 96%, var(--color-tui-text));
+    --ykhn-title-bg: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-text));
+    --ykhn-title-text: var(--color-tui-text);
+    --ykhn-menu-bg: color-mix(in srgb, var(--color-tui-bg) 92%, var(--color-tui-text));
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-menu-active-bg: color-mix(in srgb, var(--color-tui-text) 14%, var(--color-tui-bg));
+    --ykhn-menu-active-text: var(--color-tui-text);
+    --ykhn-btn-bg: color-mix(in srgb, var(--color-tui-text) 9%, var(--color-tui-bg));
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-btn-hover-bg: color-mix(in srgb, var(--color-tui-text) 18%, var(--color-tui-bg));
+    --ykhn-btn-hover-text: var(--color-tui-text);
+    --ykhn-item-hover-bg: color-mix(in srgb, var(--color-tui-text) 8%, transparent);
+    --ykhn-item-hover-text: var(--color-tui-text);
+    --ykhn-item-active-bg: color-mix(in srgb, var(--color-tui-cyan) 22%, var(--color-tui-bg));
+    --ykhn-item-active-text: var(--color-tui-text);
+    --ykhn-nav-bg: color-mix(in srgb, var(--color-tui-bg) 93%, var(--color-tui-text));
+    --ykhn-field-bg: color-mix(in srgb, var(--color-tui-bg) 84%, var(--color-tui-active));
+    --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 94%, var(--color-tui-active));
+    --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 90%, var(--color-tui-active));
+    --ykhn-scrollbar-track: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-active));
+    --ykhn-scrollbar-thumb: color-mix(in srgb, var(--color-tui-gray) 65%, var(--color-tui-bg));
+    --ykhn-letter-spacing: 0.01em;
+    --ykhn-caps-transform: none;
+  }
+
+  :root[data-style='retro'] {
+    --font-mono: 'VT323', 'JetBrains Mono', monospace;
+    --ykhn-ui-font: 'VT323', 'JetBrains Mono', monospace;
+    --tui-font-size: 18px;
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 3px;
+    --ykhn-window-border-w: 6px;
+    --ykhn-modal-border-w: 6px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-shadow-lg: 8px 8px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow: 6px 6px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow-sm: 3px 3px 0 var(--ykhn-shadow-color);
+    --ykhn-title-text-shadow: 0 0 6px currentColor;
+    --ykhn-letter-spacing: 0.04em;
+    --ykhn-window-overlay:
+      radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.4) 100%),
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.16) 0px,
+        rgba(0, 0, 0, 0.16) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    --ykhn-overlay-blend: multiply;
+  }
+
+  :root[data-style='office'] {
+    --ykhn-ui-font: Tahoma, 'Segoe UI', Verdana, Geneva, 'MS Sans Serif', sans-serif;
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 2px;
+    --ykhn-window-border-w: 2px;
+    --ykhn-modal-border-w: 2px;
+    --ykhn-modal-border-style: outset;
+    --ykhn-border-style: solid;
+    --ykhn-window-border-style: solid;
+    --ykhn-field-border-style: inset;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-gray) 60%, var(--color-tui-bg));
+    --ykhn-shadow-lg: 2px 2px 0 rgba(0, 0, 0, 0.6);
+    --ykhn-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    --ykhn-shadow-sm: 1px 1px 0 rgba(0, 0, 0, 0.4);
+    --ykhn-window-bg: color-mix(in srgb, var(--color-tui-gray) 50%, var(--color-tui-bg));
+    --ykhn-title-bg: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    --ykhn-title-text: #ffffff;
+    --ykhn-title-text-shadow: 1px 1px 0 #000040;
+    --ykhn-menu-bg: color-mix(in srgb, var(--color-tui-gray) 55%, var(--color-tui-bg));
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-menu-active-bg: #000080;
+    --ykhn-menu-active-text: #ffffff;
+    --ykhn-btn-bg: color-mix(in srgb, var(--color-tui-gray) 55%, var(--color-tui-bg));
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-btn-hover-bg: color-mix(in srgb, var(--color-tui-gray) 65%, var(--color-tui-bg));
+    --ykhn-btn-hover-text: var(--color-tui-text);
+    --ykhn-item-hover-bg: #000080;
+    --ykhn-item-hover-text: #ffffff;
+    --ykhn-item-active-bg: #000080;
+    --ykhn-item-active-text: #ffffff;
+    --ykhn-nav-bg: color-mix(in srgb, var(--color-tui-gray) 50%, var(--color-tui-bg));
+    --ykhn-field-bg: var(--color-tui-bg);
+    --ykhn-inset-shadow:
+      inset 1px 1px 0 rgba(0, 0, 0, 0.5), inset -1px -1px 0 rgba(255, 255, 255, 0.4);
+    --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-gray) 42%, var(--color-tui-bg));
+    --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-gray) 32%, var(--color-tui-bg));
+    --ykhn-scrollbar-track: color-mix(in srgb, var(--color-tui-gray) 42%, var(--color-tui-bg));
+    --ykhn-scrollbar-thumb: color-mix(in srgb, var(--color-tui-gray) 65%, var(--color-tui-bg));
+    --ykhn-caps-transform: none;
+  }
+
+  :root[data-style='y2k'] {
+    --ykhn-ui-font: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
+    --ykhn-radius: 16px;
+    --ykhn-radius-sm: 10px;
+    --ykhn-border-w: 2px;
+    --ykhn-window-border-w: 2px;
+    --ykhn-modal-border-w: 2px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-cyan) 60%, var(--color-tui-bg));
+    --ykhn-shadow-lg:
+      0 0 0 1px color-mix(in srgb, var(--color-tui-cyan) 50%, transparent),
+      0 20px 45px -12px rgba(0, 0, 0, 0.55), 0 0 35px -8px var(--color-tui-cyan);
+    --ykhn-shadow:
+      0 0 20px -8px color-mix(in srgb, var(--color-tui-cyan) 75%, transparent),
+      0 6px 16px -8px rgba(0, 0, 0, 0.65);
+    --ykhn-shadow-sm: 0 0 10px -3px var(--color-tui-cyan);
+    --ykhn-window-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-tui-bg) 82%, var(--color-tui-cyan)) 0%,
+      var(--color-tui-bg) 50%,
+      color-mix(in srgb, var(--color-tui-bg) 85%, var(--color-tui-yellow)) 100%
+    );
+    --ykhn-title-bg:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.12) 49%,
+        rgba(0, 0, 0, 0.12) 50%,
+        rgba(255, 255, 255, 0.2) 100%
+      ),
+      linear-gradient(
+        90deg,
+        var(--color-tui-cyan) 0%,
+        color-mix(in srgb, var(--color-tui-cyan) 60%, var(--color-tui-active)) 100%
+      );
+    --ykhn-title-text: #02121e;
+    --ykhn-title-text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    --ykhn-menu-bg: color-mix(in srgb, var(--color-tui-active) 65%, var(--color-tui-bg));
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-menu-active-bg: var(--color-tui-cyan);
+    --ykhn-menu-active-text: #02121e;
+    --ykhn-btn-bg:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.12) 49%,
+        rgba(0, 0, 0, 0.1) 50%,
+        rgba(255, 255, 255, 0.2) 100%
+      ),
+      color-mix(in srgb, var(--color-tui-active) 40%, var(--color-tui-bg));
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-btn-hover-bg:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.25) 49%,
+        rgba(0, 0, 0, 0.08) 50%,
+        rgba(255, 255, 255, 0.35) 100%
+      ),
+      var(--color-tui-cyan);
+    --ykhn-btn-hover-text: #02121e;
+    --ykhn-item-hover-bg: color-mix(in srgb, var(--color-tui-cyan) 25%, transparent);
+    --ykhn-item-hover-text: var(--color-tui-text);
+    --ykhn-item-active-bg: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-tui-cyan) 35%, transparent) 0%,
+      color-mix(in srgb, var(--color-tui-yellow) 20%, transparent) 100%
+    );
+    --ykhn-item-active-text: var(--color-tui-text);
+    --ykhn-nav-bg: color-mix(in srgb, var(--color-tui-active) 65%, var(--color-tui-bg));
+    --ykhn-field-bg: color-mix(in srgb, var(--color-tui-bg) 80%, var(--color-tui-active));
+    --ykhn-panel-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-bg) 82%, var(--color-tui-cyan)) 0%,
+      color-mix(in srgb, var(--color-tui-bg) 94%, var(--color-tui-active)) 100%
+    );
+    --ykhn-muted-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-cyan)) 0%,
+      color-mix(in srgb, var(--color-tui-bg) 94%, var(--color-tui-active)) 100%
+    );
+    --ykhn-scrollbar-track: color-mix(in srgb, var(--color-tui-cyan) 28%, var(--color-tui-bg));
+    --ykhn-scrollbar-thumb: linear-gradient(180deg, var(--color-tui-cyan), var(--color-tui-active));
+    --ykhn-letter-spacing: 0.02em;
+    --ykhn-caps-transform: none;
+  }
+
+  :root[data-style='og'] {
+    --ykhn-ui-font: Verdana, Geneva, -apple-system, BlinkMacSystemFont, sans-serif;
+    --ykhn-content-font: Verdana, Geneva, -apple-system, BlinkMacSystemFont, sans-serif;
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 1px;
+    --ykhn-window-border-w: 0px;
+    --ykhn-modal-border-w: 1px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-border) 24%, var(--color-tui-bg));
+    --ykhn-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --ykhn-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --ykhn-shadow-sm: none;
+    --ykhn-inset-shadow: none;
+    --ykhn-window-bg: var(--color-tui-bg);
+    --ykhn-title-bg: #ff6600;
+    --ykhn-title-text: #222222;
+    --ykhn-title-text-shadow: none;
+    --ykhn-menu-bg: #ff6600;
+    --ykhn-menu-text: #222222;
+    --ykhn-menu-active-bg: #e65c00;
+    --ykhn-menu-active-text: #ffffff;
+    --ykhn-btn-bg: color-mix(in srgb, var(--color-tui-text) 8%, var(--color-tui-bg));
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-btn-hover-bg: #ff6600;
+    --ykhn-btn-hover-text: #ffffff;
+    --ykhn-item-hover-bg: color-mix(in srgb, #ff6600 8%, transparent);
+    --ykhn-item-hover-text: var(--color-tui-text);
+    --ykhn-item-active-bg: color-mix(in srgb, #ff6600 18%, transparent);
+    --ykhn-item-active-text: var(--color-tui-text);
+    --ykhn-nav-bg: color-mix(in srgb, var(--color-tui-bg) 95%, var(--color-tui-text));
+    --ykhn-field-bg: var(--color-tui-bg);
+    --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 96%, var(--color-tui-text));
+    --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 92%, var(--color-tui-text));
+    --ykhn-letter-spacing: 0em;
+    --ykhn-caps-transform: none;
+  }
+
   body {
     @apply bg-tui-bg text-tui-text font-mono;
     font-family: var(--ykhn-ui-font);
@@ -145,15 +493,17 @@
     letter-spacing: 0;
   }
 
-  /* Norton Commander style scrollbar */
+  /* Theme-aware scrollbar */
   ::-webkit-scrollbar {
     width: 12px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-tui-active;
+    background: var(--ykhn-scrollbar-track);
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-tui-gray border-2 border-tui-bg;
+    background: var(--ykhn-scrollbar-thumb);
+    border: 2px solid var(--color-tui-bg);
+    border-radius: var(--ykhn-radius-sm);
   }
 
   /* Custom scrollbar for the main area */
@@ -161,11 +511,13 @@
     width: 16px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-tui-active/50;
+    background: var(--ykhn-scrollbar-track);
     box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.5);
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-tui-gray border-2 border-tui-bg;
+    background: var(--ykhn-scrollbar-thumb);
+    border: 2px solid var(--color-tui-bg);
+    border-radius: var(--ykhn-radius-sm);
     box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
   }
 
@@ -194,33 +546,78 @@
 
 @layer components {
   .tui-window {
-    @apply border-2 border-tui-border bg-tui-bg;
-    box-shadow: 6px 6px 0 var(--ykhn-shadow-color);
+    @apply bg-tui-bg;
+    position: relative;
+    border-width: var(--ykhn-window-border-w);
+    border-style: var(--ykhn-window-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius);
+    background: var(--ykhn-window-bg);
+    box-shadow: var(--ykhn-shadow-lg);
+  }
+
+  /* Optional decorative layer (CRT scanlines, glossy highlights). */
+  .tui-window::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--ykhn-window-overlay);
+    mix-blend-mode: var(--ykhn-overlay-blend);
   }
 
   .tui-title-bar {
-    @apply bg-tui-cyan text-tui-bg px-2 py-1 font-bold flex justify-between items-center uppercase border-b-2 border-tui-border;
+    @apply px-2 py-1 font-bold flex justify-between items-center;
+    text-transform: var(--ykhn-caps-transform);
+    background: var(--ykhn-title-bg);
+    color: var(--ykhn-title-text);
+    border-bottom-width: var(--ykhn-border-w);
+    border-bottom-style: var(--ykhn-border-style);
+    border-bottom-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius) var(--ykhn-radius) 0 0;
+    text-shadow: var(--ykhn-title-text-shadow);
+    letter-spacing: var(--ykhn-letter-spacing);
     line-height: 1.2;
   }
 
   .tui-panel,
   .retro-border {
-    @apply border-2 border-tui-border bg-tui-bg p-3 md:p-4;
+    @apply p-3 md:p-4;
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
     background: var(--ykhn-panel-bg);
-    box-shadow: 4px 4px 0 var(--ykhn-shadow-color);
+    box-shadow: var(--ykhn-shadow);
   }
 
   .tui-panel-muted {
-    @apply border border-tui-active/60 p-3 md:p-4;
+    @apply p-3 md:p-4;
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: color-mix(in srgb, var(--ykhn-border-color) 55%, transparent);
+    border-radius: var(--ykhn-radius-sm);
     background: var(--ykhn-muted-bg);
   }
 
   .tui-section-heading {
-    @apply bg-tui-active text-tui-text px-2 py-1 font-bold uppercase border-b border-tui-border/40;
+    @apply bg-tui-active text-tui-text px-2 py-1 font-bold;
+    text-transform: var(--ykhn-caps-transform);
+    border-bottom: 1px solid color-mix(in srgb, var(--ykhn-border-color) 40%, transparent);
+    border-radius: var(--ykhn-radius-sm) var(--ykhn-radius-sm) 0 0;
+    letter-spacing: var(--ykhn-letter-spacing);
   }
 
   .tui-field {
-    @apply bg-tui-bg border-2 border-tui-border px-2 py-1 font-mono outline-none text-tui-text;
+    @apply px-2 py-1 font-mono outline-none text-tui-text;
+    background: var(--ykhn-field-bg);
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-field-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
+    box-shadow: var(--ykhn-inset-shadow);
   }
 
   .tui-field:focus {
@@ -229,89 +626,144 @@
   }
 
   .tui-comment-card {
-    @apply border border-tui-active p-2 md:p-3 mb-2 relative overflow-hidden;
+    @apply p-2 md:p-3 mb-2 relative overflow-hidden;
+    border: 1px solid color-mix(in srgb, var(--color-tui-active) 80%, var(--color-tui-bg));
+    border-radius: var(--ykhn-radius-sm);
     background: color-mix(in srgb, var(--color-tui-bg) 92%, var(--color-tui-active));
-    box-shadow: 2px 2px 0 var(--ykhn-shadow-color);
+    box-shadow: var(--ykhn-shadow-sm);
+  }
+
+  /* Modal surface (help overlay, etc.) reuses the window language. */
+  .tui-modal {
+    @apply flex flex-col overflow-hidden;
+    border-width: var(--ykhn-modal-border-w);
+    border-style: var(--ykhn-modal-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius);
+    background: var(--ykhn-window-bg);
+    box-shadow: var(--ykhn-shadow-lg);
   }
 
   /* Handle long text/code in v-html */
   .prose {
-    @apply break-words w-full max-w-full;
-    overflow-wrap: anywhere;
-    line-height: 1.55;
+    color: var(--color-tui-text);
   }
-
+  .prose p {
+    margin-bottom: 0.75rem;
+  }
+  .prose p:last-child {
+    margin-bottom: 0;
+  }
+  .prose a {
+    color: var(--color-tui-cyan);
+    text-decoration: underline;
+  }
+  .prose a:hover {
+    background-color: var(--color-tui-cyan);
+    color: var(--color-tui-bg);
+    text-decoration: none;
+  }
   .prose pre {
-    @apply p-2 bg-black/30 border border-tui-active/30 my-2 font-mono w-full max-w-full;
-    white-space: pre-wrap !important;
-    word-wrap: break-word !important;
-    word-break: break-all !important;
-    overflow-x: hidden;
+    background-color: var(--color-tui-bg);
+    border: 1px solid var(--color-tui-border);
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
   }
-
   .prose code {
-    @apply px-1 bg-black/30 text-tui-cyan;
-    word-break: break-all !important;
-    white-space: pre-wrap !important;
+    font-family: var(--font-mono);
+    color: var(--color-tui-yellow);
   }
 
-  /* Quoted text in HN often uses <i> or simple indentation */
-  .prose i,
-  .prose em {
-    @apply border-l-2 border-tui-active/50 pl-2 not-italic text-tui-gray block my-2;
+  /* CRT flicker/scanline animations if needed */
+  .scanline {
+    width: 100%;
+    height: 100px;
+    z-index: 99;
+    background: linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(255, 255, 255, 0.2) 10%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+    opacity: 0.1;
+    position: absolute;
+    bottom: 100%;
+    animation: scanline 10s linear infinite;
+    pointer-events: none;
   }
 
-  .prose blockquote {
-    @apply border-l-2 border-tui-yellow pl-2 my-2 italic text-tui-gray;
+  @keyframes scanline {
+    0% {
+      bottom: 100%;
+    }
+    80% {
+      bottom: 100%;
+    }
+    100% {
+      bottom: 0%;
+    }
   }
 
-  .tui-comment-branch {
-    @apply absolute left-[-14px] md:left-[-20px] top-0 bottom-0 w-[2px] bg-tui-active/30;
+  /* Joystick button styling */
+  .tui-joy-btn {
+    @apply w-12 h-12 flex items-center justify-center font-bold text-lg border-2 border-tui-border bg-tui-bg text-tui-cyan shadow-sm active:bg-tui-cyan active:text-tui-bg transition-none select-none;
+    border-radius: var(--ykhn-radius-sm);
   }
 
-  .tui-comment-node {
-    @apply relative ml-4 md:ml-6 mb-2;
+  /* Utility classes to mirror Norton Commander F-keys */
+  .tui-footer-bar {
+    @apply flex bg-tui-active text-tui-text font-mono text-xs md:text-sm overflow-x-auto;
+    border-top: var(--ykhn-border-w) solid var(--ykhn-border-color);
   }
 
-  .tui-comment-node::before {
-    content: '├─';
-    @apply absolute left-[-16px] md:left-[-20px] top-4 text-tui-active/50 font-mono;
-  }
-
-  .tui-comment-node:last-child::before {
-    content: '└─';
-  }
-
-  .tui-comment-node:last-child > .tui-comment-branch {
-    @apply hidden;
-  }
-
-  .tui-btn {
-    @apply px-3 py-1 bg-tui-gray text-tui-text hover:bg-tui-cyan hover:text-tui-bg border-2 border-tui-border active:translate-x-[1px] active:translate-y-[1px] uppercase font-bold disabled:opacity-50 disabled:cursor-not-allowed;
-    box-shadow: 2px 2px 0 var(--ykhn-shadow-color);
-  }
-
-  .tui-btn:active {
-    box-shadow: none;
-  }
-
-  :root[data-theme='commander'] .tui-btn {
-    @apply text-tui-bg;
+  .tui-nav-bar {
+    background: var(--ykhn-nav-bg);
+    border-top: var(--ykhn-border-w) solid var(--ykhn-border-color);
   }
 
   .tui-f-key {
-    @apply flex-1 text-center py-1 border-r border-tui-border/60 last:border-r-0;
+    @apply flex-1 text-center py-1 border-r border-tui-border/60 last:border-r-0 cursor-pointer;
+    transition:
+      background-color 100ms ease,
+      color 100ms ease;
   }
   .tui-f-key span {
-    @apply text-tui-yellow font-bold mr-1;
+    @apply font-bold mr-1;
+    color: var(--color-tui-yellow);
+  }
+
+  .tui-f-key:hover {
+    background: var(--ykhn-item-hover-bg);
+    color: var(--ykhn-item-hover-text);
+  }
+
+  .tui-f-key.active {
+    background: var(--ykhn-item-active-bg);
+    color: var(--ykhn-item-active-text);
+  }
+  .tui-f-key.active span {
+    color: inherit;
   }
 
   .tui-list-item {
-    @apply flex items-start gap-3 px-2 py-2 hover:bg-tui-cyan hover:text-tui-bg cursor-pointer;
+    @apply flex items-start gap-3 px-2 py-2 cursor-pointer;
+    border-radius: var(--ykhn-radius-sm);
+    transition:
+      background-color 100ms ease,
+      color 100ms ease;
+  }
+
+  .tui-list-item:hover {
+    background: var(--ykhn-item-hover-bg);
+    color: var(--ykhn-item-hover-text);
   }
 
   .tui-list-item.active {
-    @apply bg-tui-yellow text-tui-bg;
+    background: var(--ykhn-item-active-bg);
+    color: var(--ykhn-item-active-text);
   }
 
   .tui-meta {
@@ -319,54 +771,61 @@
   }
 
   .tui-chip {
-    @apply inline-flex items-center border border-tui-active/70 px-1.5 leading-none uppercase text-tui-cyan;
+    @apply inline-flex items-center border border-tui-active/70 px-1.5 leading-none text-tui-cyan;
+    text-transform: var(--ykhn-caps-transform);
+    border-radius: var(--ykhn-radius-sm);
     min-height: 1.25rem;
   }
 
   .tui-menu-bar {
-    @apply bg-tui-gray text-tui-text flex font-mono border-b border-tui-bg sticky top-0 z-10;
+    @apply flex font-mono sticky top-0 z-10;
+    background: var(--ykhn-menu-bg);
+    color: var(--ykhn-menu-text);
+    border-bottom: 1px solid var(--ykhn-border-color);
     line-height: 1.25;
-  }
-
-  :root[data-theme='light'] .tui-menu-bar,
-  :root[data-theme='dark'] .tui-menu-bar {
-    @apply text-white;
-  }
-
-  :root[data-theme='commander'] .tui-menu-bar {
-    @apply text-black;
+    letter-spacing: var(--ykhn-letter-spacing);
   }
 
   .tui-menu-item {
-    @apply px-4 py-0.5 hover:bg-tui-bg hover:text-tui-cyan cursor-pointer transition-none relative font-bold;
-    @apply focus-visible:bg-tui-bg focus-visible:text-tui-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-tui-yellow;
+    @apply px-4 py-0.5 cursor-pointer transition-none relative font-bold;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-tui-yellow;
+  }
+
+  .tui-menu-item:hover,
+  .tui-menu-item:focus-visible,
+  .tui-menu-item.active {
+    background: var(--ykhn-menu-active-bg);
+    color: var(--ykhn-menu-active-text);
   }
 
   .tui-menu-dropdown {
-    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border z-50 min-w-[180px] text-tui-text;
-    box-shadow: 4px 4px 0 var(--ykhn-shadow-color);
-  }
-
-  :root[data-theme='light'] .tui-menu-dropdown {
-    @apply text-white;
-  }
-
-  :root[data-theme='commander'] .tui-menu-dropdown {
-    @apply text-black;
+    @apply absolute top-full left-0 z-50 min-w-[180px];
+    max-height: calc(100dvh - 3rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--ykhn-menu-bg);
+    color: var(--ykhn-menu-text);
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
+    box-shadow: var(--ykhn-shadow);
   }
 
   .tui-dropdown-item {
-    @apply px-4 py-1.5 hover:bg-tui-bg hover:text-tui-cyan whitespace-nowrap flex justify-between gap-4;
-    @apply focus-visible:bg-tui-bg focus-visible:text-tui-cyan focus-visible:outline focus-visible:outline-1 focus-visible:outline-tui-yellow;
+    @apply px-4 py-1.5 whitespace-nowrap flex justify-between gap-4;
+    @apply focus-visible:outline focus-visible:outline-1 focus-visible:outline-tui-yellow;
   }
 
-  /* System dropdown uses theme-aware text color */
+  .tui-dropdown-item:hover,
+  .tui-dropdown-item:focus-visible {
+    background: var(--ykhn-menu-active-bg);
+    color: var(--ykhn-menu-active-text);
+  }
+
+  /* System dropdown inherits the themed menu text color */
   .tui-sys-menu {
-    @apply text-tui-text;
-  }
-
-  :root[data-theme='commander'] .tui-sys-menu {
-    @apply text-tui-bg;
+    color: var(--ykhn-menu-text);
   }
 
   /* Reveal shortcuts in dropdown sub-entries on hover */
@@ -381,8 +840,179 @@
   }
 
   @media (hover: none) {
-    .tui-dropdown-item .tui-shortcut {
+    \n .tui-dropdown-item .tui-shortcut {
       opacity: 0.6;
     }
   }
+
+  .tui-btn {
+    @apply px-3 py-1 active:translate-x-[1px] active:translate-y-[1px] font-bold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center;
+    text-transform: var(--ykhn-caps-transform);
+    background: var(--ykhn-btn-bg);
+    color: var(--ykhn-btn-text);
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
+    box-shadow: var(--ykhn-shadow-sm);
+    letter-spacing: var(--ykhn-letter-spacing);
+  }
+
+  .tui-btn:hover {
+    background: var(--ykhn-btn-hover-bg);
+    color: var(--ykhn-btn-hover-text);
+  }
+
+  .tui-btn:active {
+    box-shadow: none;
+  }
+
+  /* -------------------------------------------------------------------
+     Style-specific micro-interactions & visual enhancements
+     ------------------------------------------------------------------- */
+
+  /* Modern style: soft borders, clean buttons, hide raw ASCII glyphs */
+  :root[data-style='modern'] .tui-tree-glyph {
+    display: none;
+  }
+  :root[data-style='modern'] .tui-tree-dot {
+    display: inline-block;
+  }
+  :root[data-style='modern'] .tui-btn {
+    border-color: color-mix(in srgb, var(--color-tui-border) 20%, transparent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    transition:
+      background-color 120ms ease,
+      box-shadow 120ms ease,
+      border-color 120ms ease;
+  }
+  :root[data-style='modern'] .tui-btn:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.14);
+    border-color: color-mix(in srgb, var(--color-tui-border) 35%, transparent);
+  }
+
+  /* Office style: authentic 3D beveled surfaces (Windows 95/98) */
+  :root[data-style='office'] .tui-tree-glyph {
+    display: none;
+  }
+  :root[data-style='office'] .tui-tree-dot {
+    display: inline-block;
+  }
+  :root[data-style='office'] .tui-window {
+    border-top: 2px solid rgba(255, 255, 255, 0.85);
+    border-left: 2px solid rgba(255, 255, 255, 0.85);
+    border-right: 2px solid rgba(0, 0, 0, 0.75);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.75);
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.4),
+      inset -1px -1px 0 rgba(0, 0, 0, 0.3),
+      2px 2px 0 rgba(0, 0, 0, 0.5);
+  }
+  :root[data-style='office'] .tui-panel,
+  :root[data-style='office'] .tui-panel-muted {
+    border-top: 1px solid rgba(0, 0, 0, 0.6);
+    border-left: 1px solid rgba(0, 0, 0, 0.6);
+    border-right: 1px solid rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+      inset 1px 1px 0 rgba(0, 0, 0, 0.3),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.4);
+  }
+  :root[data-style='office'] .tui-btn {
+    border-top: 2px solid rgba(255, 255, 255, 0.9);
+    border-left: 2px solid rgba(255, 255, 255, 0.9);
+    border-right: 2px solid rgba(0, 0, 0, 0.75);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.75);
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+      inset -1px -1px 0 rgba(0, 0, 0, 0.35);
+  }
+  :root[data-style='office'] .tui-btn:active {
+    border-top: 2px solid rgba(0, 0, 0, 0.75);
+    border-left: 2px solid rgba(0, 0, 0, 0.75);
+    border-right: 2px solid rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      inset 1px 1px 0 rgba(0, 0, 0, 0.4),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.5);
+    transform: translate(1px, 1px);
+  }
+  :root[data-style='office'] .tui-field {
+    border-top: 2px solid rgba(0, 0, 0, 0.75);
+    border-left: 2px solid rgba(0, 0, 0, 0.75);
+    border-right: 2px solid rgba(255, 255, 255, 0.85);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow:
+      inset 1px 1px 0 rgba(0, 0, 0, 0.4),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  /* Y2K style: Aqua gel buttons, pills, specular reflections */
+  :root[data-style='y2k'] .tui-tree-glyph {
+    display: none;
+  }
+  :root[data-style='y2k'] .tui-tree-dot {
+    display: inline-block;
+  }
+  :root[data-style='y2k'] .tui-btn {
+    border-radius: 9999px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      0 2px 6px -1px rgba(0, 0, 0, 0.35),
+      0 0 8px -2px var(--color-tui-cyan);
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  :root[data-style='y2k'] .tui-btn:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 0 16px var(--color-tui-cyan),
+      0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  :root[data-style='y2k'] .tui-chip {
+    border-radius: 9999px;
+  }
+
+  /* OG Hacker News style: clean flat layout, Verdana, 0px radius, flat buttons */
+  :root[data-style='og'] .tui-tree-glyph {
+    display: none;
+  }
+  :root[data-style='og'] .tui-tree-dot {
+    display: inline-block;
+  }
+  :root[data-style='og'] .tui-window {
+    border: none;
+    box-shadow: none;
+  }
+  :root[data-style='og'] .tui-title-bar {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+    font-weight: 700;
+  }
+  :root[data-style='og'] .tui-btn {
+    border: 1px solid color-mix(in srgb, var(--color-tui-border) 35%, transparent);
+    box-shadow: none;
+    font-weight: 500;
+    border-radius: 0px;
+  }
+  :root[data-style='og'] .tui-btn:hover {
+    box-shadow: none;
+  }
+  :root[data-style='og'] .tui-chip {
+    border-radius: 0px;
+    border-color: color-mix(in srgb, var(--color-tui-border) 35%, transparent);
+  }
+  :root[data-style='og'] .tui-list-item {
+    border-radius: 0px;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+  :root[data-style='og'] .tui-meta {
+    color: var(--color-tui-gray);
+  }
+}
+
+/* Re-case utility-driven labels to match the active look & feel. Declared
+   outside @layer components so it can override Tailwind's uppercase utility. */
+:root[data-style] .uppercase {
+  text-transform: var(--ykhn-caps-transform);
 }

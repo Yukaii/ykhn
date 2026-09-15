@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import ThemeBrowser from '../components/ThemeBrowser.vue'
+import { styleThemes, type StyleTheme } from '../lib/themes'
 import {
   fontSizePx,
   setFontMode,
   setFontSizePx,
+  setStyleTheme,
   setTheme,
   uiState,
   type FontMode,
@@ -14,10 +16,15 @@ import {
 const fontSize = fontSizePx
 
 const theme = computed(() => uiState.theme)
+const styleTheme = computed(() => uiState.styleTheme)
 const fontMode = computed(() => uiState.fontMode)
 
 function setThemeLocal(next: Theme) {
   setTheme(next)
+}
+
+function setStyleThemeLocal(next: StyleTheme) {
+  setStyleTheme(next)
 }
 
 function setFontModeLocal(next: FontMode) {
@@ -75,19 +82,21 @@ function updateFontSize(delta: number) {
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>FONT_SIZE:</span>
-          <div class="flex border border-tui-border">
+          <div
+            class="flex border border-tui-border rounded-[var(--ykhn-radius-sm)] overflow-hidden"
+          >
             <button
-              class="px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan"
+              class="px-3 py-1 bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg font-bold"
               type="button"
               @click="updateFontSize(-1)"
             >
               -
             </button>
-            <div class="px-4 py-1 bg-tui-bg text-tui-cyan min-w-20 text-center">
+            <div class="px-4 py-1 bg-tui-bg text-tui-cyan min-w-20 text-center font-mono font-bold">
               {{ fontSize }}PX
             </div>
             <button
-              class="px-3 py-1 bg-tui-gray text-tui-bg hover:bg-tui-cyan"
+              class="px-3 py-1 bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg font-bold"
               type="button"
               @click="updateFontSize(1)"
             >
@@ -98,13 +107,15 @@ function updateFontSize(delta: number) {
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>COLOR_THEME:</span>
-          <div class="grid grid-cols-3 border border-tui-border">
+          <div
+            class="grid grid-cols-4 border border-tui-border rounded-[var(--ykhn-radius-sm)] overflow-hidden"
+          >
             <button
-              class="px-3 py-1 uppercase"
+              class="px-3 py-1 uppercase transition-colors"
               :class="
                 theme === 'commander'
                   ? 'bg-tui-cyan text-tui-bg font-bold'
-                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
               "
               type="button"
               @click="setThemeLocal('commander')"
@@ -112,11 +123,11 @@ function updateFontSize(delta: number) {
               CMD
             </button>
             <button
-              class="px-3 py-1 uppercase"
+              class="px-3 py-1 uppercase transition-colors"
               :class="
                 theme === 'dark'
                   ? 'bg-tui-cyan text-tui-bg font-bold'
-                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
               "
               type="button"
               @click="setThemeLocal('dark')"
@@ -124,29 +135,66 @@ function updateFontSize(delta: number) {
               DARK
             </button>
             <button
-              class="px-3 py-1 uppercase"
+              class="px-3 py-1 uppercase transition-colors"
               :class="
                 theme === 'light'
                   ? 'bg-tui-cyan text-tui-bg font-bold'
-                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
               "
               type="button"
               @click="setThemeLocal('light')"
             >
               LIGHT
             </button>
+            <button
+              class="px-3 py-1 uppercase transition-colors"
+              :class="
+                theme === 'hackernews'
+                  ? 'bg-tui-cyan text-tui-bg font-bold'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
+              "
+              type="button"
+              @click="setThemeLocal('hackernews')"
+            >
+              HN
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span>LOOK_AND_FEEL:</span>
+          <div
+            class="grid grid-cols-3 sm:grid-cols-6 border border-tui-border rounded-[var(--ykhn-radius-sm)] overflow-hidden"
+          >
+            <button
+              v-for="style in styleThemes"
+              :key="style.id"
+              class="px-2 py-1 text-xs uppercase sm:text-sm transition-colors"
+              :class="
+                styleTheme === style.id
+                  ? 'bg-tui-cyan text-tui-bg font-bold'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
+              "
+              type="button"
+              :title="style.description"
+              @click="setStyleThemeLocal(style.id)"
+            >
+              {{ style.label }}
+            </button>
           </div>
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>READING_FONT:</span>
-          <div class="grid grid-cols-3 border border-tui-border">
+          <div
+            class="grid grid-cols-3 border border-tui-border rounded-[var(--ykhn-radius-sm)] overflow-hidden"
+          >
             <button
-              class="px-3 py-1 uppercase"
+              class="px-3 py-1 uppercase transition-colors"
               :class="
                 fontMode === 'readable'
                   ? 'bg-tui-cyan text-tui-bg font-bold'
-                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
               "
               type="button"
               @click="setFontModeLocal('readable')"
@@ -154,11 +202,11 @@ function updateFontSize(delta: number) {
               READ
             </button>
             <button
-              class="px-3 py-1 uppercase"
+              class="px-3 py-1 uppercase transition-colors"
               :class="
                 fontMode === 'balanced'
                   ? 'bg-tui-cyan text-tui-bg font-bold'
-                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
               "
               type="button"
               @click="setFontModeLocal('balanced')"
@@ -166,11 +214,11 @@ function updateFontSize(delta: number) {
               BAL
             </button>
             <button
-              class="px-3 py-1 uppercase"
+              class="px-3 py-1 uppercase transition-colors"
               :class="
                 fontMode === 'retro'
                   ? 'bg-tui-cyan text-tui-bg font-bold'
-                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+                  : 'bg-tui-active/30 text-tui-text hover:bg-tui-cyan hover:text-tui-bg'
               "
               type="button"
               @click="setFontModeLocal('retro')"

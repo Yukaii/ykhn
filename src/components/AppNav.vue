@@ -30,7 +30,7 @@ function isActive(to: string) {
 
 <template>
   <nav
-    class="bg-tui-active border-t-2 border-tui-border relative flex items-center h-11 overflow-hidden"
+    class="tui-nav-bar relative flex items-center h-11 overflow-hidden select-none"
     aria-label="Feeds"
   >
     <!-- Left Overflow Indicator -->
@@ -51,8 +51,8 @@ function isActive(to: string) {
       <RouterLink
         v-for="(tab, index) in tabs"
         :key="tab.to"
-        class="tui-f-key flex items-center justify-center hover:bg-tui-cyan hover:text-tui-bg transition-none whitespace-nowrap px-4 shrink-0 h-full"
-        :class="isActive(tab.to) ? 'bg-tui-yellow text-tui-bg' : ''"
+        class="tui-f-key flex items-center justify-center whitespace-nowrap px-4 shrink-0 h-full"
+        :class="isActive(tab.to) ? 'active' : ''"
         :to="tab.to"
       >
         <span>F{{ index + 1 }}</span

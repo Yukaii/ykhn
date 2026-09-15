@@ -89,15 +89,16 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
     <!-- Visual branch for threading -->
     <div
       v-if="depth > 0"
-      class="absolute top-4 text-tui-active/50 font-mono leading-none"
+      class="tui-comment-branch-indicator absolute top-4 text-tui-active/50 font-mono leading-none flex items-center"
       :style="branchStyle"
     >
-      <span>{{ isLast ? '└─' : '├─' }}</span>
+      <span class="tui-tree-glyph">{{ isLast ? '└──' : '├──' }}</span>
+      <span class="tui-tree-dot hidden w-1.5 h-1.5 rounded-full bg-tui-border/40 mr-1.5"></span>
       <span v-if="overflowDepth" class="ml-1 text-tui-yellow/70">+{{ overflowDepth }}</span>
     </div>
     <div
       v-if="depth > 0 && !isLast"
-      class="absolute top-8 bottom-[-16px] border-l border-tui-active/30"
+      class="tui-comment-branch-line absolute top-8 bottom-[-16px] border-l border-tui-active/30"
       :style="branchStyle"
     ></div>
 
@@ -106,7 +107,7 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
       :class="selectedId === id ? 'border-2 border-tui-yellow bg-tui-active/10' : ''"
     >
       <div
-        class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-tui-active/45 px-2 py-1.5 mb-3 font-mono border-b border-tui-border/20"
+        class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-tui-active/45 px-2 py-1.5 mb-3 font-mono border-b border-tui-border/20 rounded-t-[calc(var(--ykhn-radius-sm)-2px)]"
       >
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
           <div class="flex items-center gap-1">
@@ -123,7 +124,7 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
         <button
           v-if="kids.length"
           @click="toggle"
-          class="ml-auto shrink-0 bg-tui-bg text-tui-border px-2 py-0.5 border border-tui-border/40 hover:bg-tui-border hover:text-tui-bg transition-none"
+          class="tui-btn text-xs py-0.5 px-2 ml-auto shrink-0"
         >
           {{ expanded ? '[-] COLLAPSE' : `[+] EXPAND ${kids.length}` }}
         </button>
@@ -139,7 +140,7 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
 
         <div v-if="expanded && kids.length && !hasLoadedKids" class="mt-2 text-right">
           <button
-            class="font-bold text-tui-yellow hover:bg-tui-yellow hover:text-tui-bg px-2 border border-tui-yellow/30 transition-none uppercase"
+            class="tui-btn text-xs py-0.5 px-2 font-bold text-tui-yellow"
             type="button"
             @click="ensureKids"
           >
@@ -166,8 +167,13 @@ useEventListener(window, 'ykhn:comment-set-expanded', (ev) => {
 
   <div v-else class="relative mb-4" :style="commentOffsetStyle">
     <!-- Skeleton branch -->
-    <div v-if="depth > 0" class="absolute top-4 text-tui-active/20 font-mono" :style="branchStyle">
-      <span>{{ isLast ? '└─' : '├─' }}</span>
+    <div
+      v-if="depth > 0"
+      class="tui-comment-branch-indicator absolute top-4 text-tui-active/20 font-mono flex items-center"
+      :style="branchStyle"
+    >
+      <span class="tui-tree-glyph">{{ isLast ? '└──' : '├──' }}</span>
+      <span class="tui-tree-dot hidden w-1.5 h-1.5 rounded-full bg-tui-border/40 mr-1.5"></span>
       <span v-if="overflowDepth" class="ml-1 text-tui-yellow/40">+{{ overflowDepth }}</span>
     </div>
 
