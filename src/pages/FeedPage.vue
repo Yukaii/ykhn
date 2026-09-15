@@ -522,21 +522,21 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-else class="flex-1">
-      <div v-if="loadingItems && items.length === 0" class="flex flex-col">
+      <div v-if="loadingItems && items.length === 0" class="tui-list">
         <div
           v-for="n in 15"
           :key="n"
-          class="p-2 border-b border-tui-active/30 flex gap-3 opacity-30"
+          class="tui-list-item opacity-30 cursor-default pointer-events-none"
         >
-          <div class="w-12 text-right">000</div>
-          <div class="flex-1">
+          <div class="flex-none w-12 text-right font-bold tabular-nums pt-0.5">000</div>
+          <div class="flex-1 min-w-0">
             <div class="bg-tui-text/20 h-4 w-3/4 mb-2"></div>
             <div class="bg-tui-text/20 h-3 w-1/2"></div>
           </div>
         </div>
       </div>
 
-      <div v-else class="flex flex-col">
+      <div v-else class="tui-list">
         <div
           v-for="(item, idx) in items"
           :key="item.id"

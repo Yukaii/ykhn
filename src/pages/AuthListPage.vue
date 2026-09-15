@@ -330,7 +330,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div v-else class="flex flex-col">
+      <div v-else class="tui-list">
         <div
           v-for="(item, idx) in submissionItems"
           :key="item.id"
