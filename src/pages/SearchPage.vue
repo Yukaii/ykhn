@@ -552,13 +552,7 @@ onBeforeUnmount(() => {
 
       <div class="flex gap-2">
         <button class="tui-btn" type="submit" :disabled="!query.trim()">SEARCH</button>
-        <button
-          class="tui-btn"
-          type="button"
-          @click="clearSearch"
-        >
-          CLEAR
-        </button>
+        <button class="tui-btn" type="button" @click="clearSearch">CLEAR</button>
       </div>
     </form>
 

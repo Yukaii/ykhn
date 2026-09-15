@@ -25,6 +25,7 @@ const styleMnemonic: Record<StyleTheme, string> = {
   retro: 'k',
   office: 'x',
   y2k: 'z',
+  og: 'g',
 }
 
 const { online } = useOnline()
@@ -48,8 +49,15 @@ function mnemonicFromEvent(e: KeyboardEvent) {
 }
 
 function splitMnemonic(label: string, mnemonic: string): MnemonicParts {
+  if (!mnemonic) return { before: label, key: '', after: '' }
   const idx = label.toLowerCase().indexOf(mnemonic.toLowerCase())
-  if (idx < 0) return { before: label, key: '', after: '' }
+  if (idx < 0) {
+    return {
+      before: `${label} [`,
+      key: mnemonic.toUpperCase(),
+      after: ']',
+    }
+  }
   return {
     before: label.slice(0, idx),
     key: label.slice(idx, idx + 1),
@@ -141,7 +149,7 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
   makeItem({
     id: 'edit',
     displayLabel: 'EDIT',
-    mnemonic: 'e',
+    mnemonic: '',
     shortcut: 'N/A',
     disabled: true,
   }),
@@ -174,6 +182,16 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
     ariaChecked: uiState.theme === 'commander',
     prefix: uiState.theme === 'commander' ? '● ' : '  ',
     onSelect: () => setThemeAndClose('commander'),
+  }),
+  makeItem({
+    id: 'theme-hn',
+    displayLabel: 'THEME_HN',
+    mnemonic: 'n',
+    shortcut: 'HN',
+    role: 'menuitemradio',
+    ariaChecked: uiState.theme === 'hackernews',
+    prefix: uiState.theme === 'hackernews' ? '● ' : '  ',
+    onSelect: () => setThemeAndClose('hackernews'),
   }),
   makeSeparator('sep-style'),
   ...styleThemes.map((style) =>
@@ -607,22 +625,70 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
     <!-- Title Bar -->
     <div class="tui-title-bar gap-3">
       <div class="flex items-center gap-2 min-w-0">
-        <RouterLink
-          to="/"
-          class="hover:bg-tui-bg hover:text-tui-cyan px-1 transition-none truncate"
+        <!-- Aqua/Y2K glossy orbs -->
+        <div
+          v-if="uiState.styleTheme === 'y2k'"
+          class="flex items-center gap-1.5 mr-1 shrink-0"
+          aria-hidden="true"
         >
-          YKHN_OS V1.0
+          <span
+            class="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] inline-block shadow-sm"
+          ></span>
+          <span
+            class="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] inline-block shadow-sm"
+          ></span>
+          <span
+            class="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] inline-block shadow-sm"
+          ></span>
+        </div>
+
+        <!-- OG Hacker News [Y] box logo -->
+        <div
+          v-if="uiState.styleTheme === 'og'"
+          class="w-4 h-4 bg-[#ff6600] border border-white text-white font-bold text-[11px] leading-none flex items-center justify-center mr-1 shrink-0 select-none"
+          aria-hidden="true"
+        >
+          Y
+        </div>
+
+        <RouterLink to="/" class="hover:opacity-80 px-1 transition-none truncate font-bold">
+          {{ uiState.styleTheme === 'og' ? 'Hacker News' : 'YKHN_OS V1.0' }}
         </RouterLink>
       </div>
 
       <div class="flex items-center gap-3 md:gap-4 min-w-0">
-        <span :class="online ? 'text-tui-bg' : 'bg-red-600 text-white px-1'">
+        <span :class="online ? 'text-current font-bold' : 'bg-red-600 text-white px-1'">
           {{ online ? '[ONLINE]' : '[OFFLINE]' }}
         </span>
-        <span class="hidden sm:inline" :class="authState.userId ? 'text-tui-bg' : 'opacity-70'">
+        <span
+          class="hidden sm:inline"
+          :class="authState.userId ? 'text-current font-bold' : 'opacity-70'"
+        >
           {{ authState.userId ? `[USER:${authState.userId.toUpperCase()}]` : '[GUEST]' }}
         </span>
-        <span class="hidden md:inline opacity-70">C:\HN\STORIES\</span>
+        <span class="hidden md:inline opacity-70">{{
+          uiState.styleTheme === 'og' ? 'news.ycombinator.com' : 'C:\\HN\\STORIES\\'
+        }}</span>
+
+        <!-- Windows 95 control buttons -->
+        <div
+          v-if="uiState.styleTheme === 'office'"
+          class="flex items-center gap-1 ml-1 shrink-0"
+          aria-hidden="true"
+        >
+          <span
+            class="w-4 h-4 bg-[#c0c0c0] text-[#000000] text-[10px] leading-none font-bold flex items-center justify-center border-t border-l border-white border-b border-r border-black shadow-[inset_1px_1px_0_#dfdfdf,inset_-1px_-1px_0_#808080]"
+            >_</span
+          >
+          <span
+            class="w-4 h-4 bg-[#c0c0c0] text-[#000000] text-[10px] leading-none font-bold flex items-center justify-center border-t border-l border-white border-b border-r border-black shadow-[inset_1px_1px_0_#dfdfdf,inset_-1px_-1px_0_#808080]"
+            >&#x25A1;</span
+          >
+          <span
+            class="w-4 h-4 bg-[#c0c0c0] text-[#000000] text-[10px] leading-none font-bold flex items-center justify-center border-t border-l border-white border-b border-r border-black shadow-[inset_1px_1px_0_#dfdfdf,inset_-1px_-1px_0_#808080]"
+            >&#x2715;</span
+          >
+        </div>
       </div>
     </div>
 
@@ -633,7 +699,7 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
           ref="sysTriggerEl"
           type="button"
           class="tui-menu-item flex items-center gap-1"
-          :class="sysMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''"
+          :class="sysMenuOpen ? 'active' : ''"
           role="menuitem"
           aria-haspopup="menu"
           :aria-expanded="sysMenuOpen"
@@ -696,7 +762,7 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
           ref="actionsTriggerEl"
           type="button"
           class="tui-menu-item"
-          :class="actionsMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''"
+          :class="actionsMenuOpen ? 'active' : ''"
           role="menuitem"
           aria-haspopup="menu"
           :aria-expanded="actionsMenuOpen"
@@ -749,7 +815,7 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
           ref="helpTriggerEl"
           type="button"
           class="tui-menu-item"
-          :class="helpMenuOpen ? 'bg-tui-bg text-tui-cyan' : ''"
+          :class="helpMenuOpen ? 'active' : ''"
           role="menuitem"
           aria-haspopup="menu"
           :aria-expanded="helpMenuOpen"
@@ -797,11 +863,11 @@ useEventListener(window, 'ykhn:close-menus', onCloseMenus as EventListener)
       <div
         class="ml-auto px-4 py-0.5 opacity-100 font-mono flex items-center gap-2 whitespace-nowrap min-w-0"
       >
-        <div v-if="menuState.loading" class="text-tui-bg flex items-center gap-1 mr-1 shrink-0">
+        <div v-if="menuState.loading" class="text-tui-yellow flex items-center gap-1 mr-1 shrink-0">
           <span class="hidden md:inline font-bold">WORKING...</span>
           <span class="md:hidden font-bold">BUSY</span>
           <div class="flex gap-0.5">
-            <div class="w-1 h-3 bg-tui-bg animate-[step-end_1s_infinite]"></div>
+            <div class="w-1 h-3 bg-tui-yellow animate-[step-end_1s_infinite]"></div>
           </div>
         </div>
         <span class="truncate font-bold">{{ menuState.title }}</span>

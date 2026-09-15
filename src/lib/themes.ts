@@ -1,10 +1,10 @@
-export type BuiltInTheme = 'commander' | 'dark' | 'light'
+export type BuiltInTheme = 'commander' | 'dark' | 'light' | 'hackernews'
 
 /**
  * Look-and-feel axis, independent from the color scheme. It controls shape,
  * borders, shadows, fonts and decorative treatments rather than palette.
  */
-export type StyleTheme = 'classic' | 'modern' | 'retro' | 'office' | 'y2k'
+export type StyleTheme = 'classic' | 'modern' | 'retro' | 'office' | 'y2k' | 'og'
 
 export type ThemeAppearance = 'dark' | 'light'
 
@@ -43,6 +43,7 @@ export const builtInThemes: ReadonlyArray<{ id: BuiltInTheme; label: string }> =
   { id: 'commander', label: 'Commander' },
   { id: 'dark', label: 'Dark' },
   { id: 'light', label: 'Light' },
+  { id: 'hackernews', label: 'Hacker News' },
 ]
 
 export const styleThemes: ReadonlyArray<{
@@ -55,10 +56,11 @@ export const styleThemes: ReadonlyArray<{
   { id: 'retro', label: 'Retro', description: 'Chunky CRT pixels' },
   { id: 'office', label: 'Office', description: 'Windows 9x bevel' },
   { id: 'y2k', label: 'Y2K', description: 'Glossy chrome vibes' },
+  { id: 'og', label: 'OG HN', description: 'Classic news.ycombinator.com' },
 ]
 
 export function isBuiltInTheme(value: unknown): value is BuiltInTheme {
-  return value === 'commander' || value === 'dark' || value === 'light'
+  return value === 'commander' || value === 'dark' || value === 'light' || value === 'hackernews'
 }
 
 export function isStyleTheme(value: unknown): value is StyleTheme {
@@ -105,7 +107,7 @@ function toHex(color: Rgb): string {
 function flatten(color: Rgba, background: Rgb): Rgb {
   return {
     r: color.r * color.a + background.r * (1 - color.a),
-    g: color.g * color.a + background.g * (1 - color.a),
+    g: color.g * color.a + background.r * (1 - color.a),
     b: color.b * color.a + background.b * (1 - color.a),
   }
 }

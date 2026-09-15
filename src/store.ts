@@ -232,7 +232,7 @@ function applyThemeToDom(theme: Theme) {
 
   if (isBuiltInTheme(theme)) {
     root.dataset.theme = theme
-    root.dataset.themeAppearance = theme === 'light' ? 'light' : 'dark'
+    root.dataset.themeAppearance = theme === 'light' || theme === 'hackernews' ? 'light' : 'dark'
     return
   }
 

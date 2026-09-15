@@ -21,9 +21,15 @@
         try {
           var root = document.documentElement
           var theme = localStorage.getItem('ykhn-theme')
-          if (theme === 'commander' || theme === 'dark' || theme === 'light') {
+          if (
+            theme === 'commander' ||
+            theme === 'dark' ||
+            theme === 'light' ||
+            theme === 'hackernews'
+          ) {
             root.dataset.theme = theme
-            root.dataset.themeAppearance = theme === 'light' ? 'light' : 'dark'
+            root.dataset.themeAppearance =
+              theme === 'light' || theme === 'hackernews' ? 'light' : 'dark'
           }
           var style = localStorage.getItem('ykhn-style')
           if (
@@ -31,7 +37,8 @@
             style === 'modern' ||
             style === 'retro' ||
             style === 'office' ||
-            style === 'y2k'
+            style === 'y2k' ||
+            style === 'og'
           ) {
             root.dataset.style = style
           }
