@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import ThemeBrowser from '../components/ThemeBrowser.vue'
+import { styleThemes, type StyleTheme } from '../lib/themes'
 import {
   fontSizePx,
   setFontMode,
   setFontSizePx,
+  setStyleTheme,
   setTheme,
   uiState,
   type FontMode,
@@ -14,10 +16,15 @@ import {
 const fontSize = fontSizePx
 
 const theme = computed(() => uiState.theme)
+const styleTheme = computed(() => uiState.styleTheme)
 const fontMode = computed(() => uiState.fontMode)
 
 function setThemeLocal(next: Theme) {
   setTheme(next)
+}
+
+function setStyleThemeLocal(next: StyleTheme) {
+  setStyleTheme(next)
 }
 
 function setFontModeLocal(next: FontMode) {
@@ -134,6 +141,27 @@ function updateFontSize(delta: number) {
               @click="setThemeLocal('light')"
             >
               LIGHT
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span>LOOK_AND_FEEL:</span>
+          <div class="grid grid-cols-5 border border-tui-border">
+            <button
+              v-for="style in styleThemes"
+              :key="style.id"
+              class="px-2 py-1 text-xs uppercase sm:text-sm"
+              :class="
+                styleTheme === style.id
+                  ? 'bg-tui-cyan text-tui-bg font-bold'
+                  : 'bg-tui-gray text-tui-bg hover:bg-tui-cyan'
+              "
+              type="button"
+              :title="style.description"
+              @click="setStyleThemeLocal(style.id)"
+            >
+              {{ style.label }}
             </button>
           </div>
         </div>

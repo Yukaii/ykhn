@@ -5,8 +5,10 @@ import type { AuthSession } from './api/auth'
 import {
   isBuiltInTheme,
   isInstalledTheme,
+  isStyleTheme,
   type BuiltInTheme,
   type InstalledTheme,
+  type StyleTheme,
 } from './lib/themes'
 
 export const menuState = reactive({
@@ -43,6 +45,9 @@ export const installedThemes = computed<InstalledTheme[]>(() => {
   return Array.isArray(value) ? value.filter(isInstalledTheme) : []
 })
 
+const styleThemeStorageKey = 'ykhn-style'
+const storedStyleTheme = useLocalStorage<string>(styleThemeStorageKey, 'classic')
+
 const fontModeStorageKey = 'ykhn-font-mode'
 const storedFontMode = useLocalStorage<string>(fontModeStorageKey, 'balanced')
 
@@ -61,6 +66,7 @@ const storedJoystickCollapsed = useLocalStorage<boolean>(joystickCollapsedStorag
 export const uiState = reactive({
   shortcutsOpen: false,
   theme: 'commander' as Theme,
+  styleTheme: 'classic' as StyleTheme,
   fontMode: 'balanced' as FontMode,
   joystickDock: 'right' as JoystickDock,
   joystickPosition: null as JoystickPosition | null,
@@ -243,6 +249,11 @@ function applyThemeToDom(theme: Theme) {
   root.style.setProperty('--color-tui-yellow', installed.colors.yellow)
 }
 
+function applyStyleThemeToDom(mode: StyleTheme) {
+  if (typeof document === 'undefined') return
+  document.documentElement.dataset.style = mode
+}
+
 function applyFontModeToDom(mode: FontMode) {
   if (typeof document === 'undefined') return
   document.documentElement.dataset.font = mode
@@ -259,6 +270,21 @@ watch(
 
     storedTheme.value = uiState.theme
     applyThemeToDom(uiState.theme)
+  },
+  { immediate: true },
+)
+
+watch(
+  storedStyleTheme,
+  (value) => {
+    if (isStyleTheme(value)) {
+      uiState.styleTheme = value
+      applyStyleThemeToDom(value)
+      return
+    }
+
+    storedStyleTheme.value = uiState.styleTheme
+    applyStyleThemeToDom(uiState.styleTheme)
   },
   { immediate: true },
 )
@@ -355,6 +381,7 @@ watch(
 
 export function initThemeFromStorage() {
   applyThemeToDom(uiState.theme)
+  applyStyleThemeToDom(uiState.styleTheme)
   applyFontModeToDom(uiState.fontMode)
 }
 
@@ -392,6 +419,13 @@ export function removeInstalledThemeCollection(collectionId: string) {
     (theme) => theme.collection.id !== collectionId,
   )
   if (removedIds.has(uiState.theme)) setTheme('commander')
+}
+
+export function setStyleTheme(mode: StyleTheme) {
+  if (!isStyleTheme(mode)) return
+  uiState.styleTheme = mode
+  storedStyleTheme.value = mode
+  applyStyleThemeToDom(mode)
 }
 
 export function setFontMode(mode: FontMode) {

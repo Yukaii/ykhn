@@ -15,7 +15,7 @@ useMainScrollRestoration()
 <template>
   <div class="app-container flex flex-col bg-tui-bg overflow-hidden">
     <!-- Main Window -->
-    <div class="tui-window flex-1 flex flex-col overflow-hidden relative border-4">
+    <div class="tui-window flex-1 flex flex-col overflow-hidden relative">
       <AppHeader />
 
       <main data-ykhn-main class="flex-1 overflow-y-auto p-2 md:p-4 custom-scrollbar bg-tui-bg">

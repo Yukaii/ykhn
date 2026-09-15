@@ -1,5 +1,11 @@
 export type BuiltInTheme = 'commander' | 'dark' | 'light'
 
+/**
+ * Look-and-feel axis, independent from the color scheme. It controls shape,
+ * borders, shadows, fonts and decorative treatments rather than palette.
+ */
+export type StyleTheme = 'classic' | 'modern' | 'retro' | 'office' | 'y2k'
+
 export type ThemeAppearance = 'dark' | 'light'
 
 export type ThemeColors = {
@@ -39,8 +45,24 @@ export const builtInThemes: ReadonlyArray<{ id: BuiltInTheme; label: string }> =
   { id: 'light', label: 'Light' },
 ]
 
+export const styleThemes: ReadonlyArray<{
+  id: StyleTheme
+  label: string
+  description: string
+}> = [
+  { id: 'classic', label: 'Terminal', description: 'Norton Commander TUI' },
+  { id: 'modern', label: 'Modern', description: 'Rounded, soft, minimal' },
+  { id: 'retro', label: 'Retro', description: 'Chunky CRT pixels' },
+  { id: 'office', label: 'Office', description: 'Windows 9x bevel' },
+  { id: 'y2k', label: 'Y2K', description: 'Glossy chrome vibes' },
+]
+
 export function isBuiltInTheme(value: unknown): value is BuiltInTheme {
   return value === 'commander' || value === 'dark' || value === 'light'
+}
+
+export function isStyleTheme(value: unknown): value is StyleTheme {
+  return styleThemes.some((theme) => theme.id === value)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

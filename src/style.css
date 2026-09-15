@@ -31,6 +31,41 @@
     --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-active));
     --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 72%, var(--color-tui-active));
 
+    /* Look & feel tokens (classic terminal defaults). Styles override these
+       below so shape, borders, shadows and fonts change independently of the
+       color scheme. */
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 2px;
+    --ykhn-border-style: solid;
+    --ykhn-border-color: var(--color-tui-border);
+    --ykhn-window-border-w: 4px;
+    --ykhn-window-border-style: solid;
+    --ykhn-modal-border-w: 4px;
+    --ykhn-modal-border-style: double;
+    --ykhn-field-border-style: solid;
+    --ykhn-shadow-lg: 6px 6px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow: 4px 4px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow-sm: 2px 2px 0 var(--ykhn-shadow-color);
+    --ykhn-inset-shadow: none;
+    --ykhn-window-bg: var(--color-tui-bg);
+    --ykhn-window-overlay: none;
+    --ykhn-overlay-blend: normal;
+    --ykhn-title-bg: var(--color-tui-cyan);
+    --ykhn-title-text: var(--color-tui-bg);
+    --ykhn-title-text-shadow: none;
+    --ykhn-menu-bg: var(--color-tui-gray);
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-btn-bg: var(--color-tui-gray);
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-btn-hover-bg: var(--color-tui-cyan);
+    --ykhn-btn-hover-text: var(--color-tui-bg);
+    --ykhn-field-bg: var(--color-tui-bg);
+    --ykhn-scrollbar-track: var(--color-tui-active);
+    --ykhn-scrollbar-thumb: var(--color-tui-gray);
+    --ykhn-letter-spacing: 0em;
+    --ykhn-caps-transform: uppercase;
+
     /* Comment threading layout */
     --ykhn-comment-indent: 24px;
     --ykhn-comment-branch-offset: 18px;
@@ -53,6 +88,8 @@
     --color-tui-cyan: #66ffff;
     --color-tui-yellow: #fff56b;
     --ykhn-shadow-color: rgba(0, 0, 0, 0.62);
+    --ykhn-menu-text: #000000;
+    --ykhn-btn-text: #000000;
   }
 
   :root[data-theme='dark'] {
@@ -64,6 +101,8 @@
     --color-tui-cyan: #79d7d2;
     --color-tui-yellow: #f2dc78;
     --ykhn-shadow-color: rgba(0, 0, 0, 0.82);
+    --ykhn-menu-text: #ffffff;
+    --ykhn-btn-text: #ffffff;
   }
 
   :root[data-theme='light'] {
@@ -75,6 +114,8 @@
     --color-tui-cyan: #005c60;
     --color-tui-yellow: #806700;
     --ykhn-shadow-color: rgba(32, 36, 29, 0.34);
+    --ykhn-menu-text: #ffffff;
+    --ykhn-btn-text: #ffffff;
   }
 
   html {
@@ -125,6 +166,175 @@
     --tui-content-font-scale: 0.94;
   }
 
+  /* ===================================================================
+     Look & feel styles. These come after the font modes so a style owns
+     the UI/chrome typeface; the reading font still drives comment prose.
+     =================================================================== */
+  :root[data-style='classic'] {
+    /* Terminal is the default token set. */
+  }
+
+  :root[data-style='modern'] {
+    --font-mono:
+      ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
+    --ykhn-ui-font:
+      ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
+    --ykhn-radius: 12px;
+    --ykhn-radius-sm: 8px;
+    --ykhn-border-w: 1px;
+    --ykhn-window-border-w: 1px;
+    --ykhn-modal-border-w: 1px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-border) 32%, var(--color-tui-bg));
+    --ykhn-shadow-color: color-mix(in srgb, #000000 60%, transparent);
+    --ykhn-shadow-lg:
+      0 24px 48px -24px var(--ykhn-shadow-color), 0 3px 10px -5px var(--ykhn-shadow-color);
+    --ykhn-shadow:
+      0 12px 28px -18px var(--ykhn-shadow-color), 0 1px 3px -1px var(--ykhn-shadow-color);
+    --ykhn-shadow-sm: 0 3px 8px -4px var(--ykhn-shadow-color);
+    --ykhn-inset-shadow: inset 0 1px 2px var(--ykhn-shadow-color);
+    --ykhn-window-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-bg) 93%, var(--color-tui-text)) 0%,
+      var(--color-tui-bg) 44%
+    );
+    --ykhn-title-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-cyan) 86%, white) 0%,
+      var(--color-tui-cyan) 100%
+    );
+    --ykhn-title-text: var(--color-tui-bg);
+    --ykhn-menu-bg: color-mix(in srgb, var(--color-tui-active) 55%, var(--color-tui-bg));
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-btn-bg: color-mix(in srgb, var(--color-tui-gray) 45%, var(--color-tui-bg));
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-field-bg: color-mix(in srgb, var(--color-tui-bg) 84%, var(--color-tui-active));
+    --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-bg) 95%, var(--color-tui-active));
+    --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-bg) 91%, var(--color-tui-active));
+    --ykhn-scrollbar-track: color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-active));
+    --ykhn-scrollbar-thumb: color-mix(in srgb, var(--color-tui-gray) 70%, var(--color-tui-bg));
+    --ykhn-letter-spacing: 0.01em;
+    --ykhn-caps-transform: lowercase;
+  }
+
+  :root[data-style='retro'] {
+    --font-mono: 'VT323', 'JetBrains Mono', monospace;
+    --ykhn-ui-font: 'VT323', 'JetBrains Mono', monospace;
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 3px;
+    --ykhn-window-border-w: 6px;
+    --ykhn-modal-border-w: 6px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-shadow-lg: 8px 8px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow: 6px 6px 0 var(--ykhn-shadow-color);
+    --ykhn-shadow-sm: 3px 3px 0 var(--ykhn-shadow-color);
+    --ykhn-title-text-shadow: 2px 2px 0 var(--ykhn-shadow-color);
+    --ykhn-letter-spacing: 0.05em;
+    --ykhn-window-overlay: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.12) 0px,
+      rgba(0, 0, 0, 0.12) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    --ykhn-overlay-blend: multiply;
+  }
+
+  :root[data-style='office'] {
+    --font-mono: Tahoma, 'Segoe UI', Verdana, Geneva, sans-serif;
+    --ykhn-ui-font: Tahoma, 'Segoe UI', Verdana, Geneva, 'MS Sans Serif', sans-serif;
+    --ykhn-radius: 0px;
+    --ykhn-radius-sm: 0px;
+    --ykhn-border-w: 2px;
+    --ykhn-window-border-w: 2px;
+    --ykhn-modal-border-w: 2px;
+    --ykhn-modal-border-style: outset;
+    --ykhn-border-style: outset;
+    --ykhn-window-border-style: outset;
+    --ykhn-field-border-style: inset;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-gray) 55%, var(--color-tui-bg));
+    --ykhn-shadow-lg: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    --ykhn-shadow: 1px 1px 0 rgba(0, 0, 0, 0.45);
+    --ykhn-shadow-sm: 1px 1px 0 rgba(0, 0, 0, 0.4);
+    --ykhn-window-bg: color-mix(in srgb, var(--color-tui-gray) 45%, var(--color-tui-bg));
+    --ykhn-title-bg: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-tui-cyan) 60%, white) 0%,
+      var(--color-tui-cyan) 100%
+    );
+    --ykhn-title-text: var(--color-tui-bg);
+    --ykhn-menu-bg: color-mix(in srgb, var(--color-tui-gray) 68%, var(--color-tui-bg));
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-btn-bg: color-mix(in srgb, var(--color-tui-gray) 62%, var(--color-tui-bg));
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-field-bg: var(--color-tui-bg);
+    --ykhn-inset-shadow:
+      inset 1px 1px 0 rgba(0, 0, 0, 0.32), inset -1px -1px 0 rgba(255, 255, 255, 0.35);
+    --ykhn-panel-bg: color-mix(in srgb, var(--color-tui-gray) 34%, var(--color-tui-bg));
+    --ykhn-muted-bg: color-mix(in srgb, var(--color-tui-gray) 24%, var(--color-tui-bg));
+    --ykhn-scrollbar-track: color-mix(in srgb, var(--color-tui-gray) 42%, var(--color-tui-bg));
+    --ykhn-scrollbar-thumb: color-mix(in srgb, var(--color-tui-gray) 70%, var(--color-tui-bg));
+  }
+
+  :root[data-style='y2k'] {
+    --font-mono: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
+    --ykhn-ui-font: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
+    --ykhn-radius: 16px;
+    --ykhn-radius-sm: 11px;
+    --ykhn-border-w: 2px;
+    --ykhn-window-border-w: 3px;
+    --ykhn-modal-border-w: 3px;
+    --ykhn-modal-border-style: solid;
+    --ykhn-border-color: color-mix(in srgb, var(--color-tui-cyan) 55%, var(--color-tui-bg));
+    --ykhn-shadow-lg:
+      0 0 0 1px color-mix(in srgb, var(--color-tui-cyan) 45%, transparent),
+      0 16px 44px -14px var(--color-tui-cyan);
+    --ykhn-shadow:
+      0 0 24px -8px color-mix(in srgb, var(--color-tui-cyan) 75%, transparent),
+      0 6px 16px -8px rgba(0, 0, 0, 0.65);
+    --ykhn-shadow-sm: 0 0 12px -4px var(--color-tui-cyan);
+    --ykhn-window-bg: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-tui-bg) 78%, var(--color-tui-cyan)) 0%,
+      var(--color-tui-bg) 46%,
+      color-mix(in srgb, var(--color-tui-bg) 80%, var(--color-tui-yellow)) 100%
+    );
+    --ykhn-title-bg: linear-gradient(
+      90deg,
+      var(--color-tui-cyan) 0%,
+      color-mix(in srgb, var(--color-tui-yellow) 70%, white) 50%,
+      var(--color-tui-cyan) 100%
+    );
+    --ykhn-title-text: #ffffff;
+    --ykhn-title-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    --ykhn-menu-bg: color-mix(in srgb, var(--color-tui-active) 58%, var(--color-tui-bg));
+    --ykhn-menu-text: var(--color-tui-text);
+    --ykhn-btn-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-gray) 35%, white) 0%,
+      color-mix(in srgb, var(--color-tui-gray) 80%, var(--color-tui-bg)) 52%,
+      color-mix(in srgb, var(--color-tui-gray) 62%, var(--color-tui-bg)) 100%
+    );
+    --ykhn-btn-text: var(--color-tui-text);
+    --ykhn-field-bg: color-mix(in srgb, var(--color-tui-bg) 80%, var(--color-tui-active));
+    --ykhn-panel-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-bg) 82%, var(--color-tui-cyan)) 0%,
+      color-mix(in srgb, var(--color-tui-bg) 94%, var(--color-tui-active)) 100%
+    );
+    --ykhn-muted-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-tui-bg) 88%, var(--color-tui-cyan)) 0%,
+      color-mix(in srgb, var(--color-tui-bg) 94%, var(--color-tui-active)) 100%
+    );
+    --ykhn-scrollbar-track: color-mix(in srgb, var(--color-tui-cyan) 28%, var(--color-tui-bg));
+    --ykhn-scrollbar-thumb: linear-gradient(180deg, var(--color-tui-cyan), var(--color-tui-active));
+    --ykhn-letter-spacing: 0.02em;
+  }
+
   body {
     @apply bg-tui-bg text-tui-text font-mono;
     font-family: var(--ykhn-ui-font);
@@ -145,15 +355,17 @@
     letter-spacing: 0;
   }
 
-  /* Norton Commander style scrollbar */
+  /* Theme-aware scrollbar */
   ::-webkit-scrollbar {
     width: 12px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-tui-active;
+    background: var(--ykhn-scrollbar-track);
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-tui-gray border-2 border-tui-bg;
+    background: var(--ykhn-scrollbar-thumb);
+    border: 2px solid var(--color-tui-bg);
+    border-radius: var(--ykhn-radius-sm);
   }
 
   /* Custom scrollbar for the main area */
@@ -161,11 +373,13 @@
     width: 16px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-tui-active/50;
+    background: var(--ykhn-scrollbar-track);
     box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.5);
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-tui-gray border-2 border-tui-bg;
+    background: var(--ykhn-scrollbar-thumb);
+    border: 2px solid var(--color-tui-bg);
+    border-radius: var(--ykhn-radius-sm);
     box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
   }
 
@@ -194,33 +408,78 @@
 
 @layer components {
   .tui-window {
-    @apply border-2 border-tui-border bg-tui-bg;
-    box-shadow: 6px 6px 0 var(--ykhn-shadow-color);
+    @apply bg-tui-bg;
+    position: relative;
+    border-width: var(--ykhn-window-border-w);
+    border-style: var(--ykhn-window-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius);
+    background: var(--ykhn-window-bg);
+    box-shadow: var(--ykhn-shadow-lg);
+  }
+
+  /* Optional decorative layer (CRT scanlines, glossy highlights). */
+  .tui-window::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--ykhn-window-overlay);
+    mix-blend-mode: var(--ykhn-overlay-blend);
   }
 
   .tui-title-bar {
-    @apply bg-tui-cyan text-tui-bg px-2 py-1 font-bold flex justify-between items-center uppercase border-b-2 border-tui-border;
+    @apply px-2 py-1 font-bold flex justify-between items-center;
+    text-transform: var(--ykhn-caps-transform);
+    background: var(--ykhn-title-bg);
+    color: var(--ykhn-title-text);
+    border-bottom-width: var(--ykhn-border-w);
+    border-bottom-style: var(--ykhn-border-style);
+    border-bottom-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius) var(--ykhn-radius) 0 0;
+    text-shadow: var(--ykhn-title-text-shadow);
+    letter-spacing: var(--ykhn-letter-spacing);
     line-height: 1.2;
   }
 
   .tui-panel,
   .retro-border {
-    @apply border-2 border-tui-border bg-tui-bg p-3 md:p-4;
+    @apply p-3 md:p-4;
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
     background: var(--ykhn-panel-bg);
-    box-shadow: 4px 4px 0 var(--ykhn-shadow-color);
+    box-shadow: var(--ykhn-shadow);
   }
 
   .tui-panel-muted {
-    @apply border border-tui-active/60 p-3 md:p-4;
+    @apply p-3 md:p-4;
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: color-mix(in srgb, var(--ykhn-border-color) 55%, transparent);
+    border-radius: var(--ykhn-radius-sm);
     background: var(--ykhn-muted-bg);
   }
 
   .tui-section-heading {
-    @apply bg-tui-active text-tui-text px-2 py-1 font-bold uppercase border-b border-tui-border/40;
+    @apply bg-tui-active text-tui-text px-2 py-1 font-bold;
+    text-transform: var(--ykhn-caps-transform);
+    border-bottom: 1px solid color-mix(in srgb, var(--ykhn-border-color) 40%, transparent);
+    border-radius: var(--ykhn-radius-sm) var(--ykhn-radius-sm) 0 0;
+    letter-spacing: var(--ykhn-letter-spacing);
   }
 
   .tui-field {
-    @apply bg-tui-bg border-2 border-tui-border px-2 py-1 font-mono outline-none text-tui-text;
+    @apply px-2 py-1 font-mono outline-none text-tui-text;
+    background: var(--ykhn-field-bg);
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-field-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
+    box-shadow: var(--ykhn-inset-shadow);
   }
 
   .tui-field:focus {
@@ -229,9 +488,22 @@
   }
 
   .tui-comment-card {
-    @apply border border-tui-active p-2 md:p-3 mb-2 relative overflow-hidden;
+    @apply p-2 md:p-3 mb-2 relative overflow-hidden;
+    border: 1px solid color-mix(in srgb, var(--color-tui-active) 80%, var(--color-tui-bg));
+    border-radius: var(--ykhn-radius-sm);
     background: color-mix(in srgb, var(--color-tui-bg) 92%, var(--color-tui-active));
-    box-shadow: 2px 2px 0 var(--ykhn-shadow-color);
+    box-shadow: var(--ykhn-shadow-sm);
+  }
+
+  /* Modal surface (help overlay, etc.) reuses the window language. */
+  .tui-modal {
+    @apply flex flex-col overflow-hidden;
+    border-width: var(--ykhn-modal-border-w);
+    border-style: var(--ykhn-modal-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius);
+    background: var(--ykhn-window-bg);
+    box-shadow: var(--ykhn-shadow-lg);
   }
 
   /* Handle long text/code in v-html */
@@ -286,17 +558,33 @@
     @apply hidden;
   }
 
+  /* Non-terminal styles drop the ASCII tree glyphs and keep the guide line. */
+  :root[data-style='modern'] .tui-comment-node::before,
+  :root[data-style='office'] .tui-comment-node::before,
+  :root[data-style='y2k'] .tui-comment-node::before {
+    content: '';
+  }
+
   .tui-btn {
-    @apply px-3 py-1 bg-tui-gray text-tui-text hover:bg-tui-cyan hover:text-tui-bg border-2 border-tui-border active:translate-x-[1px] active:translate-y-[1px] uppercase font-bold disabled:opacity-50 disabled:cursor-not-allowed;
-    box-shadow: 2px 2px 0 var(--ykhn-shadow-color);
+    @apply px-3 py-1 active:translate-x-[1px] active:translate-y-[1px] font-bold disabled:opacity-50 disabled:cursor-not-allowed;
+    text-transform: var(--ykhn-caps-transform);
+    background: var(--ykhn-btn-bg);
+    color: var(--ykhn-btn-text);
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
+    box-shadow: var(--ykhn-shadow-sm);
+    letter-spacing: var(--ykhn-letter-spacing);
+  }
+
+  .tui-btn:hover {
+    background: var(--ykhn-btn-hover-bg);
+    color: var(--ykhn-btn-hover-text);
   }
 
   .tui-btn:active {
     box-shadow: none;
-  }
-
-  :root[data-theme='commander'] .tui-btn {
-    @apply text-tui-bg;
   }
 
   .tui-f-key {
@@ -319,22 +607,18 @@
   }
 
   .tui-chip {
-    @apply inline-flex items-center border border-tui-active/70 px-1.5 leading-none uppercase text-tui-cyan;
+    @apply inline-flex items-center border border-tui-active/70 px-1.5 leading-none text-tui-cyan;
+    text-transform: var(--ykhn-caps-transform);
     min-height: 1.25rem;
   }
 
   .tui-menu-bar {
-    @apply bg-tui-gray text-tui-text flex font-mono border-b border-tui-bg sticky top-0 z-10;
+    @apply flex font-mono sticky top-0 z-10;
+    background: var(--ykhn-menu-bg);
+    color: var(--ykhn-menu-text);
+    border-bottom: 1px solid var(--ykhn-border-color);
     line-height: 1.25;
-  }
-
-  :root[data-theme='light'] .tui-menu-bar,
-  :root[data-theme='dark'] .tui-menu-bar {
-    @apply text-white;
-  }
-
-  :root[data-theme='commander'] .tui-menu-bar {
-    @apply text-black;
+    letter-spacing: var(--ykhn-letter-spacing);
   }
 
   .tui-menu-item {
@@ -343,16 +627,17 @@
   }
 
   .tui-menu-dropdown {
-    @apply absolute top-full left-0 bg-tui-gray border-2 border-tui-border z-50 min-w-[180px] text-tui-text;
-    box-shadow: 4px 4px 0 var(--ykhn-shadow-color);
-  }
-
-  :root[data-theme='light'] .tui-menu-dropdown {
-    @apply text-white;
-  }
-
-  :root[data-theme='commander'] .tui-menu-dropdown {
-    @apply text-black;
+    @apply absolute top-full left-0 z-50 min-w-[180px];
+    max-height: calc(100dvh - 3rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--ykhn-menu-bg);
+    color: var(--ykhn-menu-text);
+    border-width: var(--ykhn-border-w);
+    border-style: var(--ykhn-border-style);
+    border-color: var(--ykhn-border-color);
+    border-radius: var(--ykhn-radius-sm);
+    box-shadow: var(--ykhn-shadow);
   }
 
   .tui-dropdown-item {
@@ -360,13 +645,9 @@
     @apply focus-visible:bg-tui-bg focus-visible:text-tui-cyan focus-visible:outline focus-visible:outline-1 focus-visible:outline-tui-yellow;
   }
 
-  /* System dropdown uses theme-aware text color */
+  /* System dropdown inherits the themed menu text color */
   .tui-sys-menu {
-    @apply text-tui-text;
-  }
-
-  :root[data-theme='commander'] .tui-sys-menu {
-    @apply text-tui-bg;
+    color: var(--ykhn-menu-text);
   }
 
   /* Reveal shortcuts in dropdown sub-entries on hover */
@@ -385,4 +666,10 @@
       opacity: 0.6;
     }
   }
+}
+
+/* Re-case utility-driven labels to match the active look & feel. Declared
+   outside @layer components so it can override Tailwind's uppercase utility. */
+:root[data-style] .uppercase {
+  text-transform: var(--ykhn-caps-transform);
 }

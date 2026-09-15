@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
+      allowedHosts: ['.ts.net'],
       proxy: {
         '/auth-proxy': {
           target: authProxyTarget,

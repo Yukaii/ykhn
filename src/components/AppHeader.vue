@@ -5,17 +5,27 @@ import { RouterLink, useRouter } from 'vue-router'
 import { logoutAuthProxy } from '../api/auth'
 import { useOnline } from '../composables/useOnline'
 import { shouldIgnoreKeyboardEvent } from '../lib/keyboard'
+import { styleThemes, type StyleTheme } from '../lib/themes'
 import {
   authState,
   clearAuthSession,
   menuState,
   setJoystickDock,
   setLoading,
+  setStyleTheme,
   setTheme,
   uiState,
   type JoystickDock,
   type Theme,
 } from '../store'
+
+const styleMnemonic: Record<StyleTheme, string> = {
+  classic: 'q',
+  modern: 'j',
+  retro: 'k',
+  office: 'x',
+  y2k: 'z',
+}
 
 const { online } = useOnline()
 const router = useRouter()
@@ -165,6 +175,19 @@ const sysEntries = computed<StaticMenuEntry[]>(() => [
     prefix: uiState.theme === 'commander' ? '● ' : '  ',
     onSelect: () => setThemeAndClose('commander'),
   }),
+  makeSeparator('sep-style'),
+  ...styleThemes.map((style) =>
+    makeItem({
+      id: `style-${style.id}`,
+      displayLabel: `LOOK_${style.label.toUpperCase()}`,
+      mnemonic: styleMnemonic[style.id],
+      shortcut: 'STYLE',
+      role: 'menuitemradio',
+      ariaChecked: uiState.styleTheme === style.id,
+      prefix: uiState.styleTheme === style.id ? '● ' : '  ',
+      onSelect: () => setStyleThemeAndClose(style.id),
+    }),
+  ),
   makeSeparator('sep-joy'),
   makeItem({
     id: 'joystick-dock-right',
@@ -446,6 +469,11 @@ function reboot() {
 
 function setThemeAndClose(theme: Theme) {
   setTheme(theme)
+  closeMenus()
+}
+
+function setStyleThemeAndClose(style: StyleTheme) {
+  setStyleTheme(style)
   closeMenus()
 }
 
